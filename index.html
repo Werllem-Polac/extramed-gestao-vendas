@@ -1010,7 +1010,7 @@
           <div class="row row-4">
             <div>
               <label class="req">CPF</label>
-              <input id="medicoCPF" placeholder="000.000.000-00" oninput="limparInvalido(this)" />
+              <input id="medicoCPF" placeholder="000.000.000-00" />
             </div>
             <div>
               <label class="req">Data de nascimento</label>
@@ -1022,7 +1022,7 @@
             </div>
             <div>
               <label class="req">Telefone</label>
-              <input id="medicoTelefone" placeholder="(00) 00000-0000" oninput="limparInvalido(this)" />
+              <input id="medicoTelefone" placeholder="(00) 00000-0000" />
             </div>
           </div>
           <div class="row row-4">
@@ -2408,10 +2408,10 @@
     document.getElementById('medicoId').value           = m.id;
     document.getElementById('medicoNome').value          = m.nome;
     document.getElementById('medicoEspecialidade').value = m.especialidade || '';
-    document.getElementById('medicoCPF').value           = m.cpf || '';
+    document.getElementById('medicoCPF').value           = formatCPF(m.cpf || '');
     document.getElementById('medicoNascimento').value    = m.nascimento || '';
     document.getElementById('medicoEmail').value         = m.email || '';
-    document.getElementById('medicoTelefone').value      = m.telefone || '';
+    document.getElementById('medicoTelefone').value      = formatTelefone(m.telefone || '');
     document.getElementById('medicoConselho').value    = m.conselho || (m.crm ? 'CRM' : '');
     document.getElementById('medicoNumConselho').value = m.numConselho || m.crm || '';
     const ufEl = document.getElementById('medicoUF');
@@ -2559,28 +2559,25 @@
   }
 
   function formatCPF(value){
-    const digits = onlyDigits(value).slice(0,11);
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    const d = onlyDigits(value).slice(0, 11);
+    if(d.length <= 3) return d;
+    if(d.length <= 6) return `${d.slice(0,3)}.${d.slice(3)}`;
+    if(d.length <= 9) return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
+    return `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`;
   }
 
   function formatCEP(value){
-    const digits = onlyDigits(value).slice(0,8);
-    return digits.replace(/(\d{5})(\d)/, '$1-$2');
+    const d = onlyDigits(value).slice(0, 8);
+    if(d.length <= 5) return d;
+    return `${d.slice(0,5)}-${d.slice(5)}`;
   }
 
   function formatTelefone(value){
-    const digits = onlyDigits(value).slice(0,11);
-    if(digits.length <= 10){
-      return digits
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{4})(\d)/, '$1-$2');
-    }
-    return digits
-      .replace(/(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d)/, '$1-$2');
+    const d = onlyDigits(value).slice(0, 11);
+    if(d.length <= 2) return d.length ? `(${d}` : '';
+    if(d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    if(d.length <= 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
   }
 
   function applyPatientMasks(){
@@ -3327,6 +3324,8 @@
     const pacienteCEP = document.getElementById('pacienteCEP'); if(pacienteCEP) pacienteCEP.addEventListener('input', e => e.target.value = formatCEP(e.target.value));
     const pacienteTelefone = document.getElementById('pacienteTelefone'); if(pacienteTelefone) pacienteTelefone.addEventListener('input', e => e.target.value = formatTelefone(e.target.value));
     applyPatientMasks();
+    const medicoCPF = document.getElementById('medicoCPF'); if(medicoCPF) medicoCPF.addEventListener('input', e => { e.target.value = formatCPF(e.target.value); limparInvalido(e.target); });
+    const medicoTelefone = document.getElementById('medicoTelefone'); if(medicoTelefone) medicoTelefone.addEventListener('input', e => { e.target.value = formatTelefone(e.target.value); limparInvalido(e.target); });
     const usuarioFiltroStatus = document.getElementById('usuarioFiltroStatus'); if(usuarioFiltroStatus) usuarioFiltroStatus.addEventListener('change', renderUsuarios);
     const vendaBusca = document.getElementById('vendaBusca'); if(vendaBusca) vendaBusca.addEventListener('input', renderVendas);
     const vendaFiltroData = document.getElementById('vendaFiltroData'); if(vendaFiltroData) vendaFiltroData.addEventListener('change', renderVendas);
