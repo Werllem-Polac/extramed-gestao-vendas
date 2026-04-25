@@ -375,6 +375,16 @@
     }
     .login-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(155,28,62,.3)}
     .login-footer{margin-top:20px;font-size:12px;color:var(--gray)}
+    /* painel de permissões */
+    .perm-panel{background:#fff5f7;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+    .perm-panel-title{font-size:13px;font-weight:bold;color:var(--wine);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .perm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+    .perm-item{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer;transition:.15s}
+    .perm-item:hover{border-color:var(--wine);background:#fff5f7}
+    .perm-item.checked{border-color:var(--wine);background:#fff0f3}
+    .perm-item label{cursor:pointer;font-weight:500;color:#374151;flex:1}
+    .perm-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--wine);cursor:pointer;flex-shrink:0}
+    .perm-toggle-all{font-size:12px;color:var(--wine);cursor:pointer;font-weight:bold;background:none;border:none;padding:0}
     /* menu grupo colapsável */
     .nav-group-btn{
       width:100%;border:none;background:transparent;color:#fff;
@@ -1528,6 +1538,15 @@
               </div>
             </div>
             <div class="helper-text" style="margin-bottom:12px">Login e senha são usados para entrar no sistema e para autorizações gerenciais.</div>
+
+            <div class="perm-panel">
+              <div class="perm-panel-title">
+                <span>Permissões de acesso</span>
+                <button class="perm-toggle-all" type="button" onclick="toggleTodasPermissoes()">Marcar / desmarcar todas</button>
+              </div>
+              <div class="perm-grid" id="permissoesGrid"></div>
+            </div>
+
             <div class="actions">
               <button class="btn btn-primary" onclick="salvarUsuario()">Salvar usuário</button>
               <button class="btn btn-light" onclick="limparUsuarioForm()">Limpar</button>
@@ -2124,6 +2143,10 @@
             userViews.forEach((v, index) => v.classList.toggle('active', index === 0));
           }
         }
+        // Inicializa grid de permissões ao abrir aba cadastrar usuário
+        if(target === 'cadastrar' && prefix === 'usuarios'){
+          if(!document.getElementById('permissoesGrid')?.children.length) renderPermissoesGrid();
+        }
       });
     });
   }
@@ -2320,6 +2343,7 @@
     });
     document.getElementById('usuarioPerfil').value = 'Secretária';
     document.getElementById('usuarioStatus').value = 'Ativo';
+    renderPermissoesGrid(); // todas marcadas por padrão
   }
 
   function salvarUsuario(){
@@ -2344,7 +2368,8 @@
     const loginDup = db.users.find(u => u.login === login && u.id !== id);
     if(loginDup){ alert('Esse login já está em uso por outro usuário.'); return; }
 
-    const payload = { id: id || uid(), nome, cargo, perfil, login, status, senha: senha || existing?.senha || '' };
+    const permissoes = lerPermissoesMarcadas();
+    const payload = { id: id || uid(), nome, cargo, perfil, login, status, senha: senha || existing?.senha || '', permissoes };
 
     if(id){ db.users = db.users.map(u => u.id === id ? payload : u); }
     else   { db.users.push(payload); }
@@ -2362,6 +2387,7 @@
     document.getElementById('usuarioLogin').value = u.login;
     document.getElementById('usuarioStatus').value= u.status;
     document.getElementById('usuarioSenha').value = u.senha || '';
+    renderPermissoesGrid(u.permissoes || SYSTEM_SECTIONS.map(s => s.id));
     document.querySelectorAll('#usuariosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#usuariosSubnav .subnav-btn[data-usuarios-view="cadastrar"]'); if(btn) btn.classList.add('active');
     document.querySelectorAll('#configuracoesUsuarios .subview').forEach(v => v.classList.remove('active'));
@@ -3178,6 +3204,64 @@
 
   window.addEventListener('DOMContentLoaded', init);
 
+  // ── PERMISSÕES ──
+  const SYSTEM_SECTIONS = [
+    { id:'dashboard',     label:'Dashboard'       },
+    { id:'vendas',        label:'Vendas'          },
+    { id:'repasse',       label:'Repasse Médico'  },
+    { id:'produtividade', label:'Produtividade'   },
+    { id:'pacientes',     label:'Pacientes'       },
+    { id:'medicos',       label:'Médicos'         },
+    { id:'produtos',      label:'Produtos'        },
+    { id:'financeiro',    label:'Financeiro'      },
+    { id:'cancelamentos', label:'Cancelamentos'   },
+    { id:'configuracoes', label:'Configurações'   },
+  ];
+
+  function renderPermissoesGrid(marcadas = SYSTEM_SECTIONS.map(s => s.id)){
+    const grid = document.getElementById('permissoesGrid');
+    if(!grid) return;
+    grid.innerHTML = SYSTEM_SECTIONS.map(s => {
+      const checked = marcadas.includes(s.id) ? 'checked' : '';
+      return `
+        <label class="perm-item${checked ? ' checked' : ''}" id="permItem_${s.id}">
+          <span>${s.label}</span>
+          <input type="checkbox" id="perm_${s.id}" value="${s.id}" ${checked}
+            onchange="document.getElementById('permItem_${s.id}').classList.toggle('checked',this.checked)" />
+        </label>`;
+    }).join('');
+  }
+
+  function lerPermissoesMarcadas(){
+    return SYSTEM_SECTIONS.map(s => s.id).filter(id => document.getElementById('perm_' + id)?.checked);
+  }
+
+  function toggleTodasPermissoes(){
+    const todas = SYSTEM_SECTIONS.map(s => s.id);
+    const marcadas = lerPermissoesMarcadas();
+    const marcar = marcadas.length < todas.length;
+    SYSTEM_SECTIONS.forEach(s => {
+      const cb = document.getElementById('perm_' + s.id);
+      const item = document.getElementById('permItem_' + s.id);
+      if(cb){ cb.checked = marcar; item?.classList.toggle('checked', marcar); }
+    });
+  }
+
+  function aplicarPermissoesNoMenu(permissoes){
+    // Mostra/oculta botões do menu conforme permissões do usuário logado
+    document.querySelectorAll('nav .nav-btn[data-target]').forEach(btn => {
+      const target = btn.getAttribute('data-target');
+      if(target === 'cancelamentos') return; // controlado por outra lógica
+      btn.style.display = permissoes.includes(target) ? '' : 'none';
+    });
+    // Grupo Cadastros: só mostra se ao menos um filho está visível
+    const temCadastro = ['pacientes','medicos','produtos'].some(id => permissoes.includes(id));
+    const groupBtn = document.getElementById('cadastrosGroupBtn');
+    const submenu  = document.getElementById('cadastrosSubmenu');
+    if(groupBtn) groupBtn.style.display = temCadastro ? '' : 'none';
+    if(submenu)  submenu.style.display  = temCadastro ? '' : 'none';
+  }
+
   // ── MENU CADASTROS (colapsável) ──
   const CADASTROS_TARGETS = ['pacientes','medicos','produtos'];
 
@@ -3212,6 +3296,8 @@
       document.getElementById('loginScreen').classList.remove('hidden');
     } else {
       document.getElementById('loginScreen').classList.add('hidden');
+      const perms = JSON.parse(sessionStorage.getItem('extramed_perms') || 'null') || SYSTEM_SECTIONS.map(s => s.id);
+      aplicarPermissoesNoMenu(perms);
     }
   }
 
@@ -3230,6 +3316,9 @@
     if(matched || isMaster){
       sessionStorage.setItem(LOGIN_KEY, '1');
       sessionStorage.setItem(LOGIN_USER_KEY, matched ? matched.nome : 'Administrador');
+      const perms = matched?.permissoes || SYSTEM_SECTIONS.map(s => s.id);
+      sessionStorage.setItem('extramed_perms', JSON.stringify(perms));
+      aplicarPermissoesNoMenu(perms);
       document.getElementById('loginScreen').classList.add('hidden');
       err.style.display = 'none';
     } else {
