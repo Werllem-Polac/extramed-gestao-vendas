@@ -924,10 +924,18 @@
               <input id="pacienteTelefone" />
             </div>
           </div>
-          <div class="row row-2">
+          <div class="row row-3">
             <div>
               <label>CPF</label>
               <input id="pacienteCPF" />
+            </div>
+            <div>
+              <label>E-mail</label>
+              <input id="pacienteEmail" type="email" placeholder="paciente@email.com" />
+            </div>
+            <div>
+              <label>Data de cadastro</label>
+              <input id="pacienteCadastro" type="date" />
             </div>
           </div>
           <div class="actions">
@@ -2521,9 +2529,14 @@
   }
 
   function limparPacienteForm(){
-    ['pacienteId','pacienteNome','pacienteRua','pacienteNumero','pacienteBairro','pacienteCidade','pacienteEstado','pacienteCEP','pacienteTelefone','pacienteNascimento','pacienteCPF'].forEach(id => {
+    ['pacienteId','pacienteNome','pacienteRua','pacienteNumero','pacienteBairro','pacienteCidade',
+     'pacienteCEP','pacienteTelefone','pacienteNascimento','pacienteCPF','pacienteEmail'].forEach(id => {
       const el = document.getElementById(id); if(el) el.value='';
     });
+    const peEl = document.getElementById('pacienteEstado');
+    if(peEl) peEl.innerHTML = buildUFOptions();
+    const cad = document.getElementById('pacienteCadastro');
+    if(cad) cad.value = todayStr(); // pré-preenche com a data atual
     applyPatientMasks();
   }
 
@@ -2538,8 +2551,10 @@
     const estado = document.getElementById('pacienteEstado').value;
     const cep = formatCEP(document.getElementById('pacienteCEP').value.trim());
     const telefone = formatTelefone(document.getElementById('pacienteTelefone').value.trim());
-    const nascimento = document.getElementById('pacienteNascimento').value;
-    const cpf = formatCPF(document.getElementById('pacienteCPF').value.trim());
+    const nascimento    = document.getElementById('pacienteNascimento').value;
+    const cpf           = formatCPF(document.getElementById('pacienteCPF').value.trim());
+    const email         = document.getElementById('pacienteEmail').value.trim();
+    const dataCadastro  = document.getElementById('pacienteCadastro').value || todayStr();
     if(!nome || !telefone || !cpf){
       alert('Preencha pelo menos nome, telefone e CPF do paciente.');
       return;
@@ -2560,7 +2575,7 @@
       alert('Já existe paciente cadastrado com este CPF.');
       return;
     }
-    const payload = {id: id || uid(), nome, rua, numero, bairro, cidade, estado, cep, telefone, nascimento, cpf};
+    const payload = {id: id || uid(), nome, rua, numero, bairro, cidade, estado, cep, telefone, nascimento, cpf, email, dataCadastro};
     if(id){
       db.patients = db.patients.map(p => p.id === id ? payload : p);
     } else {
@@ -2586,7 +2601,9 @@
     document.getElementById('pacienteCEP').value = p.cep || '';
     document.getElementById('pacienteTelefone').value = p.telefone || '';
     document.getElementById('pacienteNascimento').value = p.nascimento || '';
-    document.getElementById('pacienteCPF').value = p.cpf || '';
+    document.getElementById('pacienteCPF').value        = p.cpf || '';
+    document.getElementById('pacienteEmail').value      = p.email || '';
+    document.getElementById('pacienteCadastro').value   = p.dataCadastro || todayStr();
     applyPatientMasks();
   }
 
