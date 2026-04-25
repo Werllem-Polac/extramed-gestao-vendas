@@ -1,0 +1,3047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extra Med Clínica de Especialidades | Gestão de Vendas</title>
+  <style>
+    :root{
+      --gold:#c9a227;
+      --gold-dark:#9e7b10;
+      --purple:#5f2b8c;
+      --purple-dark:#40185f;
+      --white:#ffffff;
+      --soft:#f7f4fb;
+      --gray:#6b7280;
+      --border:#e8ddf4;
+      --success:#0f9d58;
+      --danger:#c62828;
+      --warning:#b7791f;
+      --shadow: 0 10px 30px rgba(95,43,140,.12);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(135deg,#fbf7ff 0%, #ffffff 38%, #fff9ea 100%);
+      color:#24152f;
+    }
+    .app{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      min-height:100vh;
+    }
+    aside{
+      background:linear-gradient(180deg,var(--purple) 0%, var(--purple-dark) 100%);
+      color:#fff;
+      padding:24px 18px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+      box-shadow:var(--shadow);
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:10px 8px 24px;
+      border-bottom:1px solid rgba(255,255,255,.15);
+      margin-bottom:20px;
+    }
+    .brand h1{
+      font-size:20px;
+      line-height:1.15;
+      margin:0;
+    }
+    .brand p{
+      margin:4px 0 0;
+      font-size:12px;
+      opacity:.85;
+    }
+    .lotus{
+      width:54px;
+      height:54px;
+      flex:0 0 54px;
+      background:radial-gradient(circle at 50% 35%, #fff8dc 0%, #f4d97a 45%, #d0a321 100%);
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      box-shadow:0 8px 18px rgba(0,0,0,.15);
+    }
+    .lotus svg{width:34px;height:34px}
+    nav button{
+      width:100%;
+      border:none;
+      background:transparent;
+      color:#fff;
+      text-align:left;
+      padding:14px 14px;
+      border-radius:14px;
+      margin-bottom:8px;
+      cursor:pointer;
+      font-size:14px;
+      transition:.2s ease;
+    }
+    nav button:hover, nav button.active{
+      background:rgba(255,255,255,.12);
+      transform:translateX(3px);
+    }
+    main{
+      padding:26px;
+      min-width:0;
+      overflow:auto;
+    }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:20px;
+      margin-bottom:22px;
+      flex-wrap:wrap;
+    }
+    .topbar h2{
+      margin:0;
+      color:var(--purple);
+      font-size:28px;
+    }
+    .topbar p{
+      margin:6px 0 0;
+      color:var(--gray);
+    }
+    .badge{
+      background:#fff;
+      border:1px solid #f0e6bf;
+      color:var(--gold-dark);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:bold;
+      box-shadow:var(--shadow);
+    }
+    .section{display:none}
+    .section.active{display:block}
+    .grid{
+      display:grid;
+      gap:18px;
+    }
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+    .card h3{
+      margin:0 0 14px;
+      color:var(--purple);
+      font-size:18px;
+    }
+    label{
+      display:block;
+      font-size:13px;
+      color:#4b5563;
+      margin-bottom:6px;
+      font-weight:bold;
+    }
+    input, select{
+      width:100%;
+      padding:12px 13px;
+      border:1px solid #d8cce7;
+      border-radius:12px;
+      outline:none;
+      background:#fff;
+      transition:.2s ease;
+    }
+    input:focus, select:focus{
+      border-color:var(--gold);
+      box-shadow:0 0 0 3px rgba(201,162,39,.15);
+    }
+    .row{
+      display:grid;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .row-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .row-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .row-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:bold;
+      transition:.2s ease;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--gold) 0%, #f2d26e 100%);
+      color:#3b2a00;
+    }
+    .btn-secondary{
+      background:linear-gradient(135deg,var(--purple) 0%, #7a44aa 100%);
+      color:#fff;
+    }
+    .btn-light{
+      background:#f5f0fa;
+      color:var(--purple);
+    }
+    .btn-danger{
+      background:#ffe8e8;
+      color:var(--danger);
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .product-subnav{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .product-subnav .btn{
+      background:#f5f0fa;
+      color:var(--purple);
+      border:1px solid #e6d9f4;
+    }
+    .product-subnav .btn.active{
+      background:linear-gradient(135deg,var(--purple) 0%, #7a44aa 100%);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 10px 24px rgba(95,43,140,.22);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+    th, td{
+      padding:12px 10px;
+      border-bottom:1px solid #eee5f7;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{
+      background:#faf6ff;
+      color:var(--purple);
+      position:sticky;
+      top:0;
+    }
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:16px;
+    }
+    .metric{
+      padding:18px;
+      border-radius:18px;
+      color:#fff;
+      box-shadow:var(--shadow);
+      min-height:120px;
+    }
+    .metric h4{
+      margin:0;
+      opacity:.9;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .metric .value{
+      font-size:28px;
+      font-weight:bold;
+      margin-top:10px;
+    }
+    .metric .sub{
+      font-size:13px;
+      margin-top:8px;
+      opacity:.9;
+    }
+    .m1{background:linear-gradient(135deg,var(--purple) 0%, #8850b7 100%)}
+    .m2{background:linear-gradient(135deg,var(--gold-dark) 0%, var(--gold) 100%)}
+    .m3{background:linear-gradient(135deg,#1f7a55 0%, #34a853 100%)}
+    .m4{background:linear-gradient(135deg,#8a1c7c 0%, #cb4bb8 100%)}
+    .muted{color:var(--gray)}
+    .pill{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:bold;
+      background:#f7f0ff;
+      color:var(--purple);
+    }
+    .right{text-align:right}
+    .empty{
+      padding:24px;
+      text-align:center;
+      color:var(--gray);
+    }
+    .footer-note{
+      font-size:12px;
+      color:var(--gray);
+      margin-top:10px;
+    }
+    .subnav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    .subnav-btn{border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:bold;background:#f5f0fa;color:var(--purple);transition:.2s ease}
+    .subnav-btn.active{background:linear-gradient(135deg,var(--purple) 0%, #7a44aa 100%);color:#fff;box-shadow:var(--shadow)}
+    .subview{display:none}
+    .subview.active{display:block}
+
+    .section-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .helper-text{font-size:12px;color:var(--gray)}
+    .status-dot{display:inline-flex;align-items:center;gap:6px;font-weight:bold}
+    .status-dot::before{content:"";width:10px;height:10px;border-radius:999px;display:inline-block;background:#9ca3af}
+    .status-danger::before{background:#dc2626}
+    .status-warning::before{background:#f59e0b}
+    .status-success::before{background:#16a34a}
+    .chip{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:bold;background:#f3f4f6;color:#374151}
+    .modal-screen{position:fixed;inset:0;background:rgba(36,21,47,.6);display:none;align-items:flex-start;justify-content:center;padding:32px;z-index:1000;overflow:auto}
+    .modal-screen.open{display:flex}
+    .modal-card{width:min(1320px,100%);background:#fff;border-radius:24px;border:1px solid var(--border);box-shadow:0 25px 60px rgba(36,21,47,.25);padding:22px}
+    .icon-btn{border:none;background:#f5f0fa;color:var(--purple);width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:18px;display:inline-grid;place-items:center}
+    .icon-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+    .receipt-wrap{font-family:Arial,Helvetica,sans-serif;color:#24152f;padding:24px;max-width:820px;margin:0 auto}
+    .receipt-head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e8ddf4;padding-bottom:14px;margin-bottom:18px}
+    .receipt-head h1{margin:0;color:var(--purple);font-size:24px}
+    .receipt-meta{font-size:13px;color:#4b5563;line-height:1.6}
+    .receipt-table{width:100%;border-collapse:collapse;margin-top:14px}
+    .receipt-table th,.receipt-table td{border:1px solid #e8ddf4;padding:10px;text-align:left;font-size:13px}
+    .receipt-table th{background:#faf6ff;color:var(--purple)}
+    .receipt-totals{margin-top:18px;display:grid;gap:8px;justify-content:end}
+    .receipt-total-line{display:flex;justify-content:space-between;gap:30px;font-size:14px}
+    .receipt-foot{margin-top:24px;padding-top:14px;border-top:1px dashed #c9a227;font-size:12px;color:#6b7280;text-align:center}
+
+    @media (max-width:768px){
+      body{overflow-x:auto}
+      .app{grid-template-columns:280px minmax(980px,1fr); min-width:1260px}
+      aside{height:100vh; position:sticky}
+      main{padding:18px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="lotus" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 14c5 4 9 10 9 17-3-2-6-3-9-3s-6 1-9 3c0-7 4-13 9-17Z" fill="#5f2b8c"/>
+          <path d="M18 22c7 3 12 10 12 18-6-2-12-1-18 3 0-9 2-16 6-21Z" fill="#7a44aa"/>
+          <path d="M46 22c-4 5-6 12-6 21-6-4-12-5-18-3 0-8 5-15 12-18 4 2 8 2 12 0Z" fill="#7a44aa"/>
+          <path d="M32 31c9 0 16 6 19 16-7-2-13-2-19 1-6-3-12-3-19-1 3-10 10-16 19-16Z" fill="#c9a227"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Extra Med</h1>
+        <p>Gestão de Vendas da Clínica</p>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" data-target="dashboard" onclick="showMainSection('dashboard', this, 'Dashboard')">Dashboard</button>
+      <button class="nav-btn" data-target="vendas" onclick="showMainSection('vendas', this, 'Vendas')">Vendas</button>
+      <button class="nav-btn" data-target="repasse" onclick="showMainSection('repasse', this, 'Repasse Médico')">Repasse Médico</button>
+      <button class="nav-btn" data-target="produtividade" onclick="showMainSection('produtividade', this, 'Produtividade')">Produtividade</button>
+      <button class="nav-btn" data-target="pacientes" onclick="showMainSection('pacientes', this, 'Pacientes')">Paciente</button>
+      <button class="nav-btn" data-target="medicos" onclick="showMainSection('medicos', this, 'Médicos')">Médicos</button>
+      <button class="nav-btn" data-target="produtos" onclick="showMainSection('produtos', this, 'Produtos')">Produtos</button>
+      <button class="nav-btn" data-target="financeiro" onclick="showMainSection('financeiro', this, 'Financeiro')">Financeiro</button>
+      <button class="nav-btn" data-target="cancelamentos" id="cancelamentosMenuBtn" style="display:none" onclick="showMainSection('cancelamentos', this, 'Cancelamentos')">Cancelamentos</button>
+      <button class="nav-btn" data-target="configuracoes" onclick="showMainSection('configuracoes', this, 'Configurações')">Configurações</button>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div>
+        <h2 id="sectionTitle">Dashboard</h2>
+        <p>Sistema gerencial para controle comercial, lucratividade e repasse médico.</p>
+      </div>
+      <div class="badge" id="todayBadge"></div>
+    </div>
+
+    <section class="section active" id="dashboard">
+      <div class="grid grid-4">
+        <div class="metric m1">
+          <h4>Faturamento</h4>
+          <div class="value" id="dashRevenue">R$ 0,00</div>
+          <div class="sub">Total das vendas registradas</div>
+        </div>
+        <div class="metric m2">
+          <h4>Lucro</h4>
+          <div class="value" id="dashProfit">R$ 0,00</div>
+          <div class="sub">Lucro bruto calculado</div>
+        </div>
+        <div class="metric m3">
+          <h4>Repasse Médico</h4>
+          <div class="value" id="dashMedicalTransfer">R$ 0,00</div>
+          <div class="sub">Total previsto para médicos</div>
+        </div>
+        <div class="metric m4">
+          <h4>Para a Clínica</h4>
+          <div class="value" id="dashClinicValue">R$ 0,00</div>
+          <div class="sub">Resultado líquido após repasse</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:18px">
+        <div class="card">
+          <h3>Visão Geral</h3>
+          <div class="row row-2">
+            <div><span class="pill">Produtos</span> <strong id="sumProducts">0</strong></div>
+            <div><span class="pill">Médicos</span> <strong id="sumDoctors">0</strong></div>
+            <div><span class="pill">Usuários</span> <strong id="sumUsers">0</strong></div>
+            <div><span class="pill">Vendas</span> <strong id="sumSales">0</strong></div>
+          </div>
+          <p class="footer-note">Os dados ficam salvos no navegador via armazenamento local.</p>
+        </div>
+        <div class="card">
+          <h3>Alertas</h3>
+          <div id="alertsBox" class="muted">Nenhum alerta no momento.</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Últimas vendas</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Usuário</th>
+                <th>Paciente</th>
+                <th>Médico</th>
+                <th>Itens</th>
+                <th>Total</th>
+                <th>Lucro</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardSalesTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="produtos">
+      <div class="card">
+        <h3>Produtos e Serviços</h3>
+        <div class="product-subnav" id="produtosSubnav">
+          <button class="btn active" data-produtos-target="consulta" onclick="abrirTelaProdutos('consulta', this)">Consultar produtos</button>
+          <button class="btn" data-produtos-target="cadastro" onclick="abrirTelaProdutos('cadastro', this)">Cadastrar produto</button>
+          <button class="btn" data-produtos-target="categorias" onclick="abrirTelaProdutos('categorias', this)">Categorias</button>
+          <button class="btn" data-produtos-target="vencimento" onclick="abrirTelaProdutos('vencimento', this)">Controle de vencimento</button>
+        </div>
+      </div>
+
+      
+      <div id="produtosConsulta" class="card" style="margin-top:18px; display:none">
+        <div class="section-header">
+          <h3>Consulta de Produtos e Serviços</h3>
+          <button class="btn btn-light" onclick="abrirTelaProdutos('cadastro')">Cadastrar novo item</button>
+        </div>
+        <div class="row row-4">
+          <div>
+            <label>Pesquisa</label>
+            <div style="position:relative">
+              <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6b7280">🔎</span>
+              <input id="produtoBusca" placeholder="Buscar por código, descrição, categoria ou tipo" style="padding-left:40px" />
+            </div>
+          </div>
+          <div>
+            <label>Tipo</label>
+            <select id="produtoBuscaTipo">
+              <option value="">Todos</option>
+              <option value="Produto">Produto</option>
+              <option value="Serviço">Serviço</option>
+            </select>
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="produtoBuscaCategoria"></select>
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="produtoBuscaStatus">
+              <option value="">Todos</option>
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Tipo</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>Estoque</th>
+                <th>Validade</th>
+                <th>Custo</th>
+                <th>Venda</th>
+                <th>Margem %</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="produtosTabela"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="produtosCadastro" class="card" style="margin-top:18px; display:none">
+        <h3>Cadastrar / Alterar Produtos e Serviços</h3>
+        <input type="hidden" id="produtoId" />
+        <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-bottom:14px">
+          <h3>Identificação</h3>
+          <div class="row row-4">
+            <div>
+              <label>Tipo</label>
+              <select id="produtoTipo" onchange="toggleProdutoSpecificFields(); atualizarSugestaoCodigo()">
+                <option value="Produto">Produto</option>
+                <option value="Serviço">Serviço</option>
+              </select>
+            </div>
+            <div>
+              <label>Categoria</label>
+              <select id="produtoCategoria"></select>
+            </div>
+            <div>
+              <label>Código interno</label>
+              <input id="produtoCodigo" placeholder="Gerado automaticamente" readonly />
+            </div>
+            <div>
+              <label>Código manual opcional</label>
+              <input id="produtoCodigoManual" placeholder="Ex.: EXAM-2026-01" oninput="atualizarSugestaoCodigo()" />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Descrição</label>
+              <input id="produtoNome" placeholder="Descrever o item cadastrado" />
+            </div>
+            <div>
+              <label>Status</label>
+              <select id="produtoStatus">
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-bottom:14px">
+          <h3>Precificação</h3>
+          <div class="row row-4">
+            <div>
+              <label>Preço de custo</label>
+              <input id="produtoCusto" type="number" min="0" step="0.01" placeholder="0,00" />
+            </div>
+            <div>
+              <label>Preço de venda</label>
+              <input id="produtoVenda" type="number" min="0" step="0.01" placeholder="0,00" />
+            </div>
+            <div>
+              <label>Margem %</label>
+              <input id="produtoMargem" placeholder="Calculado automaticamente" readonly />
+            </div>
+            <div>
+              <label>Lucro R$</label>
+              <input id="produtoLucro" placeholder="Calculado automaticamente" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-bottom:14px">
+          <h3>Regras operacionais</h3>
+          <div class="row row-3">
+            <div>
+              <label>Validade inicial da oferta</label>
+              <input id="produtoVigenciaInicial" type="date" />
+            </div>
+            <div>
+              <label>Validade final da oferta</label>
+              <input id="produtoVigenciaFinal" type="date" />
+            </div>
+            <div>
+              <label>Observação operacional</label>
+              <input id="produtoObs" placeholder="Instruções internas" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="produtoBlocoEspecifico" style="box-shadow:none;border:1px solid var(--border);margin-bottom:14px">
+          <h3>Controle específico</h3>
+          <div class="row row-4" id="produtoCamposFisicos">
+            <div>
+              <label>Lote</label>
+              <input id="produtoLote" placeholder="Ex.: LT-2026-001" />
+            </div>
+            <div>
+              <label>Validade</label>
+              <input id="produtoValidade" type="date" />
+            </div>
+            <div>
+              <label>Estoque</label>
+              <input id="produtoEstoque" type="number" min="0" step="1" placeholder="0" />
+            </div>
+            <div>
+              <label>Estoque mínimo</label>
+              <input id="produtoEstoqueMinimo" type="number" min="0" step="1" placeholder="0" />
+            </div>
+          </div>
+          <div class="row row-3" id="produtoCamposServico" style="display:none">
+            <div>
+              <label>Duração (min)</label>
+              <input id="produtoDuracao" type="number" min="0" step="5" placeholder="0" />
+            </div>
+            <div>
+              <label>Regras de repasse</label>
+              <input id="produtoRepasseInfo" placeholder="Opcional" />
+            </div>
+            <div>
+              <label>Necessita agendamento</label>
+              <select id="produtoAgendamento">
+                <option value="Sim">Sim</option>
+                <option value="Não">Não</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="salvarProduto()">Salvar</button>
+          <button class="btn btn-secondary" onclick="editarProdutoSelecionado()">Editar</button>
+          <button class="btn btn-danger" onclick="excluirProdutoSelecionado()">Excluir</button>
+          <button class="btn btn-light" onclick="limparProdutoForm()">Limpar</button>
+        </div>
+      </div>
+
+      <div id="produtosCategorias" class="grid grid-2" style="margin-top:18px; display:none">
+        <div class="card">
+          <h3>Cadastro de Categorias</h3>
+          <div class="row row-2" style="align-items:end">
+            <div>
+              <label>Nome da categoria</label>
+              <input id="novaCategoria" placeholder="Adicionar ou editar categoria" />
+            </div>
+            <div>
+              <label>Categoria selecionada</label>
+              <select id="categoriaSelecionada" onchange="carregarCategoriaSelecionadaParaEdicao()"></select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="adicionarCategoria()">Salvar categoria</button>
+            <button class="btn btn-secondary" onclick="editarCategoriaSelecionada()">Editar categoria</button>
+            <button class="btn btn-danger" onclick="excluirCategoriaSelecionada()">Excluir categoria</button>
+            <button class="btn btn-light" onclick="limparCategoriaForm()">Limpar</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Categorias cadastradas</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Categoria</th>
+                  <th>Qtd. itens</th>
+                </tr>
+              </thead>
+              <tbody id="categoriasTabela"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="produtosVencimento" class="card" style="margin-top:18px; display:none">
+        <div class="section-header">
+          <h3>Controle de Vencimento</h3>
+          <div class="helper-text">Semáforo: vermelho = vencido/próximo, amarelo = atenção, verde = ok</div>
+        </div>
+        <div class="row row-3">
+          <div>
+            <label>Período</label>
+            <select id="controleVencimentoPeriodo">
+              <option value="todos">Todos</option>
+              <option value="30">Próximos 30 dias</option>
+              <option value="60">Próximos 60 dias</option>
+              <option value="90">Próximos 90 dias</option>
+              <option value="vencidos">Somente vencidos</option>
+            </select>
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="controleVencimentoCategoria"></select>
+          </div>
+          <div>
+            <label>Busca</label>
+            <input id="controleVencimentoBusca" placeholder="Buscar por código, item ou lote" />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Validade</th>
+                <th>Dias restantes</th>
+                <th>Código</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>Lote</th>
+                <th>Estoque</th>
+              </tr>
+            </thead>
+            <tbody id="vencimentosTabela"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pacientes">
+      <div class="card">
+        <h3>Pacientes</h3>
+        <div class="subnav" id="pacientesSubnav">
+          <button class="subnav-btn active" data-pacientes-view="consultar">Consultar paciente</button>
+          <button class="subnav-btn" data-pacientes-view="cadastrar">Cadastrar paciente</button>
+        </div>
+
+        <div class="subview active" id="pacientesConsultarView">
+          <div class="section-header">
+            <div>
+              <h3>Consultar paciente</h3>
+              <div class="helper-text">Busque pacientes por nome, CPF ou telefone.</div>
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Pesquisar paciente</label>
+              <input id="pacienteBusca" placeholder="Buscar por nome, CPF ou telefone" />
+            </div>
+          </div>
+          <div class="table-wrap" style="margin-top:16px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Telefone</th>
+                  <th>Cidade/UF</th>
+                  <th>Nascimento</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="pacientesTabela"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subview" id="pacientesCadastrarView">
+          <div class="section-header">
+            <div>
+              <h3>Cadastrar paciente</h3>
+              <div class="helper-text">Cadastre pacientes para vinculação nas vendas.</div>
+            </div>
+          </div>
+          <input type="hidden" id="pacienteId" />
+          <div class="row row-2">
+            <div>
+              <label>Nome</label>
+              <input id="pacienteNome" placeholder="Nome completo do paciente" />
+            </div>
+            <div>
+              <label>Data de nascimento</label>
+              <input id="pacienteNascimento" type="date" />
+            </div>
+          </div>
+          <div class="row row-3">
+            <div>
+              <label>Rua/AV</label>
+              <input id="pacienteRua" />
+            </div>
+            <div>
+              <label>Número</label>
+              <input id="pacienteNumero" />
+            </div>
+            <div>
+              <label>Bairro</label>
+              <input id="pacienteBairro" />
+            </div>
+          </div>
+          <div class="row row-4">
+            <div>
+              <label>Cidade</label>
+              <input id="pacienteCidade" />
+            </div>
+            <div>
+              <label>Estado</label>
+              <input id="pacienteEstado" maxlength="2" />
+            </div>
+            <div>
+              <label>CEP</label>
+              <input id="pacienteCEP" />
+            </div>
+            <div>
+              <label>Telefone</label>
+              <input id="pacienteTelefone" />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>CPF</label>
+              <input id="pacienteCPF" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="salvarPaciente()">Salvar paciente</button>
+            <button class="btn btn-light" onclick="limparPacienteForm()">Limpar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="medicos">
+      <div class="card">
+        <div class="subnav" id="medicosSubnav">
+          <button class="subnav-btn active" data-medicos-view="consultar">Consultar Médicos</button>
+          <button class="subnav-btn" data-medicos-view="cadastrar">Cadastrar Médico</button>
+          <button class="subnav-btn" data-medicos-view="especialidades">Cadastrar Especialidade</button>
+        </div>
+
+        <div class="subview active" id="medicosConsultarView">
+          <h3>Consultar Médicos</h3>
+          <div class="row row-2">
+            <div>
+              <label>Pesquisar médico</label>
+              <input id="medicoBusca" placeholder="Buscar por nome, especialidade, CRM, UF, RQE ou status" />
+            </div>
+            <div>
+              <label>Filtrar por status</label>
+              <select id="medicoFiltroStatus">
+                <option value="">Todos</option>
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Especialidade</th>
+                  <th>CRM/UF</th>
+                  <th>RQE</th>
+                  <th>Status</th>
+                  <th>Vigência</th>
+                  <th>% Lucro</th>
+                  <th>% Consulta</th>
+                  <th>% Exame</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="medicosTabela"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="subview" id="medicosCadastrarView">
+          <h3>Cadastrar Médico</h3>
+          <input type="hidden" id="medicoId" />
+          <div class="row row-2">
+            <div>
+              <label>Nome do médico</label>
+              <input id="medicoNome" placeholder="Ex.: Dr. João Silva" />
+            </div>
+            <div>
+              <label>Especialidade</label>
+              <select id="medicoEspecialidade"></select>
+            </div>
+          </div>
+          <div class="row row-4">
+            <div>
+              <label>CRM</label>
+              <input id="medicoCRM" placeholder="Ex.: 123456" />
+            </div>
+            <div>
+              <label>UF</label>
+              <input id="medicoUF" maxlength="2" placeholder="Ex.: ES" />
+            </div>
+            <div>
+              <label>RQE</label>
+              <input id="medicoRQE" placeholder="Ex.: 78910" />
+            </div>
+            <div>
+              <label>Status</label>
+              <select id="medicoStatus">
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Período inicial da vigência</label>
+              <input id="medicoVigenciaInicial" type="date" />
+            </div>
+            <div>
+              <label>Período final da vigência</label>
+              <input id="medicoVigenciaFinal" type="date" />
+            </div>
+          </div>
+          <div class="row row-3">
+            <div>
+              <label>Percentual sobre o lucro (%)</label>
+              <input id="medicoPercentualLucro" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 30" />
+            </div>
+            <div>
+              <label>Percentual sobre consulta (%)</label>
+              <input id="medicoPercentualConsulta" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 10" />
+            </div>
+            <div>
+              <label>Percentual sobre exame (%)</label>
+              <input id="medicoPercentualExame" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 15" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="salvarMedico()">Salvar médico</button>
+            <button class="btn btn-light" onclick="limparMedicoForm()">Limpar</button>
+          </div>
+        </div>
+
+        <div class="subview" id="medicosEspecialidadesView">
+          <div class="grid grid-2">
+            <div class="card" style="box-shadow:none; border:1px solid var(--border);">
+              <h3>Cadastro de Especialidades</h3>
+              <div class="row row-2" style="align-items:end">
+                <div>
+                  <label>Selecionar especialidade</label>
+                  <select id="especialidadeSelecionada" onchange="carregarEspecialidadeParaEdicao()"></select>
+                </div>
+                <div>
+                  <label>Nome da especialidade</label>
+                  <input id="especialidadeNome" placeholder="Ex.: Endocrinologia" />
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" onclick="salvarEspecialidade()">Salvar especialidade</button>
+                <button class="btn btn-secondary" onclick="carregarEspecialidadeParaEdicao()">Carregar para edição</button>
+                <button class="btn btn-danger" onclick="excluirEspecialidade()">Excluir selecionada</button>
+                <button class="btn btn-light" onclick="limparEspecialidadeForm()">Limpar</button>
+              </div>
+              <p class="footer-note">Selecione uma especialidade existente para editar ou excluir. Ao salvar um nome novo, ele será cadastrado automaticamente.</p>
+            </div>
+            <div class="card" style="box-shadow:none; border:1px solid var(--border);">
+              <h3>Especialidades cadastradas</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Especialidade</th>
+                      <th>Médicos vinculados</th>
+                    </tr>
+                  </thead>
+                  <tbody id="especialidadesTabela"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="vendas">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <h3>Lançamento de Venda / Atendimento</h3>
+            <div class="helper-text">Permite misturar consulta, exame, procedimento, pacote, produto e retorno na mesma venda.</div>
+          </div>
+          <button class="btn btn-secondary" onclick="abrirConsultarVendasTela()">Consultar vendas</button>
+        </div>
+        <input type="hidden" id="vendaId" />
+        <div class="row row-4">
+          <div>
+            <label>Número da venda / atendimento</label>
+            <input id="vendaNumero" readonly />
+          </div>
+          <div>
+            <label>Data da venda</label>
+            <input id="vendaData" type="date" readonly />
+          </div>
+          <div>
+            <label>Hora da venda</label>
+            <input id="vendaHora" type="time" readonly />
+          </div>
+          <div>
+            <label>Tipo principal</label>
+            <select id="vendaTipoPrincipal">
+              <option value="Consulta">Consulta</option>
+              <option value="Exame">Exame</option>
+              <option value="Procedimento">Procedimento</option>
+              <option value="Pacote">Pacote</option>
+              <option value="Produto">Produto</option>
+              <option value="Retorno">Retorno</option>
+            </select>
+          </div>
+        </div>
+        <div class="row row-4">
+          <div>
+            <label>Paciente</label>
+            <select id="vendaPaciente"></select>
+          </div>
+          <div>
+            <label>Usuário</label>
+            <select id="vendaUsuario"></select>
+          </div>
+          <div>
+            <label>Médico</label>
+            <select id="vendaMedico"></select>
+          </div>
+          <div>
+            <label>Observações da venda</label>
+            <input id="vendaObservacoes" placeholder="Observações gerais" />
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-top:12px">
+          <div class="section-header">
+            <h3>Itens da venda</h3>
+          </div>
+          <div class="row row-4">
+            <div>
+              <label>Item</label>
+              <select id="vendaProduto"></select>
+            </div>
+            <div>
+              <label>Quantidade</label>
+              <input id="vendaQuantidade" type="number" min="1" step="1" value="1" />
+            </div>
+            <div>
+              <label>Valor unitário</label>
+              <input id="vendaValorUnitario" type="number" min="0" step="0.01" placeholder="0,00" />
+            </div>
+            <div>
+              <label>Desconto por item</label>
+              <input id="vendaDescontoItem" type="number" min="0" step="0.01" placeholder="0,00" />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Subtotal item</label>
+              <input id="vendaSubtotalItem" readonly />
+            </div>
+            <div>
+              <label>Observação do item</label>
+              <div style="display:flex;gap:10px;align-items:center">
+                <input id="vendaObsItem" placeholder="Opcional" />
+                <button type="button" class="btn btn-light" onclick="adicionarItemVenda()">Lançar</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Item</th>
+                  <th>Qtd.</th>
+                  <th>Unitário</th>
+                  <th>Desconto</th>
+                  <th>Subtotal</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="vendaItensTabela"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-top:12px">
+          <h3>Pagamento</h3>
+          <div class="row row-4">
+            <div>
+              <label>Desconto geral</label>
+              <input id="vendaDescontoGeral" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div>
+              <label>Forma principal</label>
+              <select id="vendaFormaPagamento" onchange="togglePagamentoMisto()">
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão Débito">Cartão Débito</option>
+                <option value="Cartão Crédito">Cartão Crédito</option>
+                <option value="Convênio">Convênio</option>
+                <option value="Boleto">Boleto</option>
+                <option value="Parcelado">Parcelado</option>
+                <option value="Pagamento Misto">Pagamento Misto</option>
+              </select>
+            </div>
+            <div>
+              <label>Parcelas</label>
+              <select id="vendaParcelas">
+                <option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x</option><option value="5">5x</option><option value="6">6x</option><option value="7">7x</option><option value="8">8x</option><option value="9">9x</option><option value="10">10x</option><option value="11">11x</option><option value="12">12x</option>
+              </select>
+            </div>
+            <div>
+              <label>Valor recebido</label>
+              <input id="vendaValorRecebido" type="number" min="0" step="0.01" value="0" />
+            </div>
+          </div>
+          <div id="pagamentoMistoBox" class="row row-4" style="display:none">
+            <div>
+              <label>Forma 1</label>
+              <select id="pagamentoMistoForma1"><option>Dinheiro</option><option>Pix</option><option>Cartão Débito</option><option>Cartão Crédito</option><option>Convênio</option><option>Boleto</option></select>
+            </div>
+            <div>
+              <label>Valor 1</label>
+              <input id="pagamentoMistoValor1" type="number" min="0" step="0.01" value="0" />
+            </div>
+            <div>
+              <label>Forma 2</label>
+              <select id="pagamentoMistoForma2"><option>Pix</option><option>Dinheiro</option><option>Cartão Débito</option><option>Cartão Crédito</option><option>Convênio</option><option>Boleto</option></select>
+            </div>
+            <div>
+              <label>Valor 2</label>
+              <input id="pagamentoMistoValor2" type="number" min="0" step="0.01" value="0" />
+            </div>
+          </div>
+          <div class="row row-3">
+            <div>
+              <label>Subtotal bruto</label>
+              <input id="vendaTotalBruto" readonly />
+            </div>
+            <div>
+              <label>Total líquido</label>
+              <input id="vendaValorTotal" readonly />
+            </div>
+            <div>
+              <label>Troco</label>
+              <input id="vendaTroco" readonly />
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="registrarVenda()">Registrar venda</button>
+          <button class="btn btn-light" onclick="limparVendaForm()">Limpar</button>
+        </div>
+      </div>
+
+          </section>
+
+    <section class="section" id="produtividade">
+      <div class="card">
+        <h3>Acompanhamento de Produtividade</h3>
+        <div class="grid grid-4" style="margin-bottom:18px">
+          <div class="metric m1">
+            <h4>Custo Total</h4>
+            <div class="value" id="prodCost">R$ 0,00</div>
+          </div>
+          <div class="metric m2">
+            <h4>Lucro Total</h4>
+            <div class="value" id="prodProfit">R$ 0,00</div>
+          </div>
+          <div class="metric m3">
+            <h4>% Média Clínica</h4>
+            <div class="value" id="prodClinicPct">0,00%</div>
+          </div>
+          <div class="metric m4">
+            <h4>Repasse Total</h4>
+            <div class="value" id="prodTransfer">R$ 0,00</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Prescritor</th>
+                <th>Itens</th>
+                <th>Custo</th>
+                <th>Lucro</th>
+                <th>% Clínica</th>
+                <th>Repasse</th>
+                <th>Líquido Clínica</th>
+              </tr>
+            </thead>
+            <tbody id="produtividadeTabela"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="repasse">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Gestão de Repasse Médico</h3>
+          <div class="row row-2">
+            <div>
+              <label>Filtrar por médico</label>
+              <select id="repasseFiltroMedico"></select>
+            </div>
+            <div>
+              <label>Modo de cálculo padrão</label>
+              <select id="configCalcMode">
+                <option value="medico">Usar percentual do médico</option>
+                <option value="global">Usar percentual global</option>
+              </select>
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Percentual global sobre o lucro (%)</label>
+              <input id="configGlobalPct" type="number" min="0" max="100" step="0.01" />
+            </div>
+            <div>
+              <label>Resumo</label>
+              <input id="repasseResumo" readonly />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="salvarConfiguracoes()">Salvar configurações</button>
+            <button class="btn btn-light" onclick="renderRepasse()">Atualizar visão</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Resumo por Médico</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Médico</th>
+                  <th>Vendas</th>
+                  <th>Lucro Gerado</th>
+                  <th>Repasse</th>
+                  <th>Líquido Clínica</th>
+                </tr>
+              </thead>
+              <tbody id="repasseTabela"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="configuracoes">
+      <div class="card">
+        <div class="subnav" id="configuracoesSubnav">
+          <button class="subnav-btn active" data-configuracoes-view="gerais">Configurações gerais</button>
+          <button class="subnav-btn" data-configuracoes-view="usuarios">Usuários</button>
+        </div>
+
+        <div class="subview active" id="configuracoesGeraisView">
+          <h3>Configurações Gerais</h3>
+          <div class="row row-2">
+            <div>
+              <label>Razão Social</label>
+              <input id="configRazaoSocial" />
+            </div>
+            <div>
+              <label>Nome Fantasia</label>
+              <input id="configNomeFantasia" />
+            </div>
+          </div>
+          <div class="row row-3">
+            <div>
+              <label>CNPJ</label>
+              <input id="configCNPJ" />
+            </div>
+            <div>
+              <label>Telefone</label>
+              <input id="configTelefone" />
+            </div>
+            <div>
+              <label>E-mail</label>
+              <input id="configEmail" />
+            </div>
+          </div>
+          <div class="row row-4">
+            <div>
+              <label>Rua</label>
+              <input id="configRua" />
+            </div>
+            <div>
+              <label>Número</label>
+              <input id="configNumero" />
+            </div>
+            <div>
+              <label>Bairro</label>
+              <input id="configBairro" />
+            </div>
+            <div>
+              <label>Cidade</label>
+              <input id="configCidade" />
+            </div>
+          </div>
+          <div class="row row-4">
+            <div>
+              <label>Estado</label>
+              <input id="configEstado" />
+            </div>
+            <div>
+              <label>CEP</label>
+              <input id="configCEP" />
+            </div>
+            <div>
+              <label>Instagram</label>
+              <input id="configInstagram" />
+            </div>
+            <div>
+              <label>Site</label>
+              <input id="configSite" />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Responsável</label>
+              <input id="configResponsavel" />
+            </div>
+            <div>
+              <label>Nome exibido do sistema</label>
+              <input id="configClinicName" />
+            </div>
+          </div>
+          <div class="row row-2">
+            <div>
+              <label>Modo de cálculo padrão do repasse</label>
+              <select id="configCalcMode">
+                <option value="medico">Usar percentual do médico</option>
+                <option value="global">Usar percentual global</option>
+              </select>
+            </div>
+            <div>
+              <label>Percentual global sobre o lucro (%)</label>
+              <input id="configGlobalPct" type="number" min="0" max="100" step="0.01" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="salvarConfiguracoes()">Salvar configurações</button>
+            <button class="btn btn-secondary" onclick="exportarDados()">Exportar dados</button>
+            <button class="btn btn-danger" onclick="resetarSistema()">Apagar todos os dados</button>
+          </div>
+        </div>
+
+                <div class="subview" id="configuracoesUsuariosView">
+          <div class="subnav" id="usuariosSubnav">
+            <button class="subnav-btn active" data-usuarios-view="consultar">Consultar Usuários</button>
+            <button class="subnav-btn" data-usuarios-view="cadastrar">Cadastrar Usuário</button>
+          </div>
+
+          <div class="subview active" id="usuariosConsultarView">
+            <h3>Consultar Usuários</h3>
+            <div class="row row-2">
+              <div>
+                <label>Pesquisar usuário</label>
+                <input id="usuarioBusca" placeholder="Buscar por nome, perfil, login ou status" />
+              </div>
+              <div>
+                <label>Filtrar por status</label>
+                <select id="usuarioFiltroStatus">
+                  <option value="">Todos</option>
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Perfil</th>
+                    <th>Login</th>
+                    <th>Status</th>
+                    <th>Senha gerencial</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="usuariosTabela"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="subview" id="usuariosCadastrarView">
+            <h3>Cadastrar Usuário</h3>
+            <input type="hidden" id="usuarioId" />
+            <div class="row row-2">
+              <div>
+                <label>Nome do usuário</label>
+                <input id="usuarioNome" placeholder="Ex.: Maria Souza" />
+              </div>
+              <div>
+                <label>Perfil</label>
+                <select id="usuarioPerfil">
+                  <option value="Administrador">Administrador</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Vendas">Vendas</option>
+                </select>
+              </div>
+            </div>
+            <div class="row row-3">
+              <div>
+                <label>Login</label>
+                <input id="usuarioLogin" placeholder="Ex.: maria.souza" />
+              </div>
+              <div>
+                <label>Status</label>
+                <select id="usuarioStatus">
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+              </div>
+              <div>
+                <label>Senha gerencial / administrativa</label>
+                <input id="usuarioSenha" type="password" placeholder="Obrigatória para Gerente/Administrador" />
+              </div>
+            </div>
+            <div class="helper-text" style="margin-bottom:12px">A senha é usada para autorizar exclusão de venda, cancelamentos e estornos.</div>
+            <div class="actions">
+              <button class="btn btn-primary" onclick="salvarUsuario()">Salvar usuário</button>
+              <button class="btn btn-light" onclick="limparUsuarioForm()">Limpar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="financeiro">
+      <div class="card">
+        <h3>Financeiro</h3>
+        <p class="muted">Módulo financeiro incluído no menu lateral para evolução da próxima etapa.</p>
+        <div class="grid grid-3" style="margin-top:18px">
+          <div class="metric m1"><h4>Contas a receber</h4><div class="value">R$ 0,00</div><div class="sub">Estrutura inicial</div></div>
+          <div class="metric m2"><h4>Contas a pagar</h4><div class="value">R$ 0,00</div><div class="sub">Estrutura inicial</div></div>
+          <div class="metric m3"><h4>Fluxo de caixa</h4><div class="value">R$ 0,00</div><div class="sub">Estrutura inicial</div></div>
+        </div>
+      </div>
+    </section>
+      <section class="section" id="cancelamentos">
+      <div class="card">
+        <h3>Cancelamentos e Estornos</h3>
+        <p class="muted">Somente vendas canceladas ou estornadas aparecem aqui.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Paciente</th>
+                <th>Status</th>
+                <th>Motivo</th>
+                <th>Quem cancelou</th>
+                <th>Data/Hora</th>
+                <th>Valor impactado</th>
+              </tr>
+            </thead>
+            <tbody id="cancelamentosTabela"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-screen" id="consultarVendasModal">
+  <div class="modal-card">
+    <div class="section-header">
+      <div>
+        <h3>Consultar vendas</h3>
+        <div class="helper-text">Pesquise por número, paciente, médico, usuário e data. Os filtros de status, forma de pagamento e tipo foram mantidos.</div>
+      </div>
+      <div class="actions" style="margin-top:0">
+        <button class="btn btn-light" onclick="fecharConsultarVendasTela()">Fechar</button>
+      </div>
+    </div>
+    <div class="row row-4">
+      <div><label>Pesquisar</label><input id="vendaBusca" placeholder="Número, paciente, médico ou usuário" /></div>
+      <div><label>Data</label><input id="vendaFiltroData" type="date" /></div>
+      <div><label>Status</label><select id="vendaFiltroStatus"><option value="">Todos</option><option value="Ativa">Ativa</option><option value="Cancelada">Cancelada</option><option value="Estorno Parcial">Estorno Parcial</option><option value="Estorno Total">Estorno Total</option></select></div>
+      <div><label>Forma de pagamento</label><select id="vendaFiltroPagamento"><option value="">Todas</option><option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option><option value="Cartão Débito">Cartão Débito</option><option value="Cartão Crédito">Cartão Crédito</option><option value="Convênio">Convênio</option><option value="Boleto">Boleto</option><option value="Parcelado">Parcelado</option><option value="Pagamento Misto">Pagamento Misto</option></select></div>
+    </div>
+    <div class="row row-2">
+      <div><label>Tipo</label><select id="vendaFiltroTipo"><option value="">Todos</option><option value="Consulta">Consulta</option><option value="Exame">Exame</option><option value="Procedimento">Procedimento</option><option value="Pacote">Pacote</option><option value="Produto">Produto</option><option value="Retorno">Retorno</option></select></div>
+      <div style="display:flex;align-items:end;justify-content:flex-end"><button class="btn btn-light" onclick="limparFiltrosConsultaVendas()">Limpar filtros</button></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Data/Hora</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Usuário</th>
+            <th>Itens</th>
+            <th>Total</th>
+            <th>Pagamento</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="vendasTabela"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const DB_KEY = 'extramed_clinica_vendas_v1';
+
+  const defaultDB = {
+    clinicName: 'Extra Med Clínica de Especialidades',
+    settings: {
+      calcMode: 'medico',
+      globalPct: 30
+    },
+    company: {
+      razaoSocial: '',
+      nomeFantasia: 'Extra Med Clínica de Especialidades',
+      cnpj: '',
+      rua: '',
+      numero: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      cep: '',
+      telefone: '',
+      email: '',
+      instagram: '',
+      site: '',
+      responsavel: ''
+    },
+    productCategories: ['Consulta', 'Exame', 'Pacote', 'Procedimento', 'Protocolo', 'Retorno', 'Produtos'],
+    products: [],
+    categories: ['Consulta','Exame','Pacote','Procedimento','Produtos','Protocolo','Retorno'].sort((a,b)=>a.localeCompare(b,'pt-BR')),
+    doctors: [],
+    specialties: ['Cardiologia','Dermatologia','Endocrinologia','Ginecologia'].sort((a,b)=>a.localeCompare(b,'pt-BR')),
+    patients: [],
+    users: [],
+    sales: [],
+    saleSequence: 1
+  };
+
+  let db = loadDB();
+  ensureProductCategories();
+  ensureCompanyConfig();
+
+  function loadDB(){
+    const saved = localStorage.getItem(DB_KEY);
+    if(saved){
+      try { return JSON.parse(saved); } catch(e){}
+    }
+    return structuredClone(defaultDB);
+  }
+
+  function saveDB(){
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+  }
+
+  function formatCurrency(value){
+    return Number(value || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  }
+
+  function formatPct(value){
+    return Number(value || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%';
+  }
+
+  function todayStr(){
+    return new Date().toLocaleDateString('pt-BR');
+  }
+
+  function uid(){
+    return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+
+  function ensureProductCategories(){
+    const defaults = ['Consulta', 'Exame', 'Pacote', 'Procedimento', 'Protocolo', 'Retorno', 'Produtos'];
+    const merged = [...new Set([...(db.productCategories || []), ...defaults])]
+      .map(item => String(item).trim())
+      .filter(Boolean)
+      .sort((a,b) => a.localeCompare(b, 'pt-BR'));
+    db.productCategories = merged;
+  }
+
+  function ensureCompanyConfig(){
+    db.company = Object.assign({}, structuredClone(defaultDB.company), db.company || {});
+    if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Med Clínica de Especialidades';
+    if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Med Clínica de Especialidades';
+  }
+
+  function calculateProductProfit(){
+    const custo = Number(document.getElementById('produtoCusto').value || 0);
+    const venda = Number(document.getElementById('produtoVenda').value || 0);
+    const lucro = venda - custo;
+    const margem = venda > 0 ? (lucro / venda) * 100 : 0;
+    document.getElementById('produtoLucro').value = formatCurrency(lucro);
+    document.getElementById('produtoMargem').value = formatPct(margem);
+  }
+
+  function abrirTelaProdutos(tela = 'consulta', botao = null){
+    const telas = {
+      consulta: 'produtosConsulta',
+      cadastro: 'produtosCadastro',
+      categorias: 'produtosCategorias',
+      vencimento: 'produtosVencimento'
+    };
+    Object.values(telas).forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'none';
+    });
+    const alvo = document.getElementById(telas[tela] || telas.consulta);
+    if(alvo) alvo.style.display = alvo.id === 'produtosCategorias' ? 'grid' : 'block';
+
+    const buttons = document.querySelectorAll('#produtosSubnav .btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    if(botao){
+      botao.classList.add('active');
+    } else {
+      const current = document.querySelector(`#produtosSubnav .btn[data-produtos-target="${tela}"]`);
+      if(current) current.classList.add('active');
+    }
+  }
+
+  function renderCategoriasTabela(selectedCategory = ''){
+    ensureProductCategories();
+    const tbody = document.getElementById('categoriasTabela');
+    const select = document.getElementById('categoriaSelecionada');
+    const buscaCategoria = document.getElementById('produtoBuscaCategoria');
+    const options = ['<option value="">Todas as categorias</option>'].concat(db.productCategories.map(c => `<option value="${c}">${c}</option>`));
+    if(select){
+      select.innerHTML = ['<option value="">Selecione uma categoria</option>'].concat(db.productCategories.map(c => `<option value="${c}">${c}</option>`)).join('');
+      if(selectedCategory && db.productCategories.includes(selectedCategory)){
+        select.value = selectedCategory;
+      }
+    }
+    if(buscaCategoria) buscaCategoria.innerHTML = options.join('');
+    tbody.innerHTML = db.productCategories.length ? db.productCategories.map(c => {
+      const qtd = db.products.filter(p => p.categoria === c).length;
+      return `<tr><td>${c}</td><td>${qtd}</td></tr>`;
+    }).join('') : `<tr><td colspan="2" class="empty">Nenhuma categoria cadastrada.</td></tr>`;
+  }
+
+  function renderControleVencimento(){
+    const tbody = document.getElementById('vencimentosTabela');
+    const periodo = document.getElementById('controleVencimentoPeriodo')?.value || 'todos';
+    const categoria = document.getElementById('controleVencimentoCategoria')?.value || '';
+    const busca = (document.getElementById('controleVencimentoBusca')?.value || '').toLowerCase();
+    const items = [...db.products]
+      .filter(p => (p.tipo || 'Produto') === 'Produto')
+      .filter(p => !categoria || p.categoria === categoria)
+      .filter(p => [p.codigo,p.nome,p.lote,p.categoria].join(' ').toLowerCase().includes(busca))
+      .filter(p => {
+        const s = getVencimentoStatus(p);
+        if(periodo === 'vencidos') return (s.dias ?? 9999) < 0;
+        if(periodo === 'todos') return true;
+        return (s.dias ?? 9999) <= Number(periodo);
+      })
+      .sort((a,b) => new Date(a.validade || '2999-12-31') - new Date(b.validade || '2999-12-31'));
+    tbody.innerHTML = items.length ? items.map(p => {
+      const status = getVencimentoStatus(p);
+      return `
+        <tr>
+          <td><span class="status-dot ${status.cls}">${status.label}</span></td>
+          <td>${p.validade ? new Date(p.validade + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+          <td>${status.dias ?? '-'}</td>
+          <td>${p.codigo || '-'}</td>
+          <td>${p.categoria || '-'}</td>
+          <td>${p.nome}</td>
+          <td>${p.lote || '-'}</td>
+          <td>${p.estoque ?? 0}</td>
+        </tr>`;
+    }).join('') : `<tr><td colspan="8" class="empty">Nenhum produto encontrado para o filtro informado.</td></tr>`;
+  }
+
+  function renderCategoryOptions(selectedValue = ''){
+    ensureProductCategories();
+    const selects = ['produtoCategoria','produtoBuscaCategoria','controleVencimentoCategoria'];
+    selects.forEach(id => {
+      const select = document.getElementById(id);
+      if(!select) return;
+      const isFilter = id !== 'produtoCategoria';
+      select.innerHTML = (isFilter ? `<option value="">Todas</option>` : '') + db.productCategories.map(c => `<option value="${c}">${c}</option>`).join('');
+      if(selectedValue && db.productCategories.includes(selectedValue)) select.value = selectedValue;
+    });
+  }
+
+  function carregarCategoriaSelecionadaParaEdicao(){
+    const categoria = document.getElementById('categoriaSelecionada').value;
+    document.getElementById('novaCategoria').value = categoria || '';
+  }
+
+  function limparCategoriaForm(){
+    document.getElementById('novaCategoria').value = '';
+    document.getElementById('categoriaSelecionada').value = '';
+  }
+
+  function adicionarCategoria(){
+    const input = document.getElementById('novaCategoria');
+    const novaCategoria = input.value.trim();
+    if(!novaCategoria){
+      alert('Informe o nome da categoria.');
+      return;
+    }
+    ensureProductCategories();
+    if(db.productCategories.some(c => c.toLowerCase() === novaCategoria.toLowerCase())){
+      alert('Essa categoria já existe.');
+      return;
+    }
+    db.productCategories.push(novaCategoria);
+    db.productCategories = [...new Set(db.productCategories)].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+    input.value = '';
+    saveDB();
+    refreshAll();
+    renderCategoryOptions(novaCategoria);
+    renderCategoriasTabela(novaCategoria);
+  }
+
+  function editarCategoriaSelecionada(){
+    const select = document.getElementById('categoriaSelecionada');
+    const categoriaAtual = select.value;
+    const novoNome = document.getElementById('novaCategoria').value.trim();
+
+    if(!categoriaAtual){
+      alert('Selecione uma categoria para editar.');
+      return;
+    }
+    if(!novoNome){
+      alert('Informe o novo nome da categoria.');
+      return;
+    }
+    if(categoriaAtual === novoNome){
+      alert('Informe um nome diferente para editar a categoria.');
+      return;
+    }
+    if((db.productCategories || []).some(c => c.toLowerCase() === novoNome.toLowerCase() && c !== categoriaAtual)){
+      alert('Já existe uma categoria com esse nome.');
+      return;
+    }
+
+    db.productCategories = (db.productCategories || []).map(c => c === categoriaAtual ? novoNome : c);
+    db.products = (db.products || []).map(p => p.categoria === categoriaAtual ? {...p, categoria: novoNome} : p);
+    ensureProductCategories();
+    saveDB();
+    refreshAll();
+    renderCategoryOptions(novoNome);
+    renderCategoriasTabela(novoNome);
+    document.getElementById('novaCategoria').value = novoNome;
+  }
+
+  function excluirCategoriaSelecionada(){
+    const select = document.getElementById('categoriaSelecionada');
+    const categoria = select.value;
+    if(!categoria){
+      alert('Selecione uma categoria para excluir.');
+      return;
+    }
+    const inUse = db.products.some(p => p.categoria === categoria);
+    if(inUse){
+      alert('Não é possível excluir uma categoria que já está vinculada a produtos ou serviços.');
+      return;
+    }
+    if(!confirm(`Deseja excluir a categoria "${categoria}"?`)) return;
+    db.productCategories = (db.productCategories || []).filter(c => c !== categoria);
+    ensureProductCategories();
+    saveDB();
+    refreshAll();
+    limparCategoriaForm();
+  }
+
+  function showMainSection(target, btnRef=null, label=''){
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const btn = btnRef || document.querySelector(`.nav-btn[data-target="${target}"]`);
+    if(btn) btn.classList.add('active');
+    document.querySelectorAll('section.section').forEach(sec => sec.classList.remove('active'));
+    const section = document.getElementById(target);
+    if(section) section.classList.add('active');
+    const title = document.getElementById('sectionTitle');
+    if(title) title.textContent = label || btn?.textContent || target;
+  }
+
+  function setupNav(){
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => showMainSection(btn.dataset.target, btn, btn.textContent));
+    });
+  }
+
+  function getTypePrefix(tipo, categoria=''){
+    const map = {Produto:'PROD', Serviço:'SERV'};
+    const catMap = {Consulta:'CONS', Exame:'EXAM', Procedimento:'PROC', Pacote:'PACK', Protocolo:'PROT', Retorno:'RET', Produtos:'PROD'};
+    return catMap[categoria] || map[tipo] || 'ITEM';
+  }
+
+  function getNextProductSequence(prefix){
+    const nums = db.products.filter(p => (p.codigo||'').startsWith(prefix + '-')).map(p => Number((p.codigo||'').split('-').pop()) || 0);
+    return (Math.max(0, ...nums) + 1).toString().padStart(4,'0');
+  }
+
+  function generateProductCode(tipo, categoria){
+    const prefix = getTypePrefix(tipo, categoria);
+    return `${prefix}-${getNextProductSequence(prefix)}`;
+  }
+
+  function atualizarSugestaoCodigo(){
+    const manual = document.getElementById('produtoCodigoManual')?.value.trim();
+    const tipo = document.getElementById('produtoTipo')?.value || 'Produto';
+    const categoria = document.getElementById('produtoCategoria')?.value || '';
+    const codigo = manual || generateProductCode(tipo, categoria);
+    const el = document.getElementById('produtoCodigo');
+    if(el) el.value = codigo;
+  }
+
+  function toggleProdutoSpecificFields(){
+    const tipo = document.getElementById('produtoTipo')?.value || 'Produto';
+    const fisicos = document.getElementById('produtoCamposFisicos');
+    const servico = document.getElementById('produtoCamposServico');
+    if(!fisicos || !servico) return;
+    fisicos.style.display = tipo === 'Produto' ? '' : 'none';
+    servico.style.display = tipo === 'Serviço' ? '' : 'none';
+  }
+
+  function limparProdutoForm(){
+    ['produtoId','produtoCodigo','produtoCodigoManual','produtoNome','produtoLote','produtoCusto','produtoVenda','produtoValidade','produtoLucro','produtoMargem','produtoEstoque','produtoEstoqueMinimo','produtoVigenciaInicial','produtoVigenciaFinal','produtoObs','produtoDuracao','produtoRepasseInfo'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
+    document.getElementById('produtoTipo').value = 'Produto';
+    document.getElementById('produtoStatus').value = 'Ativo';
+    document.getElementById('produtoAgendamento').value = 'Sim';
+    renderCategoryOptions();
+    toggleProdutoSpecificFields();
+    atualizarSugestaoCodigo();
+  }
+
+  function editarProdutoSelecionado(){
+    const id = document.getElementById('produtoId').value;
+    if(!id){
+      alert('Selecione um produto na lista para editar.');
+      return;
+    }
+    editarProduto(id);
+  }
+
+  function excluirProdutoSelecionado(){
+    const id = document.getElementById('produtoId').value;
+    if(!id){
+      alert('Selecione um produto na lista para excluir.');
+      return;
+    }
+    excluirProduto(id);
+  }
+
+  function salvarProduto(){
+    const id = document.getElementById('produtoId').value;
+    const tipo = document.getElementById('produtoTipo').value;
+    const categoria = document.getElementById('produtoCategoria').value;
+    const manual = document.getElementById('produtoCodigoManual').value.trim();
+    const codigo = manual || generateProductCode(tipo, categoria);
+    const nome = document.getElementById('produtoNome').value.trim();
+    const custo = Number(document.getElementById('produtoCusto').value || 0);
+    const venda = Number(document.getElementById('produtoVenda').value || 0);
+    const status = document.getElementById('produtoStatus').value;
+    const vigenciaInicial = document.getElementById('produtoVigenciaInicial').value;
+    const vigenciaFinal = document.getElementById('produtoVigenciaFinal').value;
+    const observacoes = document.getElementById('produtoObs').value.trim();
+    const lote = document.getElementById('produtoLote').value.trim();
+    const validade = document.getElementById('produtoValidade').value;
+    const estoque = Number(document.getElementById('produtoEstoque').value || 0);
+    const estoqueMinimo = Number(document.getElementById('produtoEstoqueMinimo').value || 0);
+    const duracao = Number(document.getElementById('produtoDuracao').value || 0);
+    const repasseInfo = document.getElementById('produtoRepasseInfo').value.trim();
+    const agendamento = document.getElementById('produtoAgendamento').value;
+    const lucratividade = venda - custo;
+    const margem = venda > 0 ? (lucratividade / venda) * 100 : 0;
+
+    if(!categoria || !nome || isNaN(custo) || isNaN(venda) || custo < 0 || venda < 0){
+      alert('Preencha corretamente os campos obrigatórios do item.');
+      return;
+    }
+    if(tipo === 'Produto' && (!lote || !validade)){
+      alert('Para produto, lote e validade são obrigatórios.');
+      return;
+    }
+    if(db.products.some(p => p.codigo?.toLowerCase() === codigo.toLowerCase() && p.id !== id)){
+      alert('Já existe um item com esse código.');
+      return;
+    }
+
+    const payload = {
+      id: id || uid(), tipo, categoria, codigo, codigoManual: manual, nome, custo, venda, margem, lucratividade, status,
+      vigenciaInicial, vigenciaFinal, observacoes, lote, validade, estoque, estoqueMinimo, duracao, repasseInfo, agendamento
+    };
+
+    if(id){
+      db.products = db.products.map(p => p.id === id ? payload : p);
+    } else {
+      db.products.push(payload);
+    }
+    saveDB();
+    limparProdutoForm();
+    refreshAll();
+    abrirTelaProdutos('consulta');
+  }
+
+  function editarProduto(id){
+    const p = db.products.find(x => x.id === id);
+    if(!p) return;
+    document.getElementById('produtoId').value = p.id;
+    document.getElementById('produtoTipo').value = p.tipo || 'Produto';
+    renderCategoryOptions(p.categoria || '');
+    document.getElementById('produtoCodigo').value = p.codigo || '';
+    document.getElementById('produtoCodigoManual').value = p.codigoManual || '';
+    document.getElementById('produtoNome').value = p.nome || '';
+    document.getElementById('produtoStatus').value = p.status || 'Ativo';
+    document.getElementById('produtoCusto').value = p.custo ?? '';
+    document.getElementById('produtoVenda').value = p.venda ?? '';
+    document.getElementById('produtoMargem').value = formatPct(p.margem || 0);
+    document.getElementById('produtoLucro').value = formatCurrency(p.lucratividade || 0);
+    document.getElementById('produtoVigenciaInicial').value = p.vigenciaInicial || '';
+    document.getElementById('produtoVigenciaFinal').value = p.vigenciaFinal || '';
+    document.getElementById('produtoObs').value = p.observacoes || '';
+    document.getElementById('produtoLote').value = p.lote || '';
+    document.getElementById('produtoValidade').value = p.validade || '';
+    document.getElementById('produtoEstoque').value = p.estoque ?? '';
+    document.getElementById('produtoEstoqueMinimo').value = p.estoqueMinimo ?? '';
+    document.getElementById('produtoDuracao').value = p.duracao ?? '';
+    document.getElementById('produtoRepasseInfo').value = p.repasseInfo || '';
+    document.getElementById('produtoAgendamento').value = p.agendamento || 'Sim';
+    toggleProdutoSpecificFields();
+    document.querySelectorAll('#produtosSubnav .btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector('#produtosSubnav .btn[data-produtos-target="cadastro"]'); if(btn) btn.classList.add('active');
+    document.getElementById('produtosConsulta').style.display = 'none';
+    document.getElementById('produtosCadastro').style.display = 'block';
+    document.getElementById('produtosCategorias').style.display = 'none';
+    document.getElementById('produtosVencimento').style.display = 'none';
+  }
+
+  function excluirProduto(id){
+    if(!confirm('Deseja excluir este item?')) return;
+    db.products = db.products.filter(p => p.id !== id);
+    saveDB();
+    refreshAll();
+    abrirTelaProdutos('consulta');
+  }
+
+  function getVencimentoStatus(p){
+    if((p.tipo || 'Produto') !== 'Produto') return {label:'Serviço', cls:'status-success', dias:null};
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const venc = p.validade ? new Date(p.validade + 'T00:00:00') : null;
+    if(!venc || isNaN(venc)) return {label:'Sem validade', cls:'status-warning', dias:null};
+    const dias = Math.ceil((venc - hoje)/(1000*60*60*24));
+    if(dias < 0) return {label:'Vencido', cls:'status-danger', dias};
+    if(dias <= 30) return {label:'Próximo', cls:'status-danger', dias};
+    if(dias <= 60) return {label:'Atenção', cls:'status-warning', dias};
+    return {label:'OK', cls:'status-success', dias};
+  }
+
+  function renderProdutos(){
+    ensureProductCategories();
+    const busca = (document.getElementById('produtoBusca')?.value || '').toLowerCase();
+    const filtroCategoria = document.getElementById('produtoBuscaCategoria')?.value || '';
+    const filtroTipo = document.getElementById('produtoBuscaTipo')?.value || '';
+    const filtroStatus = document.getElementById('produtoBuscaStatus')?.value || '';
+    const tbody = document.getElementById('produtosTabela');
+    const items = db.products.filter(p => {
+      const matchBusca = [p.codigo, p.categoria, p.nome, p.lote, p.validade, p.tipo].join(' ').toLowerCase().includes(busca);
+      const matchCategoria = !filtroCategoria || p.categoria === filtroCategoria;
+      const matchTipo = !filtroTipo || (p.tipo || 'Produto') === filtroTipo;
+      const matchStatus = !filtroStatus || (p.status || 'Ativo') === filtroStatus;
+      return matchBusca && matchCategoria && matchTipo && matchStatus;
+    });
+    tbody.innerHTML = items.length ? items.map(p => {
+      const status = getVencimentoStatus(p);
+      return `<tr>
+        <td>${p.codigo || '-'}</td>
+        <td>${p.tipo || 'Produto'}</td>
+        <td>${p.categoria || '-'}</td>
+        <td>${p.nome}</td>
+        <td>${(p.tipo||'Produto') === 'Produto' ? (p.estoque ?? 0) : '-'}</td>
+        <td>${p.validade ? new Date(p.validade + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+        <td>${formatCurrency(p.custo)}</td>
+        <td>${formatCurrency(p.venda)}</td>
+        <td>${formatPct(p.margem || 0)}</td>
+        <td><span class="status-dot ${status.cls}">${p.status || 'Ativo'}</span></td>
+        <td>
+          <button class="btn btn-light" onclick="editarProduto('${p.id}')">Editar</button>
+          <button class="btn btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
+        </td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="11" class="empty">Nenhum produto ou serviço cadastrado.</td></tr>`;
+  }
+
+  function setupSubnav(containerId, attrName, prefix){
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    const scope = container.parentElement;
+    const directSubviews = Array.from(scope.children).filter(el => el.classList && el.classList.contains('subview'));
+
+    container.querySelectorAll('.subnav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.subnav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        directSubviews.forEach(view => view.classList.remove('active'));
+
+        const target = btn.getAttribute(attrName);
+        const view = document.getElementById(prefix + target.charAt(0).toUpperCase() + target.slice(1) + 'View');
+        if(view) view.classList.add('active');
+
+        if(prefix === 'configuracoes' && target === 'usuarios'){
+          const userButtons = document.querySelectorAll('#usuariosSubnav .subnav-btn');
+          const userViews = document.querySelectorAll('#configuracoesUsuariosView > .subview');
+          if(userButtons.length){
+            userButtons.forEach((b, index) => b.classList.toggle('active', index === 0));
+          }
+          if(userViews.length){
+            userViews.forEach((v, index) => v.classList.toggle('active', index === 0));
+          }
+        }
+      });
+    });
+  }
+
+  function renderEspecialidades(){
+    const select = document.getElementById('especialidadeSelecionada');
+    if(select){
+      const current = select.value;
+      select.innerHTML = '<option value="">Selecione a especialidade</option>' + (db.specialties || []).map(e => `<option value="${e}">${e}</option>`).join('');
+      if((db.specialties || []).includes(current)) select.value = current;
+    }
+    const medicoEspecialidade = document.getElementById('medicoEspecialidade');
+    if(medicoEspecialidade){
+      const current = medicoEspecialidade.value;
+      medicoEspecialidade.innerHTML = '<option value="">Selecione a especialidade</option>' + (db.specialties || []).map(e => `<option value="${e}">${e}</option>`).join('');
+      if((db.specialties || []).includes(current)) medicoEspecialidade.value = current;
+    }
+    const tbody = document.getElementById('especialidadesTabela');
+    if(tbody){
+      const items = (db.specialties || []).map(nome => ({nome, total: db.doctors.filter(d => d.especialidade === nome).length}));
+      tbody.innerHTML = items.length ? items.map(i => `<tr><td>${i.nome}</td><td>${i.total}</td></tr>`).join('') : '<tr><td colspan="2" class="empty">Nenhuma especialidade cadastrada.</td></tr>';
+    }
+  }
+
+  function limparEspecialidadeForm(){
+    const seletor = document.getElementById('especialidadeSelecionada');
+    const campo = document.getElementById('especialidadeNome');
+    if(seletor) seletor.value = '';
+    if(campo) campo.value = '';
+  }
+
+  function carregarEspecialidadeParaEdicao(){
+    const nome = document.getElementById('especialidadeSelecionada').value;
+    if(!nome){ alert('Selecione uma especialidade para editar.'); return; }
+    document.getElementById('especialidadeNome').value = nome;
+  }
+
+  function salvarEspecialidade(){
+    const campo = document.getElementById('especialidadeNome');
+    const seletor = document.getElementById('especialidadeSelecionada');
+    const nome = (campo?.value || '').trim();
+    const atual = (seletor?.value || '').trim();
+
+    if(!nome){
+      alert('Informe o nome da especialidade.');
+      return;
+    }
+
+    const existe = (db.specialties || []).find(e => e.toLowerCase() === nome.toLowerCase());
+
+    if(atual){
+      if(nome.toLowerCase() !== atual.toLowerCase() && existe){
+        alert('Já existe uma especialidade com esse nome.');
+        return;
+      }
+      db.specialties = (db.specialties || []).map(e => e === atual ? nome : e);
+      db.doctors = (db.doctors || []).map(m => m.especialidade === atual ? {...m, especialidade: nome} : m);
+    } else {
+      if(existe){
+        alert('Essa especialidade já está cadastrada.');
+        return;
+      }
+      db.specialties = [...(db.specialties || []), nome];
+    }
+
+    db.specialties = [...new Set(db.specialties.map(e => e.trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+    saveDB();
+    refreshAll();
+    renderEspecialidades();
+    if(seletor && db.specialties.includes(nome)) seletor.value = nome;
+    if(campo) campo.value = nome;
+  }
+
+  function excluirEspecialidade(){
+    const seletor = document.getElementById('especialidadeSelecionada');
+    const especialidade = (seletor?.value || '').trim();
+    if(!especialidade){
+      alert('Selecione uma especialidade para excluir.');
+      return;
+    }
+    const vinculados = (db.doctors || []).some(m => m.especialidade === especialidade);
+    if(vinculados){
+      alert('Não é possível excluir uma especialidade que possui médicos vinculados.');
+      return;
+    }
+    if(!confirm(`Deseja excluir a especialidade "${especialidade}"?`)) return;
+    db.specialties = (db.specialties || []).filter(e => e !== especialidade);
+    saveDB();
+    refreshAll();
+    limparEspecialidadeForm();
+  }
+
+  function limparMedicoForm(){
+    ['medicoId','medicoNome','medicoCRM','medicoUF','medicoRQE','medicoVigenciaInicial','medicoVigenciaFinal','medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('medicoEspecialidade').value = '';
+    document.getElementById('medicoStatus').value = 'Ativo';
+  }
+
+  function salvarMedico(){
+    const id = document.getElementById('medicoId').value;
+    const nome = document.getElementById('medicoNome').value.trim();
+    const especialidade = document.getElementById('medicoEspecialidade').value.trim();
+    const crm = document.getElementById('medicoCRM').value.trim();
+    const uf = document.getElementById('medicoUF').value.trim().toUpperCase();
+    const rqe = document.getElementById('medicoRQE').value.trim();
+    const status = document.getElementById('medicoStatus').value;
+    const vigenciaInicial = document.getElementById('medicoVigenciaInicial').value;
+    const vigenciaFinal = document.getElementById('medicoVigenciaFinal').value;
+    const percentualLucro = Number(document.getElementById('medicoPercentualLucro').value);
+    const percentualConsulta = Number(document.getElementById('medicoPercentualConsulta').value);
+    const percentualExame = Number(document.getElementById('medicoPercentualExame').value);
+
+    if(!nome || !especialidade || !crm || !uf || !vigenciaInicial || !vigenciaFinal || [percentualLucro,percentualConsulta,percentualExame].some(v => isNaN(v) || v < 0 || v > 100)){
+      alert('Preencha corretamente os dados do médico.');
+      return;
+    }
+    if(vigenciaFinal < vigenciaInicial){
+      alert('O período final da vigência não pode ser menor que o período inicial.');
+      return;
+    }
+
+    const payload = {id:id || uid(), nome, especialidade, crm, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualLucro, percentualConsulta, percentualExame, percentual: percentualLucro};
+
+    if(id){
+      db.doctors = db.doctors.map(m => m.id === id ? payload : m);
+    } else {
+      db.doctors.push(payload);
+    }
+
+    saveDB();
+    limparMedicoForm();
+    refreshAll();
+  }
+
+  function editarMedico(id){
+    const m = db.doctors.find(x => x.id === id);
+    if(!m) return;
+    document.getElementById('medicoId').value = m.id;
+    document.getElementById('medicoNome').value = m.nome;
+    document.getElementById('medicoEspecialidade').value = m.especialidade || '';
+    document.getElementById('medicoCRM').value = m.crm || '';
+    document.getElementById('medicoUF').value = m.uf || '';
+    document.getElementById('medicoRQE').value = m.rqe || '';
+    document.getElementById('medicoStatus').value = m.status;
+    document.getElementById('medicoVigenciaInicial').value = m.vigenciaInicial || '';
+    document.getElementById('medicoVigenciaFinal').value = m.vigenciaFinal || '';
+    document.getElementById('medicoPercentualLucro').value = m.percentualLucro ?? m.percentual ?? '';
+    document.getElementById('medicoPercentualConsulta').value = m.percentualConsulta ?? '';
+    document.getElementById('medicoPercentualExame').value = m.percentualExame ?? '';
+    document.querySelectorAll('#medicosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector('#medicosSubnav .subnav-btn[data-medicos-view="cadastrar"]'); if(btn) btn.classList.add('active');
+    document.querySelectorAll('#medicos .subview').forEach(v => v.classList.remove('active'));
+    document.getElementById('medicosCadastrarView').classList.add('active');
+  }
+
+  function excluirMedico(id){
+    if(!confirm('Deseja excluir este médico?')) return;
+    db.doctors = db.doctors.filter(m => m.id !== id);
+    saveDB();
+    refreshAll();
+  }
+
+  function renderMedicos(){
+    const tbody = document.getElementById('medicosTabela');
+    const busca = (document.getElementById('medicoBusca')?.value || '').toLowerCase();
+    const filtroStatus = document.getElementById('medicoFiltroStatus')?.value || '';
+    const items = db.doctors.filter(m => {
+      const okBusca = [m.nome,m.especialidade,m.crm,m.uf,m.rqe,m.status].join(' ').toLowerCase().includes(busca);
+      const okStatus = !filtroStatus || m.status === filtroStatus;
+      return okBusca && okStatus;
+    });
+    tbody.innerHTML = items.length ? items.map(m => `
+      <tr>
+        <td>${m.nome}</td>
+        <td>${m.especialidade || '-'}</td>
+        <td>${m.crm || '-'}${m.uf ? '/' + m.uf : ''}</td>
+        <td>${m.rqe || '-'}</td>
+        <td>${m.status}</td>
+        <td>${m.vigenciaInicial ? new Date(m.vigenciaInicial + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}${m.vigenciaFinal ? ' até ' + new Date(m.vigenciaFinal + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+        <td>${formatPct(m.percentualLucro ?? m.percentual)}</td>
+        <td>${formatPct(m.percentualConsulta)}</td>
+        <td>${formatPct(m.percentualExame)}</td>
+        <td>
+          <button class="btn btn-light" onclick="editarMedico('${m.id}')">Editar</button>
+          <button class="btn btn-danger" onclick="excluirMedico('${m.id}')">Excluir</button>
+        </td>
+      </tr>
+    `).join('') : `<tr><td colspan="10" class="empty">Nenhum médico cadastrado.</td></tr>`;
+  }
+
+  function limparUsuarioForm(){
+    ['usuarioId','usuarioNome','usuarioLogin','usuarioSenha'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('usuarioPerfil').value = 'Vendas';
+    document.getElementById('usuarioStatus').value = 'Ativo';
+  }
+
+  function salvarUsuario(){
+    const id = document.getElementById('usuarioId').value;
+    const nome = document.getElementById('usuarioNome').value.trim();
+    const perfil = document.getElementById('usuarioPerfil').value;
+    const login = document.getElementById('usuarioLogin').value.trim();
+    const status = document.getElementById('usuarioStatus').value;
+    const senha = document.getElementById('usuarioSenha').value;
+
+    if(!nome || !perfil || !login){
+      alert('Preencha corretamente os dados do usuário.');
+      return;
+    }
+    if(['Administrador','Gerente'].includes(perfil) && !senha && !id){
+      alert('Administrador e Gerente precisam de senha para autorizações.');
+      return;
+    }
+
+    const existing = db.users.find(u => u.id === id);
+    const payload = {id:id || uid(), nome, perfil, login, status, senha: senha || existing?.senha || ''};
+
+    if(id){ db.users = db.users.map(u => u.id === id ? payload : u); }
+    else { db.users.push(payload); }
+
+    saveDB(); limparUsuarioForm(); refreshAll();
+  }
+
+  function editarUsuario(id){
+    const u = db.users.find(x => x.id === id);
+    if(!u) return;
+    document.getElementById('usuarioId').value = u.id;
+    document.getElementById('usuarioNome').value = u.nome;
+    document.getElementById('usuarioPerfil').value = u.perfil;
+    document.getElementById('usuarioLogin').value = u.login;
+    document.getElementById('usuarioStatus').value = u.status;
+    document.getElementById('usuarioSenha').value = u.senha || '';
+    document.querySelectorAll('#usuariosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector('#usuariosSubnav .subnav-btn[data-usuarios-view="cadastrar"]'); if(btn) btn.classList.add('active');
+    document.querySelectorAll('#configuracoesUsuarios .subview').forEach(v => v.classList.remove('active'));
+    document.getElementById('usuariosCadastrarView').classList.add('active');
+  }
+
+  function excluirUsuario(id){
+    if(!confirm('Deseja excluir este usuário?')) return;
+    db.users = db.users.filter(u => u.id !== id);
+    saveDB(); refreshAll();
+  }
+
+  function renderUsuarios(){
+    const tbody = document.getElementById('usuariosTabela');
+    const busca = (document.getElementById('usuarioBusca')?.value || '').toLowerCase();
+    const filtroStatus = document.getElementById('usuarioFiltroStatus')?.value || '';
+    const items = db.users.filter(u => {
+      const okBusca = [u.nome,u.perfil,u.login,u.status].join(' ').toLowerCase().includes(busca);
+      const okStatus = !filtroStatus || u.status === filtroStatus;
+      return okBusca && okStatus;
+    });
+    tbody.innerHTML = items.length ? items.map(u => `
+      <tr>
+        <td>${u.nome}</td>
+        <td>${u.perfil}</td>
+        <td>${u.login}</td>
+        <td>${u.status}</td>
+        <td>${u.senha ? '••••••' : '-'}</td>
+        <td>
+          <button class="btn btn-light" onclick="editarUsuario('${u.id}')">Editar</button>
+          <button class="btn btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>
+        </td>
+      </tr>
+    `).join('') : `<tr><td colspan="6" class="empty">Nenhum usuário cadastrado.</td></tr>`;
+    updateProtectedMenuVisibility();
+  }
+
+
+  function onlyDigits(value){
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  function formatCPF(value){
+    const digits = onlyDigits(value).slice(0,11);
+    return digits
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  }
+
+  function formatCEP(value){
+    const digits = onlyDigits(value).slice(0,8);
+    return digits.replace(/(\d{5})(\d)/, '$1-$2');
+  }
+
+  function formatTelefone(value){
+    const digits = onlyDigits(value).slice(0,11);
+    if(digits.length <= 10){
+      return digits
+        .replace(/(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{4})(\d)/, '$1-$2');
+    }
+    return digits
+      .replace(/(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2');
+  }
+
+  function applyPatientMasks(){
+    const cpf = document.getElementById('pacienteCPF');
+    const cep = document.getElementById('pacienteCEP');
+    const telefone = document.getElementById('pacienteTelefone');
+    if(cpf) cpf.value = formatCPF(cpf.value);
+    if(cep) cep.value = formatCEP(cep.value);
+    if(telefone) telefone.value = formatTelefone(telefone.value);
+  }
+
+  function limparPacienteForm(){
+    ['pacienteId','pacienteNome','pacienteRua','pacienteNumero','pacienteBairro','pacienteCidade','pacienteEstado','pacienteCEP','pacienteTelefone','pacienteNascimento','pacienteCPF'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+    applyPatientMasks();
+  }
+
+  function salvarPaciente(){
+    if(!Array.isArray(db.patients)) db.patients = [];
+    const id = document.getElementById('pacienteId').value;
+    const nome = document.getElementById('pacienteNome').value.trim();
+    const rua = document.getElementById('pacienteRua').value.trim();
+    const numero = document.getElementById('pacienteNumero').value.trim();
+    const bairro = document.getElementById('pacienteBairro').value.trim();
+    const cidade = document.getElementById('pacienteCidade').value.trim();
+    const estado = document.getElementById('pacienteEstado').value.trim().toUpperCase();
+    const cep = formatCEP(document.getElementById('pacienteCEP').value.trim());
+    const telefone = formatTelefone(document.getElementById('pacienteTelefone').value.trim());
+    const nascimento = document.getElementById('pacienteNascimento').value;
+    const cpf = formatCPF(document.getElementById('pacienteCPF').value.trim());
+    if(!nome || !telefone || !cpf){
+      alert('Preencha pelo menos nome, telefone e CPF do paciente.');
+      return;
+    }
+    if(onlyDigits(cpf).length !== 11){
+      alert('Informe um CPF válido com 11 dígitos.');
+      return;
+    }
+    if(onlyDigits(cep).length && onlyDigits(cep).length !== 8){
+      alert('Informe um CEP válido com 8 dígitos.');
+      return;
+    }
+    if(onlyDigits(telefone).length < 10){
+      alert('Informe um telefone válido com DDD.');
+      return;
+    }
+    if((db.patients || []).some(p => onlyDigits(p.cpf) === onlyDigits(cpf) && p.id !== id)){
+      alert('Já existe paciente cadastrado com este CPF.');
+      return;
+    }
+    const payload = {id: id || uid(), nome, rua, numero, bairro, cidade, estado, cep, telefone, nascimento, cpf};
+    if(id){
+      db.patients = db.patients.map(p => p.id === id ? payload : p);
+    } else {
+      db.patients.push(payload);
+    }
+    saveDB();
+    limparPacienteForm();
+    refreshAll();
+    alert('Paciente salvo com sucesso.');
+  }
+
+  function editarPaciente(id){
+    const p = (db.patients || []).find(x => x.id === id);
+    if(!p) return;
+    document.getElementById('pacienteId').value = p.id;
+    document.getElementById('pacienteNome').value = p.nome || '';
+    document.getElementById('pacienteRua').value = p.rua || '';
+    document.getElementById('pacienteNumero').value = p.numero || '';
+    document.getElementById('pacienteBairro').value = p.bairro || '';
+    document.getElementById('pacienteCidade').value = p.cidade || '';
+    document.getElementById('pacienteEstado').value = p.estado || '';
+    document.getElementById('pacienteCEP').value = p.cep || '';
+    document.getElementById('pacienteTelefone').value = p.telefone || '';
+    document.getElementById('pacienteNascimento').value = p.nascimento || '';
+    document.getElementById('pacienteCPF').value = p.cpf || '';
+    applyPatientMasks();
+  }
+
+  function excluirPaciente(id){
+    const paciente = (db.patients || []).find(p => p.id === id);
+    if(!paciente) return;
+    const vinculado = (db.sales || []).some(v => v.pacienteId === id || v.paciente === paciente.nome);
+    if(vinculado){
+      alert('Não é possível excluir paciente vinculado a vendas.');
+      return;
+    }
+    if(!confirm('Deseja excluir este paciente?')) return;
+    db.patients = db.patients.filter(p => p.id !== id);
+    saveDB();
+    refreshAll();
+  }
+
+  function renderPacientes(){
+    const tbody = document.getElementById('pacientesTabela');
+    if(!tbody) return;
+    const busca = (document.getElementById('pacienteBusca')?.value || '').toLowerCase();
+    const items = (db.patients || []).filter(p => [p.nome,p.cpf,p.telefone,p.cidade,p.estado].join(' ').toLowerCase().includes(busca));
+    tbody.innerHTML = items.length ? items.map(p => `
+      <tr>
+        <td>${p.nome || ''}</td>
+        <td>${p.cpf || ''}</td>
+        <td>${p.telefone || ''}</td>
+        <td>${[p.cidade || '', p.estado || ''].filter(Boolean).join('/')}</td>
+        <td>${p.nascimento ? new Date(p.nascimento+'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+        <td>
+          <button class="btn btn-light" onclick="editarPaciente('${p.id}')">Editar</button>
+          <button class="btn btn-danger" onclick="excluirPaciente('${p.id}')">Excluir</button>
+        </td>
+      </tr>
+    `).join('') : `<tr><td colspan="6" class="empty">Nenhum paciente cadastrado.</td></tr>`;
+  }
+
+  function fillSelect(selectId, items, placeholder, valueField='id', labelField='nome'){
+    const el = document.getElementById(selectId);
+    if(!el) return;
+    el.innerHTML = `<option value="">${placeholder}</option>` + items.map(i => `
+      <option value="${i[valueField]}">${i[labelField]}</option>
+    `).join('');
+  }
+
+  function preencherSelectsVendas(){
+    fillSelect('vendaPaciente', db.patients || [], 'Selecione o paciente');
+    fillSelect('vendaUsuario', db.users.filter(u => u.status === 'Ativo'), 'Selecione o usuário');
+    fillSelect('vendaMedico', db.doctors.filter(d => d.status === 'Ativo'), 'Selecione o médico');
+    fillSelect('vendaProduto', db.products.filter(p => (p.status || 'Ativo') === 'Ativo'), 'Selecione o item');
+    fillSelect('repasseFiltroMedico', [{id:'', nome:'Todos'}].concat(db.doctors), 'Todos');
+    renderEspecialidades();
+    renderPacientes();
+  }
+
+  window.vendaItensTemp = window.vendaItensTemp || [];
+
+  function updateSaleNumberPreview(){
+    const num = String(db.saleSequence || 1).padStart(6,'0');
+    const el = document.getElementById('vendaNumero'); if(el && !el.value) el.value = `VEN-${num}`;
+  }
+
+  function refreshVendaDateTime(){
+    const now = new Date();
+    document.getElementById('vendaData').value = now.toISOString().slice(0,10);
+    document.getElementById('vendaHora').value = now.toTimeString().slice(0,5);
+  }
+
+  function limparVendaForm(){
+    window.vendaItensTemp = [];
+    ['vendaId','vendaNumero','vendaObservacoes','vendaObsItem','vendaValorUnitario','vendaSubtotalItem','vendaDescontoItem','vendaDescontoGeral','vendaTotalBruto','vendaValorTotal','vendaTroco'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('vendaQuantidade').value = 1;
+    document.getElementById('vendaParcelas').value = 1;
+    document.getElementById('vendaFormaPagamento').value = 'Dinheiro';
+    document.getElementById('vendaValorRecebido').value = 0;
+    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
+    refreshVendaDateTime();
+    document.getElementById('vendaTipoPrincipal').value = 'Consulta';
+    document.getElementById('pagamentoMistoValor1').value = 0;
+    document.getElementById('pagamentoMistoValor2').value = 0;
+    togglePagamentoMisto();
+    updateSaleNumberPreview();
+    renderVendaItensTemp();
+    updateVendaTotals();
+  }
+
+  function updateVendaPreview(){
+    const produtoId = document.getElementById('vendaProduto').value;
+    const qtd = Number(document.getElementById('vendaQuantidade').value || 0);
+    const desconto = Number(document.getElementById('vendaDescontoItem').value || 0);
+    const valUnitInput = document.getElementById('vendaValorUnitario');
+    const produto = db.products.find(p => p.id === produtoId);
+    if(produto && !valUnitInput.value){ valUnitInput.value = produto.venda; }
+    const valUnit = Number(valUnitInput.value || 0);
+    const total = Math.max((qtd * valUnit) - desconto, 0);
+    document.getElementById('vendaSubtotalItem').value = formatCurrency(total);
+  }
+
+  function adicionarItemVenda(){
+    const produtoId = document.getElementById('vendaProduto').value;
+    const quantidade = Number(document.getElementById('vendaQuantidade').value || 0);
+    const valorUnitario = Number(document.getElementById('vendaValorUnitario').value || 0);
+    const desconto = Number(document.getElementById('vendaDescontoItem').value || 0);
+    const observacao = document.getElementById('vendaObsItem').value.trim();
+    const produto = db.products.find(p => p.id === produtoId);
+    if(!produto || quantidade <= 0 || valorUnitario < 0){
+      alert('Selecione um item válido e informe quantidade/valor.');
+      return;
+    }
+    const subtotal = Math.max((quantidade * valorUnitario) - desconto, 0);
+    const lucro = subtotal - (quantidade * Number(produto.custo || 0));
+    window.vendaItensTemp.push({produtoId: produto.id, produtoNome: produto.nome, tipo: produto.categoria || produto.tipo || 'Item', quantidade, valorUnitario, desconto, subtotal, custo: quantidade * Number(produto.custo || 0), lucro, observacao});
+    document.getElementById('vendaProduto').value = '';
+    document.getElementById('vendaQuantidade').value = 1;
+    document.getElementById('vendaValorUnitario').value = '';
+    document.getElementById('vendaDescontoItem').value = '';
+    document.getElementById('vendaObsItem').value = '';
+    renderVendaItensTemp();
+    updateVendaTotals();
+  }
+
+  function removerItemVendaTemp(index){
+    window.vendaItensTemp.splice(index,1);
+    renderVendaItensTemp();
+    updateVendaTotals();
+  }
+
+  function renderVendaItensTemp(){
+    const tbody = document.getElementById('vendaItensTabela');
+    tbody.innerHTML = window.vendaItensTemp.length ? window.vendaItensTemp.map((item, idx) => `
+      <tr>
+        <td>${item.tipo}</td>
+        <td>${item.produtoNome}</td>
+        <td>${item.quantidade}</td>
+        <td>${formatCurrency(item.valorUnitario)}</td>
+        <td>${formatCurrency(item.desconto)}</td>
+        <td>${formatCurrency(item.subtotal)}</td>
+        <td><button class="btn btn-danger" onclick="removerItemVendaTemp(${idx})">Remover</button></td>
+      </tr>
+    `).join('') : `<tr><td colspan="7" class="empty">Nenhum item adicionado à venda.</td></tr>`;
+  }
+
+  function togglePagamentoMisto(){
+    const mixed = document.getElementById('vendaFormaPagamento').value === 'Pagamento Misto';
+    document.getElementById('pagamentoMistoBox').style.display = mixed ? '' : 'none';
+  }
+
+  function serializePayments(totalLiquido){
+    const forma = document.getElementById('vendaFormaPagamento').value;
+    if(forma === 'Pagamento Misto'){
+      return [
+        {forma: document.getElementById('pagamentoMistoForma1').value, valor: Number(document.getElementById('pagamentoMistoValor1').value || 0)},
+        {forma: document.getElementById('pagamentoMistoForma2').value, valor: Number(document.getElementById('pagamentoMistoValor2').value || 0)}
+      ].filter(p => p.valor > 0);
+    }
+    return [{forma, valor: totalLiquido, parcelas: Number(document.getElementById('vendaParcelas').value || 1)}];
+  }
+
+  function updateVendaTotals(){
+    const bruto = window.vendaItensTemp.reduce((acc,i) => acc + i.subtotal, 0);
+    const descontoGeral = Number(document.getElementById('vendaDescontoGeral').value || 0);
+    const liquido = Math.max(bruto - descontoGeral, 0);
+    const lucro = window.vendaItensTemp.reduce((acc,i) => acc + i.lucro, 0) - descontoGeral;
+    const recebido = Number(document.getElementById('vendaValorRecebido').value || 0);
+    const troco = Math.max(recebido - liquido, 0);
+    document.getElementById('vendaTotalBruto').value = formatCurrency(bruto);
+    document.getElementById('vendaValorTotal').value = formatCurrency(liquido);
+    document.getElementById('vendaTroco').value = formatCurrency(troco);
+  }
+
+  function getApplicablePct(doctorId){
+    if(db.settings.calcMode === 'global') return Number(db.settings.globalPct || 0);
+    const doc = db.doctors.find(d => d.id === doctorId);
+    return Number((doc?.percentualLucro ?? doc?.percentual) || 0);
+  }
+
+  function registrarVenda(){
+    const usuarioId = document.getElementById('vendaUsuario').value;
+    const medicoId = document.getElementById('vendaMedico').value;
+    const pacienteId = document.getElementById('vendaPaciente').value;
+    const pacienteObj = (db.patients || []).find(p => p.id === pacienteId);
+    const paciente = pacienteObj ? pacienteObj.nome : '';
+    refreshVendaDateTime();
+    const data = document.getElementById('vendaData').value;
+    const hora = document.getElementById('vendaHora').value;
+    const tipoPrincipal = document.getElementById('vendaTipoPrincipal').value;
+    const observacoes = document.getElementById('vendaObservacoes').value.trim();
+    const descontoGeral = Number(document.getElementById('vendaDescontoGeral').value || 0);
+    const recebido = Number(document.getElementById('vendaValorRecebido').value || 0);
+    if(!usuarioId || !medicoId || !pacienteId || !data || !hora){
+      alert('Preencha paciente, usuário, médico e os dados principais da venda.');
+      return;
+    }
+    if(!window.vendaItensTemp.length){
+      alert('Não há itens lançados na venda. Clique em "Lançar" para adicionar o item antes de fechar a venda.');
+      return;
+    }
+    const usuario = db.users.find(u => u.id === usuarioId);
+    const medico = db.doctors.find(d => d.id === medicoId);
+    const totalBruto = window.vendaItensTemp.reduce((a,i)=>a+i.subtotal,0);
+    const custo = window.vendaItensTemp.reduce((a,i)=>a+i.custo,0);
+    const totalLiquido = Math.max(totalBruto - descontoGeral, 0);
+    const lucro = totalLiquido - custo;
+    const pctRepasse = getApplicablePct(medicoId);
+    const repasse = Math.max(lucro,0) * (pctRepasse/100);
+    const liquidoClinica = lucro - repasse;
+    const percentualClinica = lucro > 0 ? (liquidoClinica / lucro) * 100 : 0;
+    const payments = serializePayments(totalLiquido);
+    const troco = Math.max(recebido - totalLiquido, 0);
+    const numero = document.getElementById('vendaNumero').value || `VEN-${String(db.saleSequence || 1).padStart(6,'0')}`;
+    db.sales.unshift({
+      id: uid(), numero, dataHora: `${data}T${hora}:00`, data, hora, pacienteId, paciente, usuarioId, usuarioNome: usuario?.nome || '', medicoId, medicoNome: medico?.nome || '',
+      tipoPrincipal, itens: structuredClone(window.vendaItensTemp), observacoes, descontoGeral, valorRecebido: recebido, troco, pagamentos: payments,
+      valorTotal: totalLiquido, valorBruto: totalBruto, custo, lucro, percentualRepasse: pctRepasse, repasse, liquidoClinica, percentualClinica,
+      status: 'Ativa', cancelamento: null
+    });
+    db.saleSequence = Number(db.saleSequence || 1) + 1;
+    const saleId = db.sales[0]?.id;
+    saveDB(); limparVendaForm(); refreshAll();
+    if(saleId) abrirComprovanteVenda(saleId, true);
+  }
+
+  function pedirSenhaGerencial(acao='autorizar'){
+    const senha = prompt(`Digite a senha do gerente ou administrador para ${acao}:`);
+    if(!senha) return null;
+    const user = db.users.find(u => ['Administrador','Gerente'].includes(u.perfil) && u.status === 'Ativo' && u.senha === senha);
+    if(!user){ alert('Senha inválida.'); return null; }
+    return user;
+  }
+
+  function excluirVenda(id){
+    if(!confirm('Confirma a exclusão definitiva desta venda?')) return;
+    const autorizador = pedirSenhaGerencial('excluir a venda');
+    if(!autorizador) return;
+    db.sales = db.sales.filter(v => v.id !== id);
+    saveDB(); refreshAll();
+  }
+
+  function cancelarVenda(id, tipo='Cancelada'){
+    const venda = db.sales.find(v => v.id === id);
+    if(!venda) return;
+    if(!confirm(`Confirma ${tipo.toLowerCase()} desta venda?`)) return;
+    const autorizador = pedirSenhaGerencial(tipo.toLowerCase());
+    if(!autorizador) return;
+    const motivo = prompt('Informe o motivo do cancelamento/estorno:');
+    if(!motivo) return;
+    venda.status = tipo;
+    venda.cancelamento = {motivo, usuario: autorizador.nome, dataHora: new Date().toISOString(), tipo};
+    if(tipo === 'Estorno Parcial') venda.valorImpactado = venda.valorTotal / 2;
+    else venda.valorImpactado = venda.valorTotal;
+    saveDB(); refreshAll();
+  }
+
+  function abrirConsultarVendasTela(){
+    const modal = document.getElementById('consultarVendasModal');
+    if(modal) modal.classList.add('open');
+    renderVendas();
+  }
+
+  function fecharConsultarVendasTela(){
+    const modal = document.getElementById('consultarVendasModal');
+    if(modal) modal.classList.remove('open');
+  }
+
+  function limparFiltrosConsultaVendas(){
+    const ids = ['vendaBusca','vendaFiltroData','vendaFiltroStatus','vendaFiltroPagamento','vendaFiltroTipo'];
+    ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+    renderVendas();
+  }
+
+  function getSaleById(id){
+    return (db.sales || []).find(v => v.id === id);
+  }
+
+  function escapeHtml(value){
+    return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[char] || char));
+  }
+
+  function getReceiptHtml(venda){
+    const company = db.company || {};
+    const clinicName = db.clinicName || company.nomeFantasia || 'Extra Med Clínica de Especialidades';
+    const endereco = [company.rua, company.numero, company.bairro, company.cidade, company.estado].filter(Boolean).join(', ');
+    const pagamentos = (venda.pagamentos || []).map(p => `${p.forma}: ${formatCurrency(p.valor)}${p.parcelas && p.parcelas > 1 ? ` (${p.parcelas}x)` : ''}`).join('<br>') || '-';
+    const itensHtml = (venda.itens || []).map(item => `
+      <tr>
+        <td>${escapeHtml(item.tipo || '-')}</td>
+        <td>${escapeHtml(item.produtoNome || '-')}</td>
+        <td>${item.quantidade || 0}</td>
+        <td>${formatCurrency(item.valorUnitario || 0)}</td>
+        <td>${formatCurrency(item.desconto || 0)}</td>
+        <td>${formatCurrency(item.subtotal || 0)}</td>
+      </tr>
+    `).join('');
+    return `
+      <div class="receipt-wrap">
+        <div class="receipt-head">
+          <div>
+            <h1>Comprovante Não Fiscal</h1>
+            <div class="receipt-meta">
+              <strong>${escapeHtml(clinicName)}</strong><br>
+              ${company.cnpj ? `CNPJ: ${escapeHtml(company.cnpj)}<br>` : ''}
+              ${endereco ? `${escapeHtml(endereco)}<br>` : ''}
+              ${company.telefone ? `Telefone: ${escapeHtml(company.telefone)}<br>` : ''}
+              ${company.email ? `E-mail: ${escapeHtml(company.email)}` : ''}
+            </div>
+          </div>
+          <div class="receipt-meta">
+            <strong>Venda:</strong> ${escapeHtml(venda.numero || '-')}<br>
+            <strong>Data:</strong> ${new Date(venda.dataHora).toLocaleString('pt-BR')}<br>
+            <strong>Status:</strong> ${escapeHtml(venda.status || 'Ativa')}<br>
+            <strong>Tipo:</strong> ${escapeHtml(venda.tipoPrincipal || '-')}
+          </div>
+        </div>
+
+        <div class="receipt-meta">
+          <strong>Paciente:</strong> ${escapeHtml(venda.paciente || '-')}<br>
+          <strong>Médico:</strong> ${escapeHtml(venda.medicoNome || '-')}<br>
+          <strong>Usuário:</strong> ${escapeHtml(venda.usuarioNome || '-')}<br>
+          <strong>Pagamento:</strong><br>${pagamentos}
+          ${venda.observacoes ? `<br><strong>Observações:</strong> ${escapeHtml(venda.observacoes)}` : ''}
+        </div>
+
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Item</th>
+              <th>Qtd.</th>
+              <th>Unitário</th>
+              <th>Desconto</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>${itensHtml}</tbody>
+        </table>
+
+        <div class="receipt-totals">
+          <div class="receipt-total-line"><strong>Subtotal bruto</strong><span>${formatCurrency(venda.valorBruto || 0)}</span></div>
+          <div class="receipt-total-line"><strong>Desconto geral</strong><span>${formatCurrency(venda.descontoGeral || 0)}</span></div>
+          <div class="receipt-total-line"><strong>Total líquido</strong><span>${formatCurrency(venda.valorTotal || 0)}</span></div>
+          <div class="receipt-total-line"><strong>Valor recebido</strong><span>${formatCurrency(venda.valorRecebido || 0)}</span></div>
+          <div class="receipt-total-line"><strong>Troco</strong><span>${formatCurrency(venda.troco || 0)}</span></div>
+        </div>
+
+        <div class="receipt-foot">Documento interno sem valor fiscal. Emitido exclusivamente para conferência e impressão do atendimento.</div>
+      </div>
+    `;
+  }
+
+  function abrirComprovanteVenda(id, autoPrint = false){
+    const venda = getSaleById(id);
+    if(!venda){
+      alert('Venda não encontrada.');
+      return;
+    }
+    const receiptHtml = getReceiptHtml(venda);
+    const printWindow = window.open('', '_blank');
+    if(!printWindow){
+      alert('O navegador bloqueou a abertura do comprovante. Libere pop-ups para gerar o PDF/recibo.');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Comprovante Não Fiscal - ${escapeHtml(venda.numero || '')}</title><style>body{font-family:Arial,Helvetica,sans-serif;background:#fff;margin:0;padding:0;color:#24152f} .receipt-wrap{font-family:Arial,Helvetica,sans-serif;color:#24152f;padding:24px;max-width:820px;margin:0 auto} .receipt-head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e8ddf4;padding-bottom:14px;margin-bottom:18px} .receipt-head h1{margin:0;color:#5f2b8c;font-size:24px} .receipt-meta{font-size:13px;color:#4b5563;line-height:1.6} .receipt-table{width:100%;border-collapse:collapse;margin-top:14px} .receipt-table th,.receipt-table td{border:1px solid #e8ddf4;padding:10px;text-align:left;font-size:13px} .receipt-table th{background:#faf6ff;color:#5f2b8c} .receipt-totals{margin-top:18px;display:grid;gap:8px;justify-content:end} .receipt-total-line{display:flex;justify-content:space-between;gap:30px;font-size:14px} .receipt-foot{margin-top:24px;padding-top:14px;border-top:1px dashed #c9a227;font-size:12px;color:#6b7280;text-align:center} @media print{body{margin:0}.receipt-wrap{padding:8mm;max-width:none}}</style></head><body>${receiptHtml}</body></html>`);
+    printWindow.document.close();
+    if(autoPrint){
+      printWindow.onload = () => {
+        printWindow.focus();
+        setTimeout(() => printWindow.print(), 250);
+      };
+    }
+  }
+
+  function renderVendas(){
+    const tbody = document.getElementById('vendasTabela');
+    if(!tbody) return;
+    const busca = (document.getElementById('vendaBusca')?.value || '').toLowerCase();
+    const filtroData = document.getElementById('vendaFiltroData')?.value || '';
+    const filtroStatus = document.getElementById('vendaFiltroStatus')?.value || '';
+    const filtroPagamento = document.getElementById('vendaFiltroPagamento')?.value || '';
+    const filtroTipo = document.getElementById('vendaFiltroTipo')?.value || '';
+    const items = db.sales.filter(v => {
+      const okBusca = [v.numero,v.paciente,v.medicoNome,v.usuarioNome].join(' ').toLowerCase().includes(busca);
+      const okData = !filtroData || v.data === filtroData;
+      const okStatus = !filtroStatus || v.status === filtroStatus;
+      const okPagamento = !filtroPagamento || (v.pagamentos||[]).some(p => p.forma === filtroPagamento) || (v.pagamentos||[])[0]?.forma === filtroPagamento;
+      const okTipo = !filtroTipo || v.tipoPrincipal === filtroTipo || (v.itens||[]).some(i => i.tipo === filtroTipo);
+      return okBusca && okData && okStatus && okPagamento && okTipo;
+    });
+    tbody.innerHTML = items.length ? items.map(v => `
+      <tr>
+        <td>${v.numero || '-'}</td>
+        <td>${new Date(v.dataHora).toLocaleDateString('pt-BR')} ${v.hora || ''}</td>
+        <td>${v.paciente}</td>
+        <td>${v.medicoNome}</td>
+        <td>${v.usuarioNome || '-'}</td>
+        <td>${(v.itens||[]).map(i => `${i.produtoNome} (${i.quantidade})`).join('<br>')}</td>
+        <td>${formatCurrency(v.valorTotal)}</td>
+        <td>${(v.pagamentos||[]).map(p => `${p.forma}: ${formatCurrency(p.valor)}`).join('<br>')}</td>
+        <td>${v.status || 'Ativa'}</td>
+        <td>
+          <button class="icon-btn" title="Imprimir / baixar recibo não fiscal" onclick="abrirComprovanteVenda('${v.id}', true)">🖨️</button>
+          <button class="btn btn-light" onclick="cancelarVenda('${v.id}','Cancelada')">Cancelar</button>
+          <button class="btn btn-light" onclick="cancelarVenda('${v.id}','Estorno Parcial')">Estorno parcial</button>
+          <button class="btn btn-light" onclick="cancelarVenda('${v.id}','Estorno Total')">Estorno total</button>
+          <button class="btn btn-danger" onclick="excluirVenda('${v.id}')">Excluir</button>
+        </td>
+      </tr>
+    `).join('') : `<tr><td colspan="10" class="empty">Nenhuma venda registrada.</td></tr>`;
+  }
+
+  function renderCancelamentos(){
+    const tbody = document.getElementById('cancelamentosTabela');
+    const items = db.sales.filter(v => ['Cancelada','Estorno Parcial','Estorno Total'].includes(v.status));
+    tbody.innerHTML = items.length ? items.map(v => `
+      <tr>
+        <td>${v.numero}</td>
+        <td>${v.paciente}</td>
+        <td>${v.status}</td>
+        <td>${v.cancelamento?.motivo || '-'}</td>
+        <td>${v.cancelamento?.usuario || '-'}</td>
+        <td>${v.cancelamento?.dataHora ? new Date(v.cancelamento.dataHora).toLocaleString('pt-BR') : '-'}</td>
+        <td>${formatCurrency(v.valorImpactado || v.valorTotal || 0)}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="7" class="empty">Nenhum cancelamento ou estorno registrado.</td></tr>`;
+  }
+
+  function updateProtectedMenuVisibility(){
+    const btn = document.getElementById('cancelamentosMenuBtn');
+    if(!btn) return;
+    const hasProtected = db.users.some(u => ['Administrador','Gerente'].includes(u.perfil) && u.status === 'Ativo');
+    btn.style.display = hasProtected ? 'block' : 'none';
+  }
+
+  function renderDashboard(){
+    const revenue = db.sales.reduce((acc,s) => acc + Number(s.valorTotal || 0), 0);
+    const profit = db.sales.reduce((acc,s) => acc + Number(s.lucro || 0), 0);
+    const transfer = db.sales.reduce((acc,s) => acc + Number(s.repasse || 0), 0);
+    const clinic = db.sales.reduce((acc,s) => acc + Number(s.liquidoClinica || 0), 0);
+
+    document.getElementById('dashRevenue').textContent = formatCurrency(revenue);
+    document.getElementById('dashProfit').textContent = formatCurrency(profit);
+    document.getElementById('dashMedicalTransfer').textContent = formatCurrency(transfer);
+    document.getElementById('dashClinicValue').textContent = formatCurrency(clinic);
+
+    document.getElementById('sumProducts').textContent = db.products.length;
+    document.getElementById('sumDoctors').textContent = db.doctors.length;
+    document.getElementById('sumUsers').textContent = db.users.length;
+    document.getElementById('sumSales').textContent = db.sales.length;
+
+    const nearExpiry = db.products.filter(p => {
+      const diff = (new Date(p.validade) - new Date()) / (1000*60*60*24);
+      return diff >= 0 && diff <= 30;
+    });
+    document.getElementById('alertsBox').innerHTML = nearExpiry.length
+      ? nearExpiry.map(p => `<div>• Produto próximo da validade: <strong>${p.nome}</strong> (${new Date(p.validade+'T00:00:00').toLocaleDateString('pt-BR')})</div>`).join('')
+      : 'Nenhum produto com validade crítica nos próximos 30 dias.';
+
+    const tbody = document.getElementById('dashboardSalesTable');
+    tbody.innerHTML = db.sales.slice(0,8).map(v => `
+      <tr>
+        <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+        <td>${v.usuarioNome || '-'}</td>
+        <td>${v.paciente || '-'}</td>
+        <td>${v.medicoNome}</td>
+        <td>${(v.itens||[]).length}</td>
+        <td>${formatCurrency(v.valorTotal)}</td>
+        <td>${formatCurrency(v.lucro)}</td>
+      </tr>
+    `).join('') || `<tr><td colspan="7" class="empty">Sem vendas recentes.</td></tr>`;
+  }
+
+  function renderProdutividade(){
+    const tbody = document.getElementById('produtividadeTabela');
+    const totalCost = db.sales.reduce((acc,s) => acc + Number(s.custo || 0), 0);
+    const totalProfit = db.sales.reduce((acc,s) => acc + Number(s.lucro || 0), 0);
+    const totalTransfer = db.sales.reduce((acc,s) => acc + Number(s.repasse || 0), 0);
+    const avgClinicPct = totalProfit > 0 ? ((totalProfit - totalTransfer) / totalProfit) * 100 : 0;
+
+    document.getElementById('prodCost').textContent = formatCurrency(totalCost);
+    document.getElementById('prodProfit').textContent = formatCurrency(totalProfit);
+    document.getElementById('prodClinicPct').textContent = formatPct(avgClinicPct);
+    document.getElementById('prodTransfer').textContent = formatCurrency(totalTransfer);
+
+    tbody.innerHTML = db.sales.length ? db.sales.map(v => `
+      <tr>
+        <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
+        <td>${v.medicoNome}</td>
+        <td>${(v.itens||[]).length}</td>
+        <td>${formatCurrency(v.custo)}</td>
+        <td>${formatCurrency(v.lucro)}</td>
+        <td>${formatPct(v.percentualClinica)}</td>
+        <td>${formatCurrency(v.repasse)}</td>
+        <td>${formatCurrency(v.liquidoClinica)}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="8" class="empty">Sem dados para produtividade.</td></tr>`;
+  }
+
+  function renderRepasse(){
+    const filtro = document.getElementById('repasseFiltroMedico')?.value || '';
+    const rows = {};
+    db.sales
+      .filter(v => !filtro || v.medicoId === filtro)
+      .forEach(v => {
+        if(!rows[v.medicoNome]){
+          rows[v.medicoNome] = {vendas:0,lucro:0,repasse:0,clinica:0};
+        }
+        rows[v.medicoNome].vendas += 1;
+        rows[v.medicoNome].lucro += Number(v.lucro || 0);
+        rows[v.medicoNome].repasse += Number(v.repasse || 0);
+        rows[v.medicoNome].clinica += Number(v.liquidoClinica || 0);
+      });
+
+    const tbody = document.getElementById('repasseTabela');
+    const entries = Object.entries(rows);
+    tbody.innerHTML = entries.length ? entries.map(([nome, data]) => `
+      <tr>
+        <td>${nome}</td>
+        <td>${data.vendas}</td>
+        <td>${formatCurrency(data.lucro)}</td>
+        <td>${formatCurrency(data.repasse)}</td>
+        <td>${formatCurrency(data.clinica)}</td>
+      </tr>
+    `).join('') : `<tr><td colspan="5" class="empty">Nenhum dado de repasse encontrado.</td></tr>`;
+
+    const totalRepasse = entries.reduce((a,[,d]) => a + d.repasse, 0);
+    document.getElementById('repasseResumo').value = formatCurrency(totalRepasse);
+  }
+
+  function salvarConfiguracoes(){
+    db.settings.calcMode = document.getElementById('configCalcMode').value;
+    db.settings.globalPct = Number(document.getElementById('configGlobalPct').value || 0);
+    db.clinicName = document.getElementById('configClinicName').value || 'Extra Med Clínica de Especialidades';
+    db.company = {
+      razaoSocial: document.getElementById('configRazaoSocial').value.trim(),
+      nomeFantasia: document.getElementById('configNomeFantasia').value.trim(),
+      cnpj: document.getElementById('configCNPJ').value.trim(),
+      rua: document.getElementById('configRua').value.trim(),
+      numero: document.getElementById('configNumero').value.trim(),
+      bairro: document.getElementById('configBairro').value.trim(),
+      cidade: document.getElementById('configCidade').value.trim(),
+      estado: document.getElementById('configEstado').value.trim(),
+      cep: document.getElementById('configCEP').value.trim(),
+      telefone: document.getElementById('configTelefone').value.trim(),
+      email: document.getElementById('configEmail').value.trim(),
+      instagram: document.getElementById('configInstagram').value.trim(),
+      site: document.getElementById('configSite').value.trim(),
+      responsavel: document.getElementById('configResponsavel').value.trim()
+    };
+    if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName;
+    saveDB();
+    refreshAll();
+    alert('Configurações salvas com sucesso.');
+  }
+
+  function renderConfiguracoes(){
+    ensureCompanyConfig();
+    document.getElementById('configCalcMode').value = db.settings.calcMode;
+    document.getElementById('configGlobalPct').value = db.settings.globalPct;
+    document.getElementById('configClinicName').value = db.clinicName;
+    updateProtectedMenuVisibility();
+    document.getElementById('configRazaoSocial').value = db.company.razaoSocial || '';
+    document.getElementById('configNomeFantasia').value = db.company.nomeFantasia || '';
+    document.getElementById('configCNPJ').value = db.company.cnpj || '';
+    document.getElementById('configRua').value = db.company.rua || '';
+    document.getElementById('configNumero').value = db.company.numero || '';
+    document.getElementById('configBairro').value = db.company.bairro || '';
+    document.getElementById('configCidade').value = db.company.cidade || '';
+    document.getElementById('configEstado').value = db.company.estado || '';
+    document.getElementById('configCEP').value = db.company.cep || '';
+    document.getElementById('configTelefone').value = db.company.telefone || '';
+    document.getElementById('configEmail').value = db.company.email || '';
+    document.getElementById('configInstagram').value = db.company.instagram || '';
+    document.getElementById('configSite').value = db.company.site || '';
+    document.getElementById('configResponsavel').value = db.company.responsavel || '';
+  }
+
+  function exportarDados(){
+    const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'extramed-dados.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function resetarSistema(){
+    if(!confirm('Isso apagará todos os dados salvos neste navegador. Deseja continuar?')) return;
+    localStorage.removeItem(DB_KEY);
+    db = structuredClone(defaultDB);
+    refreshAll();
+  }
+
+  function refreshAll(){
+    saveDB();
+    renderProdutos();
+    renderCategoriasTabela();
+    renderControleVencimento();
+    renderMedicos();
+    renderUsuarios();
+    renderPacientes();
+    preencherSelectsVendas();
+    renderVendas();
+    renderDashboard();
+    renderProdutividade();
+    renderRepasse();
+    renderCancelamentos();
+    renderConfiguracoes();
+    document.title = `${db.clinicName} | Gestão de Vendas`;
+  }
+
+  function init(){
+    setupNav();
+    try {
+    setupSubnav('produtosSubnav', 'data-produtos-view', 'produtos');
+    setupSubnav('medicosSubnav', 'data-medicos-view', 'medicos');
+    setupSubnav('pacientesSubnav', 'data-pacientes-view', 'pacientes');
+    setupSubnav('configuracoesSubnav', 'data-configuracoes-view', 'configuracoes');
+    setupSubnav('usuariosSubnav', 'data-usuarios-view', 'usuarios');
+    document.getElementById('todayBadge').textContent = 'Hoje: ' + todayStr();
+    renderCategoryOptions();
+    document.getElementById('produtoCusto').addEventListener('input', calculateProductProfit);
+    document.getElementById('produtoVenda').addEventListener('input', calculateProductProfit);
+    document.getElementById('produtoTipo').addEventListener('change', () => { toggleProdutoSpecificFields(); atualizarSugestaoCodigo(); });
+    document.getElementById('produtoCategoria').addEventListener('change', atualizarSugestaoCodigo);
+    document.getElementById('produtoBusca').addEventListener('input', renderProdutos);
+    document.getElementById('produtoBuscaCategoria').addEventListener('change', renderProdutos);
+    document.getElementById('produtoBuscaTipo').addEventListener('change', renderProdutos);
+    document.getElementById('produtoBuscaStatus').addEventListener('change', renderProdutos);
+    document.getElementById('controleVencimentoPeriodo').addEventListener('change', renderControleVencimento);
+    document.getElementById('controleVencimentoCategoria').addEventListener('change', renderControleVencimento);
+    document.getElementById('controleVencimentoBusca').addEventListener('input', renderControleVencimento);
+    document.getElementById('vendaProduto').addEventListener('change', () => {
+      const prod = db.products.find(p => p.id === document.getElementById('vendaProduto').value);
+      document.getElementById('vendaValorUnitario').value = prod ? prod.venda : '';
+      updateVendaPreview();
+    });
+    document.getElementById('vendaQuantidade').addEventListener('input', updateVendaPreview);
+    document.getElementById('vendaValorUnitario').addEventListener('input', updateVendaPreview);
+    document.getElementById('vendaDescontoItem').addEventListener('input', updateVendaPreview);
+    document.getElementById('vendaDescontoGeral').addEventListener('input', updateVendaTotals);
+    document.getElementById('vendaValorRecebido').addEventListener('input', updateVendaTotals);
+    document.getElementById('pagamentoMistoValor1').addEventListener('input', updateVendaTotals);
+    document.getElementById('pagamentoMistoValor2').addEventListener('input', updateVendaTotals);
+    document.getElementById('repasseFiltroMedico').addEventListener('change', renderRepasse);
+    const medicoBusca = document.getElementById('medicoBusca'); if(medicoBusca) medicoBusca.addEventListener('input', renderMedicos);
+    const medicoFiltroStatus = document.getElementById('medicoFiltroStatus'); if(medicoFiltroStatus) medicoFiltroStatus.addEventListener('change', renderMedicos);
+    const usuarioBusca = document.getElementById('usuarioBusca'); if(usuarioBusca) usuarioBusca.addEventListener('input', renderUsuarios);
+    const pacienteBusca = document.getElementById('pacienteBusca'); if(pacienteBusca) pacienteBusca.addEventListener('input', renderPacientes);
+    const pacienteCPF = document.getElementById('pacienteCPF'); if(pacienteCPF) pacienteCPF.addEventListener('input', e => e.target.value = formatCPF(e.target.value));
+    const pacienteCEP = document.getElementById('pacienteCEP'); if(pacienteCEP) pacienteCEP.addEventListener('input', e => e.target.value = formatCEP(e.target.value));
+    const pacienteTelefone = document.getElementById('pacienteTelefone'); if(pacienteTelefone) pacienteTelefone.addEventListener('input', e => e.target.value = formatTelefone(e.target.value));
+    applyPatientMasks();
+    const usuarioFiltroStatus = document.getElementById('usuarioFiltroStatus'); if(usuarioFiltroStatus) usuarioFiltroStatus.addEventListener('change', renderUsuarios);
+    const vendaBusca = document.getElementById('vendaBusca'); if(vendaBusca) vendaBusca.addEventListener('input', renderVendas);
+    const vendaFiltroData = document.getElementById('vendaFiltroData'); if(vendaFiltroData) vendaFiltroData.addEventListener('change', renderVendas);
+    const vendaFiltroStatus = document.getElementById('vendaFiltroStatus'); if(vendaFiltroStatus) vendaFiltroStatus.addEventListener('change', renderVendas);
+    const vendaFiltroPagamento = document.getElementById('vendaFiltroPagamento'); if(vendaFiltroPagamento) vendaFiltroPagamento.addEventListener('change', renderVendas);
+    const vendaFiltroTipo = document.getElementById('vendaFiltroTipo'); if(vendaFiltroTipo) vendaFiltroTipo.addEventListener('change', renderVendas);
+    const consultarVendasModal = document.getElementById('consultarVendasModal');
+    if(consultarVendasModal) consultarVendasModal.addEventListener('click', e => { if(e.target === consultarVendasModal) fecharConsultarVendasTela(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') fecharConsultarVendasTela(); });
+    refreshVendaDateTime();
+    refreshAll();
+    abrirTelaProdutos('consulta');
+    limparVendaForm();
+    } catch (error) {
+      console.error('Erro na inicialização do sistema:', error);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
