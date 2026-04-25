@@ -1678,6 +1678,10 @@
 <script>
   const DB_KEY = 'extramed_clinica_vendas_v1';
 
+  // ── SUPABASE ──
+  const SUPABASE_URL = 'https://ftcokjikthnnegnsxliu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0Y29ramlrdGhubmVnbnN4bGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2MTUxMTMsImV4cCI6MjA2MTE5MTExM30.Ix0jbkKLPCpN4eFIGnHFoJMAlvYr0HBz_LPpqXHvtEc';
+
   const defaultDB = {
     clinicName: 'Extra Med Clínica de Especialidades',
     settings: {
@@ -1723,8 +1727,48 @@
     return structuredClone(defaultDB);
   }
 
+  function mergeDB(remote){
+    const base = structuredClone(defaultDB);
+    Object.keys(base).forEach(k => {
+      if(remote[k] !== undefined) base[k] = remote[k];
+    });
+    return base;
+  }
+
   function saveDB(){
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch(e){}
+    syncToSupabase();
+  }
+
+  async function syncToSupabase(){
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ key: DB_KEY, value: db })
+      });
+    } catch(e){ console.warn('Supabase sync falhou:', e); }
+  }
+
+  async function loadFromSupabase(){
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/app_data?key=eq.${DB_KEY}&select=value`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+      );
+      if(!res.ok) return;
+      const rows = await res.json();
+      if(rows.length && rows[0].value){
+        db = mergeDB(rows[0].value);
+        try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch(e){}
+        refreshAll();
+      }
+    } catch(e){ console.warn('Supabase load falhou:', e); }
   }
 
   function formatCurrency(value){
@@ -3191,10 +3235,14 @@
   }
 
   function resetarSistema(){
-    if(!confirm('Isso apagará todos os dados salvos neste navegador. Deseja continuar?')) return;
+    if(!confirm('Isso apagará todos os dados salvos neste navegador e na nuvem. Deseja continuar?')) return;
     localStorage.removeItem(DB_KEY);
     db = structuredClone(defaultDB);
     refreshAll();
+    fetch(`${SUPABASE_URL}/rest/v1/app_data?key=eq.${DB_KEY}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    }).catch(e => console.warn('Supabase reset falhou:', e));
   }
 
   function refreshAll(){
@@ -3272,6 +3320,7 @@
     refreshAll();
     abrirTelaProdutos('consulta');
     limparVendaForm();
+    loadFromSupabase();
     } catch (error) {
       console.error('Erro na inicialização do sistema:', error);
     }
