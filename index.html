@@ -3133,9 +3133,11 @@
   window.addEventListener('DOMContentLoaded', init);
 
   // ── LOGIN ──
-  const LOGIN_KEY = 'extramed_logged';
-  const VALID_USER = 'Extramed@';
-  const VALID_PASS = 'Extramed@';
+  const LOGIN_KEY   = 'extramed_logged';
+  const LOGIN_USER_KEY = 'extramed_login_user';
+  // Credencial mestre (fallback quando não há usuários cadastrados)
+  const MASTER_USER = 'Extramed@';
+  const MASTER_PASS = 'Extramed@';
 
   function checkLogin(){
     if(sessionStorage.getItem(LOGIN_KEY) !== '1'){
@@ -3149,8 +3151,17 @@
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
     const err  = document.getElementById('loginErr');
-    if(user === VALID_USER && pass === VALID_PASS){
+
+    // Busca usuário ativo com login e senha correspondentes
+    const matched = db.users.find(u =>
+      u.login === user && u.senha === pass && u.status === 'Ativo'
+    );
+    // Fallback: credencial mestre
+    const isMaster = (user === MASTER_USER && pass === MASTER_PASS);
+
+    if(matched || isMaster){
       sessionStorage.setItem(LOGIN_KEY, '1');
+      sessionStorage.setItem(LOGIN_USER_KEY, matched ? matched.nome : 'Administrador');
       document.getElementById('loginScreen').classList.add('hidden');
       err.style.display = 'none';
     } else {
