@@ -375,6 +375,27 @@
     }
     .login-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(155,28,62,.3)}
     .login-footer{margin-top:20px;font-size:12px;color:var(--gray)}
+    /* menu grupo colapsável */
+    .nav-group-btn{
+      width:100%;border:none;background:transparent;color:#fff;
+      text-align:left;padding:14px 14px;border-radius:14px;
+      margin-bottom:2px;cursor:pointer;font-size:14px;
+      transition:.2s ease;display:flex;justify-content:space-between;align-items:center;
+    }
+    .nav-group-btn:hover{background:rgba(255,255,255,.12);transform:translateX(3px)}
+    .nav-group-btn.open{background:rgba(255,255,255,.1)}
+    .nav-group-arrow{font-size:11px;transition:transform .25s;display:inline-block}
+    .nav-group-btn.open .nav-group-arrow{transform:rotate(90deg)}
+    .nav-submenu{
+      max-height:0;overflow:hidden;
+      transition:max-height .3s ease;
+      padding-left:14px;margin-bottom:2px;
+    }
+    .nav-submenu.open{max-height:200px}
+    .nav-submenu .nav-btn{
+      font-size:13px;padding:10px 14px;margin-bottom:4px;
+      border-left:2px solid rgba(255,255,255,.2);border-radius:0 10px 10px 0;
+    }
     /* logout btn na sidebar */
     .logout-btn{
       width:100%;border:none;background:rgba(255,255,255,.1);
@@ -436,9 +457,17 @@
       <button class="nav-btn" data-target="vendas" onclick="showMainSection('vendas', this, 'Vendas')">Vendas</button>
       <button class="nav-btn" data-target="repasse" onclick="showMainSection('repasse', this, 'Repasse Médico')">Repasse Médico</button>
       <button class="nav-btn" data-target="produtividade" onclick="showMainSection('produtividade', this, 'Produtividade')">Produtividade</button>
-      <button class="nav-btn" data-target="pacientes" onclick="showMainSection('pacientes', this, 'Pacientes')">Paciente</button>
-      <button class="nav-btn" data-target="medicos" onclick="showMainSection('medicos', this, 'Médicos')">Médicos</button>
-      <button class="nav-btn" data-target="produtos" onclick="showMainSection('produtos', this, 'Produtos')">Produtos</button>
+
+      <!-- Grupo: Cadastros -->
+      <button class="nav-group-btn" id="cadastrosGroupBtn" onclick="toggleNavGroup()">
+        Cadastros <span class="nav-group-arrow">&#9658;</span>
+      </button>
+      <div class="nav-submenu" id="cadastrosSubmenu">
+        <button class="nav-btn" data-target="pacientes" onclick="showMainSection('pacientes', this, 'Pacientes')">Pacientes</button>
+        <button class="nav-btn" data-target="medicos" onclick="showMainSection('medicos', this, 'Médicos')">Médicos</button>
+        <button class="nav-btn" data-target="produtos" onclick="showMainSection('produtos', this, 'Produtos')">Produtos</button>
+      </div>
+
       <button class="nav-btn" data-target="financeiro" onclick="showMainSection('financeiro', this, 'Financeiro')">Financeiro</button>
       <button class="nav-btn" data-target="cancelamentos" id="cancelamentosMenuBtn" style="display:none" onclick="showMainSection('cancelamentos', this, 'Cancelamentos')">Cancelamentos</button>
       <button class="nav-btn" data-target="configuracoes" onclick="showMainSection('configuracoes', this, 'Configurações')">Configurações</button>
@@ -3148,6 +3177,28 @@
   }
 
   window.addEventListener('DOMContentLoaded', init);
+
+  // ── MENU CADASTROS (colapsável) ──
+  const CADASTROS_TARGETS = ['pacientes','medicos','produtos'];
+
+  function toggleNavGroup(){
+    const btn = document.getElementById('cadastrosGroupBtn');
+    const sub = document.getElementById('cadastrosSubmenu');
+    const open = sub.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+
+  function openCadastrosGroup(){
+    document.getElementById('cadastrosSubmenu').classList.add('open');
+    document.getElementById('cadastrosGroupBtn').classList.add('open');
+  }
+
+  // Sobrescreve showMainSection para abrir o grupo quando necessário
+  const _origShowMainSection = showMainSection;
+  showMainSection = function(target, btn, title){
+    if(CADASTROS_TARGETS.includes(target)) openCadastrosGroup();
+    _origShowMainSection(target, btn, title);
+  };
 
   // ── LOGIN ──
   const LOGIN_KEY   = 'extramed_logged';
