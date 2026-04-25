@@ -375,6 +375,10 @@
     }
     .login-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(155,28,62,.3)}
     .login-footer{margin-top:20px;font-size:12px;color:var(--gray)}
+    /* campo obrigatório inválido */
+    .campo-invalido{border-color:#dc2626 !important;background:#fff5f5 !important;box-shadow:0 0 0 3px rgba(220,38,38,.12) !important;}
+    .campo-invalido:focus{border-color:#dc2626 !important;}
+    label.req::after{content:" *";color:#dc2626;font-size:11px;}
     /* painel de permissões */
     .perm-panel{background:#fff5f7;border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
     .perm-panel-title{font-size:13px;font-weight:bold;color:var(--wine);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
@@ -909,7 +913,7 @@
             </div>
             <div>
               <label>Estado</label>
-              <input id="pacienteEstado" maxlength="2" />
+              <select id="pacienteEstado"></select>
             </div>
             <div>
               <label>CEP</label>
@@ -984,29 +988,47 @@
           <input type="hidden" id="medicoId" />
           <div class="row row-2">
             <div>
-              <label>Nome do médico</label>
-              <input id="medicoNome" placeholder="Ex.: Dr. João Silva" />
+              <label class="req">Nome do médico</label>
+              <input id="medicoNome" placeholder="Ex.: Dr. João Silva" oninput="limparInvalido(this)" />
             </div>
             <div>
-              <label>Especialidade</label>
-              <select id="medicoEspecialidade"></select>
+              <label class="req">Especialidade</label>
+              <select id="medicoEspecialidade" onchange="limparInvalido(this)"></select>
             </div>
           </div>
           <div class="row row-4">
             <div>
-              <label>CRM</label>
-              <input id="medicoCRM" placeholder="Ex.: 123456" />
+              <label class="req">CPF</label>
+              <input id="medicoCPF" placeholder="000.000.000-00" oninput="limparInvalido(this)" />
             </div>
             <div>
-              <label>UF</label>
-              <input id="medicoUF" maxlength="2" placeholder="Ex.: ES" />
+              <label class="req">Data de nascimento</label>
+              <input id="medicoNascimento" type="date" oninput="limparInvalido(this)" />
+            </div>
+            <div>
+              <label class="req">E-mail</label>
+              <input id="medicoEmail" type="email" placeholder="medico@email.com" oninput="limparInvalido(this)" />
+            </div>
+            <div>
+              <label class="req">Telefone</label>
+              <input id="medicoTelefone" placeholder="(00) 00000-0000" oninput="limparInvalido(this)" />
+            </div>
+          </div>
+          <div class="row row-4">
+            <div>
+              <label class="req">CRM</label>
+              <input id="medicoCRM" placeholder="Ex.: 123456" oninput="limparInvalido(this)" />
+            </div>
+            <div>
+              <label class="req">UF</label>
+              <select id="medicoUF" onchange="limparInvalido(this)"></select>
             </div>
             <div>
               <label>RQE</label>
               <input id="medicoRQE" placeholder="Ex.: 78910" />
             </div>
             <div>
-              <label>Status</label>
+              <label class="req">Status</label>
               <select id="medicoStatus">
                 <option value="Ativo">Ativo</option>
                 <option value="Inativo">Inativo</option>
@@ -1015,8 +1037,8 @@
           </div>
           <div class="row row-2">
             <div>
-              <label>Período inicial da vigência</label>
-              <input id="medicoVigenciaInicial" type="date" />
+              <label class="req">Período inicial da vigência</label>
+              <input id="medicoVigenciaInicial" type="date" oninput="limparInvalido(this)" />
             </div>
             <div>
               <label>Período final da vigência</label>
@@ -1025,16 +1047,16 @@
           </div>
           <div class="row row-3">
             <div>
-              <label>Percentual sobre o lucro (%)</label>
-              <input id="medicoPercentualLucro" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 30" />
+              <label class="req">Percentual sobre o lucro (%)</label>
+              <input id="medicoPercentualLucro" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 30" oninput="limparInvalido(this)" />
             </div>
             <div>
-              <label>Percentual sobre consulta (%)</label>
-              <input id="medicoPercentualConsulta" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 10" />
+              <label class="req">Percentual sobre consulta (%)</label>
+              <input id="medicoPercentualConsulta" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 10" oninput="limparInvalido(this)" />
             </div>
             <div>
-              <label>Percentual sobre exame (%)</label>
-              <input id="medicoPercentualExame" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 15" />
+              <label class="req">Percentual sobre exame (%)</label>
+              <input id="medicoPercentualExame" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 15" oninput="limparInvalido(this)" />
             </div>
           </div>
           <div class="actions">
@@ -2240,35 +2262,50 @@
   }
 
   function limparMedicoForm(){
-    ['medicoId','medicoNome','medicoCRM','medicoUF','medicoRQE','medicoVigenciaInicial','medicoVigenciaFinal','medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'].forEach(id => document.getElementById(id).value = '');
+    ['medicoId','medicoNome','medicoCPF','medicoNascimento','medicoEmail','medicoTelefone',
+     'medicoCRM','medicoRQE','medicoVigenciaInicial','medicoVigenciaFinal',
+     'medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'
+    ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; el?.classList.remove('campo-invalido'); });
+    const uf = document.getElementById('medicoUF'); if(uf){ uf.innerHTML = buildUFOptions(); uf.classList.remove('campo-invalido'); }
     document.getElementById('medicoEspecialidade').value = '';
     document.getElementById('medicoStatus').value = 'Ativo';
   }
 
   function salvarMedico(){
     const id = document.getElementById('medicoId').value;
-    const nome = document.getElementById('medicoNome').value.trim();
-    const especialidade = document.getElementById('medicoEspecialidade').value.trim();
-    const crm = document.getElementById('medicoCRM').value.trim();
-    const uf = document.getElementById('medicoUF').value.trim().toUpperCase();
-    const rqe = document.getElementById('medicoRQE').value.trim();
-    const status = document.getElementById('medicoStatus').value;
-    const vigenciaInicial = document.getElementById('medicoVigenciaInicial').value;
-    const vigenciaFinal = document.getElementById('medicoVigenciaFinal').value;
-    const percentualLucro = Number(document.getElementById('medicoPercentualLucro').value);
-    const percentualConsulta = Number(document.getElementById('medicoPercentualConsulta').value);
-    const percentualExame = Number(document.getElementById('medicoPercentualExame').value);
 
-    if(!nome || !especialidade || !crm || !uf || !vigenciaInicial || !vigenciaFinal || [percentualLucro,percentualConsulta,percentualExame].some(v => isNaN(v) || v < 0 || v > 100)){
-      alert('Preencha corretamente os dados do médico.');
+    const camposObrigatorios = [
+      'medicoNome','medicoEspecialidade','medicoCPF','medicoNascimento',
+      'medicoEmail','medicoTelefone','medicoCRM','medicoUF',
+      'medicoVigenciaInicial','medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'
+    ];
+    if(marcarInvalidos(camposObrigatorios)){
+      document.querySelector('#medicosCadastrarView .campo-invalido')?.scrollIntoView({behavior:'smooth',block:'center'});
       return;
     }
-    if(vigenciaFinal < vigenciaInicial){
+
+    const nome           = document.getElementById('medicoNome').value.trim();
+    const especialidade  = document.getElementById('medicoEspecialidade').value.trim();
+    const cpf            = document.getElementById('medicoCPF').value.trim();
+    const nascimento     = document.getElementById('medicoNascimento').value;
+    const email          = document.getElementById('medicoEmail').value.trim();
+    const telefone       = document.getElementById('medicoTelefone').value.trim();
+    const crm            = document.getElementById('medicoCRM').value.trim();
+    const uf             = document.getElementById('medicoUF').value;
+    const rqe            = document.getElementById('medicoRQE').value.trim();
+    const status         = document.getElementById('medicoStatus').value;
+    const vigenciaInicial   = document.getElementById('medicoVigenciaInicial').value;
+    const vigenciaFinal     = document.getElementById('medicoVigenciaFinal').value;
+    const percentualLucro   = Number(document.getElementById('medicoPercentualLucro').value);
+    const percentualConsulta= Number(document.getElementById('medicoPercentualConsulta').value);
+    const percentualExame   = Number(document.getElementById('medicoPercentualExame').value);
+
+    if(vigenciaFinal && vigenciaFinal < vigenciaInicial){
       alert('O período final da vigência não pode ser menor que o período inicial.');
       return;
     }
 
-    const payload = {id:id || uid(), nome, especialidade, crm, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualLucro, percentualConsulta, percentualExame, percentual: percentualLucro};
+    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, crm, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualLucro, percentualConsulta, percentualExame, percentual: percentualLucro};
 
     if(id){
       db.doctors = db.doctors.map(m => m.id === id ? payload : m);
@@ -2284,18 +2321,23 @@
   function editarMedico(id){
     const m = db.doctors.find(x => x.id === id);
     if(!m) return;
-    document.getElementById('medicoId').value = m.id;
-    document.getElementById('medicoNome').value = m.nome;
+    document.getElementById('medicoId').value           = m.id;
+    document.getElementById('medicoNome').value          = m.nome;
     document.getElementById('medicoEspecialidade').value = m.especialidade || '';
-    document.getElementById('medicoCRM').value = m.crm || '';
-    document.getElementById('medicoUF').value = m.uf || '';
-    document.getElementById('medicoRQE').value = m.rqe || '';
-    document.getElementById('medicoStatus').value = m.status;
-    document.getElementById('medicoVigenciaInicial').value = m.vigenciaInicial || '';
-    document.getElementById('medicoVigenciaFinal').value = m.vigenciaFinal || '';
-    document.getElementById('medicoPercentualLucro').value = m.percentualLucro ?? m.percentual ?? '';
+    document.getElementById('medicoCPF').value           = m.cpf || '';
+    document.getElementById('medicoNascimento').value    = m.nascimento || '';
+    document.getElementById('medicoEmail').value         = m.email || '';
+    document.getElementById('medicoTelefone').value      = m.telefone || '';
+    document.getElementById('medicoCRM').value           = m.crm || '';
+    const ufEl = document.getElementById('medicoUF');
+    ufEl.innerHTML = buildUFOptions(m.uf || '');
+    document.getElementById('medicoRQE').value           = m.rqe || '';
+    document.getElementById('medicoStatus').value        = m.status;
+    document.getElementById('medicoVigenciaInicial').value  = m.vigenciaInicial || '';
+    document.getElementById('medicoVigenciaFinal').value    = m.vigenciaFinal || '';
+    document.getElementById('medicoPercentualLucro').value  = m.percentualLucro ?? m.percentual ?? '';
     document.getElementById('medicoPercentualConsulta').value = m.percentualConsulta ?? '';
-    document.getElementById('medicoPercentualExame').value = m.percentualExame ?? '';
+    document.getElementById('medicoPercentualExame').value  = m.percentualExame ?? '';
     document.querySelectorAll('#medicosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#medicosSubnav .subnav-btn[data-medicos-view="cadastrar"]'); if(btn) btn.classList.add('active');
     document.querySelectorAll('#medicos .subview').forEach(v => v.classList.remove('active'));
@@ -2480,7 +2522,7 @@
     const numero = document.getElementById('pacienteNumero').value.trim();
     const bairro = document.getElementById('pacienteBairro').value.trim();
     const cidade = document.getElementById('pacienteCidade').value.trim();
-    const estado = document.getElementById('pacienteEstado').value.trim().toUpperCase();
+    const estado = document.getElementById('pacienteEstado').value;
     const cep = formatCEP(document.getElementById('pacienteCEP').value.trim());
     const telefone = formatTelefone(document.getElementById('pacienteTelefone').value.trim());
     const nascimento = document.getElementById('pacienteNascimento').value;
@@ -2526,7 +2568,8 @@
     document.getElementById('pacienteNumero').value = p.numero || '';
     document.getElementById('pacienteBairro').value = p.bairro || '';
     document.getElementById('pacienteCidade').value = p.cidade || '';
-    document.getElementById('pacienteEstado').value = p.estado || '';
+    const peEl = document.getElementById('pacienteEstado');
+    peEl.innerHTML = buildUFOptions(p.estado || '');
     document.getElementById('pacienteCEP').value = p.cep || '';
     document.getElementById('pacienteTelefone').value = p.telefone || '';
     document.getElementById('pacienteNascimento').value = p.nascimento || '';
@@ -3151,6 +3194,8 @@
     setupSubnav('configuracoesSubnav', 'data-configuracoes-view', 'configuracoes');
     setupSubnav('usuariosSubnav', 'data-usuarios-view', 'usuarios');
     document.getElementById('todayBadge').textContent = 'Hoje: ' + todayStr();
+    initUFSelects();
+    renderPermissoesGrid();
     renderCategoryOptions();
     document.getElementById('produtoCusto').addEventListener('input', calculateProductProfit);
     document.getElementById('produtoVenda').addEventListener('input', calculateProductProfit);
@@ -3203,6 +3248,45 @@
   }
 
   window.addEventListener('DOMContentLoaded', init);
+
+  // ── UF E VALIDAÇÃO VISUAL ──
+  const UF_LIST = [
+    ['AC','Acre'],['AL','Alagoas'],['AP','Amapá'],['AM','Amazonas'],
+    ['BA','Bahia'],['CE','Ceará'],['DF','Distrito Federal'],['ES','Espírito Santo'],
+    ['GO','Goiás'],['MA','Maranhão'],['MT','Mato Grosso'],['MS','Mato Grosso do Sul'],
+    ['MG','Minas Gerais'],['PA','Pará'],['PB','Paraíba'],['PR','Paraná'],
+    ['PE','Pernambuco'],['PI','Piauí'],['RJ','Rio de Janeiro'],['RN','Rio Grande do Norte'],
+    ['RS','Rio Grande do Sul'],['RO','Rondônia'],['RR','Roraima'],['SC','Santa Catarina'],
+    ['SP','São Paulo'],['SE','Sergipe'],['TO','Tocantins']
+  ];
+
+  function buildUFOptions(selectedValue = ''){
+    return '<option value="">Selecione</option>' +
+      UF_LIST.map(([sigla, nome]) =>
+        `<option value="${sigla}"${selectedValue === sigla ? ' selected' : ''}>${sigla} — ${nome}</option>`
+      ).join('');
+  }
+
+  function initUFSelects(){
+    ['medicoUF','pacienteEstado'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el && el.tagName === 'SELECT') el.innerHTML = buildUFOptions();
+    });
+  }
+
+  function limparInvalido(el){ el.classList.remove('campo-invalido'); }
+
+  function marcarInvalidos(ids){
+    let algumInvalido = false;
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      const vazio = el.tagName === 'SELECT' ? !el.value : !el.value.trim();
+      if(vazio){ el.classList.add('campo-invalido'); algumInvalido = true; }
+      else { el.classList.remove('campo-invalido'); }
+    });
+    return algumInvalido;
+  }
 
   // ── PERMISSÕES ──
   const SYSTEM_SECTIONS = [
