@@ -1442,11 +1442,12 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Nome</th>
+                    <th>Nome de usuário</th>
+                    <th>Cargo</th>
                     <th>Perfil</th>
                     <th>Login</th>
                     <th>Status</th>
-                    <th>Senha gerencial</th>
+                    <th>Senha</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -1460,22 +1461,23 @@
             <input type="hidden" id="usuarioId" />
             <div class="row row-2">
               <div>
-                <label>Nome do usuário</label>
+                <label>Nome de usuário</label>
                 <input id="usuarioNome" placeholder="Ex.: Maria Souza" />
               </div>
+              <div>
+                <label>Cargo</label>
+                <input id="usuarioCargo" placeholder="Ex.: Recepcionista" />
+              </div>
+            </div>
+            <div class="row row-3">
               <div>
                 <label>Perfil</label>
                 <select id="usuarioPerfil">
                   <option value="Administrador">Administrador</option>
                   <option value="Gerente">Gerente</option>
-                  <option value="Vendas">Vendas</option>
+                  <option value="Secretária">Secretária</option>
+                  <option value="Médico">Médico</option>
                 </select>
-              </div>
-            </div>
-            <div class="row row-3">
-              <div>
-                <label>Login</label>
-                <input id="usuarioLogin" placeholder="Ex.: maria.souza" />
               </div>
               <div>
                 <label>Status</label>
@@ -1484,12 +1486,19 @@
                   <option value="Inativo">Inativo</option>
                 </select>
               </div>
+              <div></div>
+            </div>
+            <div class="row row-2">
               <div>
-                <label>Senha gerencial / administrativa</label>
-                <input id="usuarioSenha" type="password" placeholder="Obrigatória para Gerente/Administrador" />
+                <label>Login</label>
+                <input id="usuarioLogin" placeholder="Ex.: maria.souza" autocomplete="off" />
+              </div>
+              <div>
+                <label>Senha</label>
+                <input id="usuarioSenha" type="password" placeholder="Senha de acesso ao sistema" autocomplete="new-password" />
               </div>
             </div>
-            <div class="helper-text" style="margin-bottom:12px">A senha é usada para autorizar exclusão de venda, cancelamentos e estornos.</div>
+            <div class="helper-text" style="margin-bottom:12px">Login e senha são usados para entrar no sistema e para autorizações gerenciais.</div>
             <div class="actions">
               <button class="btn btn-primary" onclick="salvarUsuario()">Salvar usuário</button>
               <button class="btn btn-light" onclick="limparUsuarioForm()">Limpar</button>
@@ -2277,33 +2286,39 @@
   }
 
   function limparUsuarioForm(){
-    ['usuarioId','usuarioNome','usuarioLogin','usuarioSenha'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('usuarioPerfil').value = 'Vendas';
+    ['usuarioId','usuarioNome','usuarioCargo','usuarioLogin','usuarioSenha'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+    document.getElementById('usuarioPerfil').value = 'Secretária';
     document.getElementById('usuarioStatus').value = 'Ativo';
   }
 
   function salvarUsuario(){
-    const id = document.getElementById('usuarioId').value;
-    const nome = document.getElementById('usuarioNome').value.trim();
-    const perfil = document.getElementById('usuarioPerfil').value;
+    const id    = document.getElementById('usuarioId').value;
+    const nome  = document.getElementById('usuarioNome').value.trim();
+    const cargo = document.getElementById('usuarioCargo').value.trim();
+    const perfil= document.getElementById('usuarioPerfil').value;
     const login = document.getElementById('usuarioLogin').value.trim();
-    const status = document.getElementById('usuarioStatus').value;
+    const status= document.getElementById('usuarioStatus').value;
     const senha = document.getElementById('usuarioSenha').value;
 
     if(!nome || !perfil || !login){
-      alert('Preencha corretamente os dados do usuário.');
+      alert('Preencha Nome de usuário, Perfil e Login.');
       return;
     }
-    if(['Administrador','Gerente'].includes(perfil) && !senha && !id){
-      alert('Administrador e Gerente precisam de senha para autorizações.');
+    if(!senha && !id){
+      alert('Informe a senha de acesso ao sistema.');
       return;
     }
 
     const existing = db.users.find(u => u.id === id);
-    const payload = {id:id || uid(), nome, perfil, login, status, senha: senha || existing?.senha || ''};
+    const loginDup = db.users.find(u => u.login === login && u.id !== id);
+    if(loginDup){ alert('Esse login já está em uso por outro usuário.'); return; }
+
+    const payload = { id: id || uid(), nome, cargo, perfil, login, status, senha: senha || existing?.senha || '' };
 
     if(id){ db.users = db.users.map(u => u.id === id ? payload : u); }
-    else { db.users.push(payload); }
+    else   { db.users.push(payload); }
 
     saveDB(); limparUsuarioForm(); refreshAll();
   }
@@ -2311,11 +2326,12 @@
   function editarUsuario(id){
     const u = db.users.find(x => x.id === id);
     if(!u) return;
-    document.getElementById('usuarioId').value = u.id;
-    document.getElementById('usuarioNome').value = u.nome;
-    document.getElementById('usuarioPerfil').value = u.perfil;
+    document.getElementById('usuarioId').value    = u.id;
+    document.getElementById('usuarioNome').value  = u.nome;
+    document.getElementById('usuarioCargo').value = u.cargo || '';
+    document.getElementById('usuarioPerfil').value= u.perfil;
     document.getElementById('usuarioLogin').value = u.login;
-    document.getElementById('usuarioStatus').value = u.status;
+    document.getElementById('usuarioStatus').value= u.status;
     document.getElementById('usuarioSenha').value = u.senha || '';
     document.querySelectorAll('#usuariosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#usuariosSubnav .subnav-btn[data-usuarios-view="cadastrar"]'); if(btn) btn.classList.add('active');
@@ -2334,15 +2350,16 @@
     const busca = (document.getElementById('usuarioBusca')?.value || '').toLowerCase();
     const filtroStatus = document.getElementById('usuarioFiltroStatus')?.value || '';
     const items = db.users.filter(u => {
-      const okBusca = [u.nome,u.perfil,u.login,u.status].join(' ').toLowerCase().includes(busca);
+      const okBusca = [u.nome,u.cargo,u.perfil,u.login,u.status].join(' ').toLowerCase().includes(busca);
       const okStatus = !filtroStatus || u.status === filtroStatus;
       return okBusca && okStatus;
     });
     tbody.innerHTML = items.length ? items.map(u => `
       <tr>
-        <td>${u.nome}</td>
-        <td>${u.perfil}</td>
-        <td>${u.login}</td>
+        <td>${escapeHtml(u.nome)}</td>
+        <td>${escapeHtml(u.cargo || '-')}</td>
+        <td>${escapeHtml(u.perfil)}</td>
+        <td>${escapeHtml(u.login)}</td>
         <td>${u.status}</td>
         <td>${u.senha ? '••••••' : '-'}</td>
         <td>
@@ -2350,7 +2367,7 @@
           <button class="btn btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="6" class="empty">Nenhum usuário cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="7" class="empty">Nenhum usuário cadastrado.</td></tr>`;
     updateProtectedMenuVisibility();
   }
 
