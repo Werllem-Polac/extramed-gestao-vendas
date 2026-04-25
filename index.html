@@ -495,7 +495,10 @@
         <h2 id="sectionTitle">Dashboard</h2>
         <p>Sistema gerencial para controle comercial, lucratividade e repasse médico.</p>
       </div>
-      <div class="badge" id="todayBadge"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="syncStatus" style="font-size:11px;font-weight:600;letter-spacing:.4px;"></span>
+        <div class="badge" id="todayBadge"></div>
+      </div>
     </div>
 
     <section class="section active" id="dashboard">
@@ -1680,7 +1683,7 @@
 
   // ── SUPABASE ──
   const SUPABASE_URL = 'https://ftcokjikthnnegnsxliu.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0Y29ramlrdGhubmVnbnN4bGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU2MTUxMTMsImV4cCI6MjA2MTE5MTExM30.Ix0jbkKLPCpN4eFIGnHFoJMAlvYr0HBz_LPpqXHvtEc';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0Y29ramlrdGhubmVnbnN4bGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTk1MDMsImV4cCI6MjA5MjczNTUwM30.qd9aiV16f2QPQbk7CufQpZYgIa6NvHwQgvq_Uyj1jhs';
 
   const defaultDB = {
     clinicName: 'Extra Med Clínica de Especialidades',
@@ -1740,9 +1743,18 @@
     syncToSupabase();
   }
 
+  function setSyncStatus(status){
+    const el = document.getElementById('syncStatus');
+    if(!el) return;
+    if(status === 'ok'){ el.textContent = '☁ Nuvem'; el.style.color = '#4caf50'; }
+    else if(status === 'err'){ el.textContent = '⚠ Sem nuvem'; el.style.color = '#e57373'; }
+    else { el.textContent = '↑ Salvando…'; el.style.color = '#C9A84C'; }
+  }
+
   async function syncToSupabase(){
+    setSyncStatus('saving');
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY,
@@ -1752,7 +1764,14 @@
         },
         body: JSON.stringify({ key: DB_KEY, value: db })
       });
-    } catch(e){ console.warn('Supabase sync falhou:', e); }
+      if(res.ok || res.status === 201 || res.status === 200){
+        setSyncStatus('ok');
+      } else {
+        const txt = await res.text();
+        console.warn('Supabase sync erro HTTP', res.status, txt);
+        setSyncStatus('err');
+      }
+    } catch(e){ console.warn('Supabase sync falhou:', e); setSyncStatus('err'); }
   }
 
   async function loadFromSupabase(){
@@ -1761,14 +1780,15 @@
         `${SUPABASE_URL}/rest/v1/app_data?key=eq.${DB_KEY}&select=value`,
         { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
       );
-      if(!res.ok) return;
+      if(!res.ok){ console.warn('Supabase load erro HTTP', res.status); setSyncStatus('err'); return; }
       const rows = await res.json();
       if(rows.length && rows[0].value){
         db = mergeDB(rows[0].value);
         try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch(e){}
         refreshAll();
       }
-    } catch(e){ console.warn('Supabase load falhou:', e); }
+      setSyncStatus('ok');
+    } catch(e){ console.warn('Supabase load falhou:', e); setSyncStatus('err'); }
   }
 
   function formatCurrency(value){
