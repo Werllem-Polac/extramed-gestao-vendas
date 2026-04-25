@@ -478,7 +478,7 @@
       </button>
       <div class="nav-submenu" id="cadastrosSubmenu">
         <button class="nav-btn" data-target="pacientes" onclick="showMainSection('pacientes', this, 'Pacientes')">Pacientes</button>
-        <button class="nav-btn" data-target="medicos" onclick="showMainSection('medicos', this, 'Médicos')">Médicos</button>
+        <button class="nav-btn" data-target="medicos" onclick="showMainSection('medicos', this, 'Profissionais')">Profissionais</button>
         <button class="nav-btn" data-target="produtos" onclick="showMainSection('produtos', this, 'Produtos')">Produtos</button>
       </div>
 
@@ -941,17 +941,17 @@
     <section class="section" id="medicos">
       <div class="card">
         <div class="subnav" id="medicosSubnav">
-          <button class="subnav-btn active" data-medicos-view="consultar">Consultar Médicos</button>
-          <button class="subnav-btn" data-medicos-view="cadastrar">Cadastrar Médico</button>
+          <button class="subnav-btn active" data-medicos-view="consultar">Consultar Profissionais</button>
+          <button class="subnav-btn" data-medicos-view="cadastrar">Cadastrar Profissional</button>
           <button class="subnav-btn" data-medicos-view="especialidades">Cadastrar Especialidade</button>
         </div>
 
         <div class="subview active" id="medicosConsultarView">
-          <h3>Consultar Médicos</h3>
+          <h3>Consultar Profissionais</h3>
           <div class="row row-2">
             <div>
               <label>Pesquisar médico</label>
-              <input id="medicoBusca" placeholder="Buscar por nome, especialidade, CRM, UF, RQE ou status" />
+              <input id="medicoBusca" placeholder="Buscar por nome, especialidade, conselho, UF ou status" />
             </div>
             <div>
               <label>Filtrar por status</label>
@@ -968,7 +968,7 @@
                 <tr>
                   <th>Nome</th>
                   <th>Especialidade</th>
-                  <th>CRM/UF</th>
+                  <th>Conselho/UF</th>
                   <th>RQE</th>
                   <th>Status</th>
                   <th>Vigência</th>
@@ -1016,8 +1016,18 @@
           </div>
           <div class="row row-4">
             <div>
-              <label class="req">CRM</label>
-              <input id="medicoCRM" placeholder="Ex.: 123456" oninput="limparInvalido(this)" />
+              <label class="req">Conselho</label>
+              <select id="medicoConselho" onchange="limparInvalido(this)">
+                <option value="">Selecione</option>
+                <option value="CRM">CRM</option>
+                <option value="COREN">COREN</option>
+                <option value="CRN">CRN</option>
+                <option value="CRP">CRP</option>
+              </select>
+            </div>
+            <div>
+              <label class="req">Número do conselho</label>
+              <input id="medicoNumConselho" placeholder="Ex.: 123456" oninput="limparInvalido(this)" />
             </div>
             <div>
               <label class="req">UF</label>
@@ -2263,10 +2273,11 @@
 
   function limparMedicoForm(){
     ['medicoId','medicoNome','medicoCPF','medicoNascimento','medicoEmail','medicoTelefone',
-     'medicoCRM','medicoRQE','medicoVigenciaInicial','medicoVigenciaFinal',
+     'medicoNumConselho','medicoRQE','medicoVigenciaInicial','medicoVigenciaFinal',
      'medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'
     ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; el?.classList.remove('campo-invalido'); });
     const uf = document.getElementById('medicoUF'); if(uf){ uf.innerHTML = buildUFOptions(); uf.classList.remove('campo-invalido'); }
+    document.getElementById('medicoConselho').value = '';
     document.getElementById('medicoEspecialidade').value = '';
     document.getElementById('medicoStatus').value = 'Ativo';
   }
@@ -2276,7 +2287,7 @@
 
     const camposObrigatorios = [
       'medicoNome','medicoEspecialidade','medicoCPF','medicoNascimento',
-      'medicoEmail','medicoTelefone','medicoCRM','medicoUF',
+      'medicoEmail','medicoTelefone','medicoConselho','medicoNumConselho','medicoUF',
       'medicoVigenciaInicial','medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'
     ];
     if(marcarInvalidos(camposObrigatorios)){
@@ -2290,7 +2301,8 @@
     const nascimento     = document.getElementById('medicoNascimento').value;
     const email          = document.getElementById('medicoEmail').value.trim();
     const telefone       = document.getElementById('medicoTelefone').value.trim();
-    const crm            = document.getElementById('medicoCRM').value.trim();
+    const conselho       = document.getElementById('medicoConselho').value;
+    const numConselho    = document.getElementById('medicoNumConselho').value.trim();
     const uf             = document.getElementById('medicoUF').value;
     const rqe            = document.getElementById('medicoRQE').value.trim();
     const status         = document.getElementById('medicoStatus').value;
@@ -2305,7 +2317,7 @@
       return;
     }
 
-    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, crm, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualLucro, percentualConsulta, percentualExame, percentual: percentualLucro};
+    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, conselho, numConselho, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualLucro, percentualConsulta, percentualExame, percentual: percentualLucro};
 
     if(id){
       db.doctors = db.doctors.map(m => m.id === id ? payload : m);
@@ -2328,7 +2340,8 @@
     document.getElementById('medicoNascimento').value    = m.nascimento || '';
     document.getElementById('medicoEmail').value         = m.email || '';
     document.getElementById('medicoTelefone').value      = m.telefone || '';
-    document.getElementById('medicoCRM').value           = m.crm || '';
+    document.getElementById('medicoConselho').value    = m.conselho || (m.crm ? 'CRM' : '');
+    document.getElementById('medicoNumConselho').value = m.numConselho || m.crm || '';
     const ufEl = document.getElementById('medicoUF');
     ufEl.innerHTML = buildUFOptions(m.uf || '');
     document.getElementById('medicoRQE').value           = m.rqe || '';
@@ -2356,7 +2369,7 @@
     const busca = (document.getElementById('medicoBusca')?.value || '').toLowerCase();
     const filtroStatus = document.getElementById('medicoFiltroStatus')?.value || '';
     const items = db.doctors.filter(m => {
-      const okBusca = [m.nome,m.especialidade,m.crm,m.uf,m.rqe,m.status].join(' ').toLowerCase().includes(busca);
+      const okBusca = [m.nome,m.especialidade,m.conselho,m.numConselho,m.crm,m.uf,m.rqe,m.status].join(' ').toLowerCase().includes(busca);
       const okStatus = !filtroStatus || m.status === filtroStatus;
       return okBusca && okStatus;
     });
@@ -2364,7 +2377,7 @@
       <tr>
         <td>${m.nome}</td>
         <td>${m.especialidade || '-'}</td>
-        <td>${m.crm || '-'}${m.uf ? '/' + m.uf : ''}</td>
+        <td>${m.conselho || (m.crm ? 'CRM' : '-')} ${m.numConselho || m.crm || ''}${m.uf ? '/' + m.uf : ''}</td>
         <td>${m.rqe || '-'}</td>
         <td>${m.status}</td>
         <td>${m.vigenciaInicial ? new Date(m.vigenciaInicial + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}${m.vigenciaFinal ? ' até ' + new Date(m.vigenciaFinal + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
@@ -3295,7 +3308,7 @@
     { id:'repasse',       label:'Repasse Médico'  },
     { id:'produtividade', label:'Produtividade'   },
     { id:'pacientes',     label:'Pacientes'       },
-    { id:'medicos',       label:'Médicos'         },
+    { id:'medicos',       label:'Profissionais'   },
     { id:'produtos',      label:'Produtos'        },
     { id:'financeiro',    label:'Financeiro'      },
     { id:'cancelamentos', label:'Cancelamentos'   },
