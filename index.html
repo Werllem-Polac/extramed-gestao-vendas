@@ -6,25 +6,26 @@
   <title>Extra Med Clínica de Especialidades | Gestão de Vendas</title>
   <style>
     :root{
-      --gold:#c9a227;
+      --wine:#9B1C3E;
+      --wine-dark:#750F2D;
+      --wine-light:#B52248;
+      --gold:#C9A84C;
       --gold-dark:#9e7b10;
-      --purple:#5f2b8c;
-      --purple-dark:#40185f;
       --white:#ffffff;
-      --soft:#f7f4fb;
+      --soft:#F5F0F2;
       --gray:#6b7280;
-      --border:#e8ddf4;
+      --border:#e8d8de;
       --success:#0f9d58;
       --danger:#c62828;
       --warning:#b7791f;
-      --shadow: 0 10px 30px rgba(95,43,140,.12);
+      --shadow: 0 10px 30px rgba(155,28,62,.12);
       --radius:18px;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
-      background:linear-gradient(135deg,#fbf7ff 0%, #ffffff 38%, #fff9ea 100%);
+      background:linear-gradient(135deg,#fff5f7 0%, #ffffff 38%, #fff9ea 100%);
       color:#24152f;
     }
     .app{
@@ -33,7 +34,7 @@
       min-height:100vh;
     }
     aside{
-      background:linear-gradient(180deg,var(--purple) 0%, var(--purple-dark) 100%);
+      background:linear-gradient(180deg,var(--wine) 0%, var(--wine-dark) 100%);
       color:#fff;
       padding:24px 18px;
       position:sticky;
@@ -103,7 +104,7 @@
     }
     .topbar h2{
       margin:0;
-      color:var(--purple);
+      color:var(--wine);
       font-size:28px;
     }
     .topbar p{
@@ -137,7 +138,7 @@
     }
     .card h3{
       margin:0 0 14px;
-      color:var(--purple);
+      color:var(--wine);
       font-size:18px;
     }
     label{
@@ -187,12 +188,12 @@
       color:#3b2a00;
     }
     .btn-secondary{
-      background:linear-gradient(135deg,var(--purple) 0%, #7a44aa 100%);
+      background:linear-gradient(135deg,var(--wine) 0%, #B52248 100%);
       color:#fff;
     }
     .btn-light{
-      background:#f5f0fa;
-      color:var(--purple);
+      background:#f5f0f2;
+      color:var(--wine);
     }
     .btn-danger{
       background:#ffe8e8;
@@ -206,15 +207,15 @@
       margin-top:14px;
     }
     .product-subnav .btn{
-      background:#f5f0fa;
-      color:var(--purple);
-      border:1px solid #e6d9f4;
+      background:#f5f0f2;
+      color:var(--wine);
+      border:1px solid #e8d8de;
     }
     .product-subnav .btn.active{
-      background:linear-gradient(135deg,var(--purple) 0%, #7a44aa 100%);
+      background:linear-gradient(135deg,var(--wine) 0%, #B52248 100%);
       color:#fff;
       border-color:transparent;
-      box-shadow:0 10px 24px rgba(95,43,140,.22);
+      box-shadow:0 10px 24px rgba(155,28,62,.22);
     }
     table{
       width:100%;
@@ -228,8 +229,8 @@
       vertical-align:top;
     }
     th{
-      background:#faf6ff;
-      color:var(--purple);
+      background:#faf6f8;
+      color:var(--wine);
       position:sticky;
       top:0;
     }
@@ -262,7 +263,7 @@
       margin-top:8px;
       opacity:.9;
     }
-    .m1{background:linear-gradient(135deg,var(--purple) 0%, #8850b7 100%)}
+    .m1{background:linear-gradient(135deg,var(--wine) 0%, #B52248 100%)}
     .m2{background:linear-gradient(135deg,var(--gold-dark) 0%, var(--gold) 100%)}
     .m3{background:linear-gradient(135deg,#1f7a55 0%, #34a853 100%)}
     .m4{background:linear-gradient(135deg,#8a1c7c 0%, #cb4bb8 100%)}
@@ -273,8 +274,8 @@
       border-radius:999px;
       font-size:12px;
       font-weight:bold;
-      background:#f7f0ff;
-      color:var(--purple);
+      background:#fff0f3;
+      color:var(--wine);
     }
     .right{text-align:right}
     .empty{
@@ -288,8 +289,8 @@
       margin-top:10px;
     }
     .subnav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-    .subnav-btn{border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:bold;background:#f5f0fa;color:var(--purple);transition:.2s ease}
-    .subnav-btn.active{background:linear-gradient(135deg,var(--purple) 0%, #7a44aa 100%);color:#fff;box-shadow:var(--shadow)}
+    .subnav-btn{border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:bold;background:#f5f0f2;color:var(--wine);transition:.2s ease}
+    .subnav-btn.active{background:linear-gradient(135deg,var(--wine) 0%, #B52248 100%);color:#fff;box-shadow:var(--shadow)}
     .subview{display:none}
     .subview.active{display:block}
 
@@ -304,15 +305,15 @@
     .modal-screen{position:fixed;inset:0;background:rgba(36,21,47,.6);display:none;align-items:flex-start;justify-content:center;padding:32px;z-index:1000;overflow:auto}
     .modal-screen.open{display:flex}
     .modal-card{width:min(1320px,100%);background:#fff;border-radius:24px;border:1px solid var(--border);box-shadow:0 25px 60px rgba(36,21,47,.25);padding:22px}
-    .icon-btn{border:none;background:#f5f0fa;color:var(--purple);width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:18px;display:inline-grid;place-items:center}
+    .icon-btn{border:none;background:#f5f0f2;color:var(--wine);width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:18px;display:inline-grid;place-items:center}
     .icon-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
     .receipt-wrap{font-family:Arial,Helvetica,sans-serif;color:#24152f;padding:24px;max-width:820px;margin:0 auto}
-    .receipt-head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e8ddf4;padding-bottom:14px;margin-bottom:18px}
-    .receipt-head h1{margin:0;color:var(--purple);font-size:24px}
+    .receipt-head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e8d8de;padding-bottom:14px;margin-bottom:18px}
+    .receipt-head h1{margin:0;color:var(--wine);font-size:24px}
     .receipt-meta{font-size:13px;color:#4b5563;line-height:1.6}
     .receipt-table{width:100%;border-collapse:collapse;margin-top:14px}
-    .receipt-table th,.receipt-table td{border:1px solid #e8ddf4;padding:10px;text-align:left;font-size:13px}
-    .receipt-table th{background:#faf6ff;color:var(--purple)}
+    .receipt-table th,.receipt-table td{border:1px solid #e8d8de;padding:10px;text-align:left;font-size:13px}
+    .receipt-table th{background:#faf6f8;color:var(--wine)}
     .receipt-totals{margin-top:18px;display:grid;gap:8px;justify-content:end}
     .receipt-total-line{display:flex;justify-content:space-between;gap:30px;font-size:14px}
     .receipt-foot{margin-top:24px;padding-top:14px;border-top:1px dashed #c9a227;font-size:12px;color:#6b7280;text-align:center}
@@ -337,7 +338,7 @@
       border-radius:24px;
       padding:40px 36px 32px;
       width:min(420px,94vw);
-      box-shadow:0 20px 60px rgba(95,43,140,.15);
+      box-shadow:0 20px 60px rgba(155,28,62,.15);
       text-align:center;
     }
     .login-logo{
@@ -349,7 +350,7 @@
       box-shadow:0 8px 24px rgba(0,0,0,.12);
     }
     .login-logo svg{width:44px;height:44px}
-    .login-card h1{margin:0 0 4px;color:var(--purple);font-size:22px}
+    .login-card h1{margin:0 0 4px;color:var(--wine);font-size:22px}
     .login-card p{margin:0 0 28px;color:var(--gray);font-size:13px}
     .login-field{text-align:left;margin-bottom:16px}
     .login-field label{display:block;font-size:13px;font-weight:bold;color:#4b5563;margin-bottom:6px}
@@ -367,12 +368,12 @@
     }
     .login-btn{
       width:100%;padding:14px;border:none;border-radius:12px;
-      background:linear-gradient(135deg,var(--purple) 0%,#8a44c8 100%);
+      background:linear-gradient(135deg,var(--wine) 0%,#B52248 100%);
       color:#fff;font-size:15px;font-weight:bold;cursor:pointer;
-      box-shadow:0 8px 20px rgba(95,43,140,.25);
+      box-shadow:0 8px 20px rgba(155,28,62,.25);
       transition:.2s ease;
     }
-    .login-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(95,43,140,.3)}
+    .login-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(155,28,62,.3)}
     .login-footer{margin-top:20px;font-size:12px;color:var(--gray)}
     /* logout btn na sidebar */
     .logout-btn{
@@ -391,9 +392,9 @@
   <div class="login-card">
     <div class="login-logo" aria-hidden="true">
       <svg viewBox="0 0 64 64" fill="none">
-        <path d="M32 14c5 4 9 10 9 17-3-2-6-3-9-3s-6 1-9 3c0-7 4-13 9-17Z" fill="#5f2b8c"/>
-        <path d="M18 22c7 3 12 10 12 18-6-2-12-1-18 3 0-9 2-16 6-21Z" fill="#8a44c8"/>
-        <path d="M46 22c-4 5-6 12-6 21-6-4-12-5-18-3 0-8 5-15 12-18 4 2 8 2 12 0Z" fill="#8a44c8"/>
+        <path d="M32 14c5 4 9 10 9 17-3-2-6-3-9-3s-6 1-9 3c0-7 4-13 9-17Z" fill="#9B1C3E"/>
+        <path d="M18 22c7 3 12 10 12 18-6-2-12-1-18 3 0-9 2-16 6-21Z" fill="#B52248"/>
+        <path d="M46 22c-4 5-6 12-6 21-6-4-12-5-18-3 0-8 5-15 12-18 4 2 8 2 12 0Z" fill="#B52248"/>
         <path d="M32 31c9 0 16 6 19 16-7-2-13-2-19 1-6-3-12-3-19-1 3-10 10-16 19-16Z" fill="#C9A84C"/>
       </svg>
     </div>
@@ -418,9 +419,9 @@
     <div class="brand">
       <div class="lotus" aria-hidden="true">
         <svg viewBox="0 0 64 64" fill="none">
-          <path d="M32 14c5 4 9 10 9 17-3-2-6-3-9-3s-6 1-9 3c0-7 4-13 9-17Z" fill="#5f2b8c"/>
-          <path d="M18 22c7 3 12 10 12 18-6-2-12-1-18 3 0-9 2-16 6-21Z" fill="#7a44aa"/>
-          <path d="M46 22c-4 5-6 12-6 21-6-4-12-5-18-3 0-8 5-15 12-18 4 2 8 2 12 0Z" fill="#7a44aa"/>
+          <path d="M32 14c5 4 9 10 9 17-3-2-6-3-9-3s-6 1-9 3c0-7 4-13 9-17Z" fill="#9B1C3E"/>
+          <path d="M18 22c7 3 12 10 12 18-6-2-12-1-18 3 0-9 2-16 6-21Z" fill="#B52248"/>
+          <path d="M46 22c-4 5-6 12-6 21-6-4-12-5-18-3 0-8 5-15 12-18 4 2 8 2 12 0Z" fill="#B52248"/>
           <path d="M32 31c9 0 16 6 19 16-7-2-13-2-19 1-6-3-12-3-19-1 3-10 10-16 19-16Z" fill="#c9a227"/>
         </svg>
       </div>
@@ -2820,7 +2821,7 @@
       return;
     }
     printWindow.document.open();
-    printWindow.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Comprovante Não Fiscal - ${escapeHtml(venda.numero || '')}</title><style>body{font-family:Arial,Helvetica,sans-serif;background:#fff;margin:0;padding:0;color:#24152f} .receipt-wrap{font-family:Arial,Helvetica,sans-serif;color:#24152f;padding:24px;max-width:820px;margin:0 auto} .receipt-head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e8ddf4;padding-bottom:14px;margin-bottom:18px} .receipt-head h1{margin:0;color:#5f2b8c;font-size:24px} .receipt-meta{font-size:13px;color:#4b5563;line-height:1.6} .receipt-table{width:100%;border-collapse:collapse;margin-top:14px} .receipt-table th,.receipt-table td{border:1px solid #e8ddf4;padding:10px;text-align:left;font-size:13px} .receipt-table th{background:#faf6ff;color:#5f2b8c} .receipt-totals{margin-top:18px;display:grid;gap:8px;justify-content:end} .receipt-total-line{display:flex;justify-content:space-between;gap:30px;font-size:14px} .receipt-foot{margin-top:24px;padding-top:14px;border-top:1px dashed #c9a227;font-size:12px;color:#6b7280;text-align:center} @media print{body{margin:0}.receipt-wrap{padding:8mm;max-width:none}}</style></head><body>${receiptHtml}</body></html>`);
+    printWindow.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Comprovante Não Fiscal - ${escapeHtml(venda.numero || '')}</title><style>body{font-family:Arial,Helvetica,sans-serif;background:#fff;margin:0;padding:0;color:#24152f} .receipt-wrap{font-family:Arial,Helvetica,sans-serif;color:#24152f;padding:24px;max-width:820px;margin:0 auto} .receipt-head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #e8d8de;padding-bottom:14px;margin-bottom:18px} .receipt-head h1{margin:0;color:#9B1C3E;font-size:24px} .receipt-meta{font-size:13px;color:#4b5563;line-height:1.6} .receipt-table{width:100%;border-collapse:collapse;margin-top:14px} .receipt-table th,.receipt-table td{border:1px solid #e8d8de;padding:10px;text-align:left;font-size:13px} .receipt-table th{background:#faf6f8;color:#9B1C3E} .receipt-totals{margin-top:18px;display:grid;gap:8px;justify-content:end} .receipt-total-line{display:flex;justify-content:space-between;gap:30px;font-size:14px} .receipt-foot{margin-top:24px;padding-top:14px;border-top:1px dashed #c9a227;font-size:12px;color:#6b7280;text-align:center} @media print{body{margin:0}.receipt-wrap{padding:8mm;max-width:none}}</style></head><body>${receiptHtml}</body></html>`);
     printWindow.document.close();
     if(autoPrint){
       printWindow.onload = () => {
