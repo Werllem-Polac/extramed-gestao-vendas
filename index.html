@@ -334,10 +334,16 @@
     #publicFormScreen select {
       height:44px;
     }
+    #publicFormScreen .row > div {
+      min-width:0;
+    }
     #publicFormScreen input[type="date"] {
-      padding:10px 12px;
+      padding:10px 8px;
       box-sizing:border-box;
       width:100%;
+      max-width:100%;
+      min-width:0;
+      display:block;
     }
     #publicFormScreen label {
       font-size:14px;
