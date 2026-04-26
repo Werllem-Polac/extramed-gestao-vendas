@@ -471,6 +471,50 @@
 </head>
 <body>
 
+<!-- FORMULÁRIO PÚBLICO PARA PACIENTES -->
+<div id="publicFormScreen" style="display:none;min-height:100vh;background:linear-gradient(135deg,#9B1C3E 0%,#6d0e27 100%);padding:24px 16px;box-sizing:border-box;">
+  <div style="width:100%;max-width:600px;margin:0 auto;background:#fff;border-radius:18px;padding:32px;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:64px;height:64px;margin:0 auto 12px;border-radius:14px;background:radial-gradient(circle at 50% 35%,#fff8dc 0%,#f4d97a 45%,#d0a321 100%);display:grid;place-items:center;box-shadow:0 2px 12px rgba(0,0,0,.15);">
+        <svg viewBox="0 0 64 64" fill="none" style="width:34px;height:34px;">
+          <path d="M32 14c5 4 9 10 9 17-3-2-6-3-9-3s-6 1-9 3c0-7 4-13 9-17Z" fill="#9B1C3E"/>
+          <path d="M18 22c7 3 12 10 12 18-6-2-12-1-18 3 0-9 2-16 6-21Z" fill="#B52248"/>
+          <path d="M46 22c-4 5-6 12-6 21-6-4-12-5-18-3 0-8 5-15 12-18 4 2 8 2 12 0Z" fill="#B52248"/>
+          <path d="M32 31c9 0 16 6 19 16-7-2-13-2-19 1-6-3-12-3-19-1 3-10 10-16 19-16Z" fill="#C9A84C"/>
+        </svg>
+      </div>
+      <h2 style="color:#9B1C3E;margin:0 0 4px;font-size:20px;">Extra Diagnósticos</h2>
+      <p style="color:#888;margin:0;font-size:14px;">Formulário de Cadastro de Paciente</p>
+    </div>
+    <div id="pubFormMsg" style="display:none;padding:14px;border-radius:10px;margin-bottom:16px;text-align:center;font-weight:600;font-size:14px;"></div>
+    <div id="pubFormFields">
+      <div class="row row-2">
+        <div><label>Nome completo *</label><input id="pubNome" placeholder="Seu nome completo" /></div>
+        <div><label>Data de nascimento</label><input id="pubNascimento" type="date" /></div>
+      </div>
+      <div class="row row-3">
+        <div><label>Rua/Av.</label><input id="pubRua" /></div>
+        <div><label>Número</label><input id="pubNumero" /></div>
+        <div><label>Bairro</label><input id="pubBairro" /></div>
+      </div>
+      <div class="row row-4">
+        <div><label>Cidade</label><input id="pubCidade" /></div>
+        <div><label>Estado</label><select id="pubEstado"></select></div>
+        <div><label>CEP</label><input id="pubCEP" /></div>
+        <div><label>Telefone *</label><input id="pubTelefone" /></div>
+      </div>
+      <div class="row row-2">
+        <div><label>CPF *</label><input id="pubCPF" /></div>
+        <div><label>E-mail</label><input id="pubEmail" type="email" /></div>
+      </div>
+      <div class="actions">
+        <button id="pubSubmitBtn" class="btn btn-primary" onclick="enviarFormularioPaciente()">Enviar formulário</button>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:11px;color:#aaa;margin-top:16px;">Extra Diagnósticos &copy; 2026 &mdash; desenvolvido por Werllem Polac</p>
+  </div>
+</div>
+
 <!-- TELA DE LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
@@ -901,6 +945,7 @@
         <div class="subnav" id="pacientesSubnav">
           <button class="subnav-btn active" data-pacientes-view="consultar">Consultar paciente</button>
           <button class="subnav-btn" data-pacientes-view="cadastrar">Cadastrar paciente</button>
+          <button class="subnav-btn" data-pacientes-view="curadoria">Curadoria <span id="curadoriaCount" style="display:inline-block;background:var(--wine);color:#fff;border-radius:10px;font-size:10px;padding:1px 7px;margin-left:4px;min-width:16px;text-align:center;">0</span></button>
         </div>
 
         <div class="subview active" id="pacientesConsultarView">
@@ -924,6 +969,7 @@
               <thead>
                 <tr>
                   <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-pacientes" onchange="bulkToggleAll('pacientes',this.checked)"></th>
+                  <th>Cód.</th>
                   <th>Nome</th>
                   <th>CPF</th>
                   <th>Telefone</th>
@@ -945,7 +991,11 @@
             </div>
           </div>
           <input type="hidden" id="pacienteId" />
-          <div class="row row-2">
+          <div class="row row-3">
+            <div>
+              <label>Cod. Paciente</label>
+              <input id="pacienteCodigo" readonly style="background:#f5f5f5;cursor:default;font-weight:700;color:var(--wine);" />
+            </div>
             <div>
               <label>Nome</label>
               <input id="pacienteNome" placeholder="Nome completo do paciente" />
@@ -1001,11 +1051,46 @@
               <input id="pacienteCadastro" type="date" />
             </div>
           </div>
+          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;background:#fafafa;">
+            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--wine);">Formulário de cadastro</label>
+            <p style="font-size:12px;color:#666;margin:0 0 10px;">Envie este link para o paciente preencher os próprios dados:</p>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input id="linkFormularioPaciente" readonly style="flex:1;min-width:200px;font-size:12px;background:#fff;" />
+              <button class="btn btn-secondary" onclick="copiarLinkFormulario()" style="white-space:nowrap;font-size:12px;padding:6px 14px;">Copiar link</button>
+              <button class="btn btn-primary" onclick="compartilharWhatsApp()" style="white-space:nowrap;font-size:12px;padding:6px 14px;background:#25D366;border-color:#25D366;">WhatsApp</button>
+            </div>
+          </div>
           <div class="actions">
             <button class="btn btn-primary" onclick="salvarPaciente()">Salvar</button>
             <button class="btn btn-light" onclick="limparPacienteForm()">Limpar</button>
           </div>
+
         </div>
+
+        <div class="subview" id="pacientesCuradoriaView">
+          <div class="section-header">
+            <div>
+              <h3>Curadoria de Formulários</h3>
+              <div class="helper-text">Formulários recebidos aguardando validação e cadastro.</div>
+            </div>
+            <button class="btn btn-secondary" onclick="atualizarCuradoria()" style="font-size:12px;">Atualizar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data / Hora</th>
+                  <th>Nome</th>
+                  <th>CPF</th>
+                  <th>Telefone</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="curadoriaTabela"></tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -1876,6 +1961,43 @@
   </main>
 </div>
 
+<!-- MODAL CURADORIA DETALHE -->
+<div class="modal-screen" id="curadoriaDetalheModal" onclick="if(event.target===this)fecharCuradoriaDetalhe()">
+  <div class="modal-card" style="max-width:640px;">
+    <div class="modal-header">
+      <h3>Detalhes do Formulário</h3>
+      <button class="modal-close" onclick="fecharCuradoriaDetalhe()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="curadoriaPendenteId" />
+      <div class="row row-2">
+        <div><label>Nome</label><input id="curNome" /></div>
+        <div><label>Data de nascimento</label><input id="curNascimento" type="date" /></div>
+      </div>
+      <div class="row row-3">
+        <div><label>Rua/Av.</label><input id="curRua" /></div>
+        <div><label>Número</label><input id="curNumero" /></div>
+        <div><label>Bairro</label><input id="curBairro" /></div>
+      </div>
+      <div class="row row-4">
+        <div><label>Cidade</label><input id="curCidade" /></div>
+        <div><label>Estado</label><select id="curEstado"></select></div>
+        <div><label>CEP</label><input id="curCEP" /></div>
+        <div><label>Telefone</label><input id="curTelefone" /></div>
+      </div>
+      <div class="row row-2">
+        <div><label>CPF</label><input id="curCPF" /></div>
+        <div><label>E-mail</label><input id="curEmail" type="email" /></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="aprovarPacientePendente()">Cadastrar paciente</button>
+        <button class="btn btn-danger" onclick="rejeitarPacientePendente()">Rejeitar</button>
+        <button class="btn btn-light" onclick="fecharCuradoriaDetalhe()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-screen" id="consultarVendasModal">
   <div class="modal-card">
     <div class="section-header">
@@ -1979,7 +2101,9 @@
       {id:'cp11', descricao:'Treinamento Equipe',       fornecedor:'Instituto Saúde+',       categoria:'Variável',   centroCusto:'rh',  vencimento:'2026-05-20', valor:5600,  formaPagamento:'PIX',           status:'Previsto', recorrencia:'Único',  observacao:'',         anexo:null},
       {id:'cp12', descricao:'Manutenção AC',            fornecedor:'FrioTec Serviços',       categoria:'Variável',   centroCusto:'adm', vencimento:'2026-04-22', valor:2100,  formaPagamento:'PIX',           status:'Pago',     recorrencia:'Único',  observacao:'',         anexo:null}
     ],
-    logoUrl: ''
+    logoUrl: '',
+    patientSequence: 1,
+    pendingPatients: []
   };
 
   let db = loadDB();
@@ -2856,6 +2980,152 @@
     if(telefone) telefone.value = formatTelefone(telefone.value);
   }
 
+  function copiarLinkFormulario(){
+    const url = window.location.origin + window.location.pathname + '?formulario=paciente';
+    navigator.clipboard.writeText(url).then(() => alert('Link copiado!')).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = url; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      alert('Link copiado!');
+    });
+  }
+
+  function compartilharWhatsApp(){
+    const url = window.location.origin + window.location.pathname + '?formulario=paciente';
+    const msg = encodeURIComponent('Olá! Para completar seu cadastro na Extra Diagnósticos, preencha seus dados pelo link abaixo:\n' + url);
+    window.open('https://wa.me/?text=' + msg, '_blank');
+  }
+
+  function renderCuradoria(){
+    const tbody = document.getElementById('curadoriaTabela');
+    const countEl = document.getElementById('curadoriaCount');
+    const pending = (db.pendingPatients || []).filter(p => p.status === 'pendente');
+    if(countEl) countEl.textContent = pending.length;
+    if(!tbody) return;
+    tbody.innerHTML = pending.length ? pending.map(p => `
+      <tr>
+        <td style="white-space:nowrap;">${new Date(p.dataEnvio).toLocaleString('pt-BR')}</td>
+        <td>${p.nome || ''}</td>
+        <td>${p.cpf || ''}</td>
+        <td>${p.telefone || ''}</td>
+        <td>
+          <button class="btn btn-light" onclick="abrirCuradoriaDetalhe('${p.id}')">Ver detalhes</button>
+        </td>
+      </tr>
+    `).join('') : `<tr><td colspan="5" class="empty">Nenhum formulário pendente.</td></tr>`;
+  }
+
+  function abrirCuradoriaDetalhe(id){
+    const p = (db.pendingPatients || []).find(x => x.id === id);
+    if(!p) return;
+    document.getElementById('curadoriaPendenteId').value = p.id;
+    document.getElementById('curNome').value = p.nome || '';
+    document.getElementById('curNascimento').value = p.nascimento || '';
+    document.getElementById('curRua').value = p.rua || '';
+    document.getElementById('curNumero').value = p.numero || '';
+    document.getElementById('curBairro').value = p.bairro || '';
+    document.getElementById('curCidade').value = p.cidade || '';
+    document.getElementById('curEstado').innerHTML = buildUFOptions(p.estado || '');
+    document.getElementById('curCEP').value = p.cep || '';
+    document.getElementById('curTelefone').value = p.telefone || '';
+    document.getElementById('curCPF').value = p.cpf || '';
+    document.getElementById('curEmail').value = p.email || '';
+    document.getElementById('curadoriaDetalheModal').classList.add('active');
+  }
+
+  function fecharCuradoriaDetalhe(){
+    document.getElementById('curadoriaDetalheModal').classList.remove('active');
+  }
+
+  function aprovarPacientePendente(){
+    const id = document.getElementById('curadoriaPendenteId').value;
+    const nome     = document.getElementById('curNome').value.trim();
+    const telefone = formatTelefone(document.getElementById('curTelefone').value.trim());
+    const cpf      = formatCPF(document.getElementById('curCPF').value.trim());
+    if(!nome || !telefone || !cpf){ alert('Preencha pelo menos nome, telefone e CPF.'); return; }
+    if(!db.patientSequence) db.patientSequence = 1;
+    const codigoPaciente = 'PAC' + String(db.patientSequence).padStart(3, '0');
+    db.patientSequence++;
+    const patient = {
+      id: uid(), codigoPaciente, nome,
+      rua: document.getElementById('curRua').value.trim(),
+      numero: document.getElementById('curNumero').value.trim(),
+      bairro: document.getElementById('curBairro').value.trim(),
+      cidade: document.getElementById('curCidade').value.trim(),
+      estado: document.getElementById('curEstado').value,
+      cep: formatCEP(document.getElementById('curCEP').value.trim()),
+      telefone, nascimento: document.getElementById('curNascimento').value,
+      cpf, email: document.getElementById('curEmail').value.trim(),
+      dataCadastro: todayStr()
+    };
+    if(!Array.isArray(db.patients)) db.patients = [];
+    db.patients.push(patient);
+    db.pendingPatients = (db.pendingPatients || []).map(p => p.id === id ? {...p, status:'aprovado'} : p);
+    saveDB();
+    fecharCuradoriaDetalhe();
+    refreshAll();
+    alert('Paciente ' + patient.nome + ' cadastrado! Código: ' + codigoPaciente);
+  }
+
+  function rejeitarPacientePendente(){
+    const id = document.getElementById('curadoriaPendenteId').value;
+    if(!confirm('Rejeitar este formulário?')) return;
+    db.pendingPatients = (db.pendingPatients || []).map(p => p.id === id ? {...p, status:'rejeitado'} : p);
+    saveDB();
+    fecharCuradoriaDetalhe();
+    refreshAll();
+  }
+
+  function atualizarCuradoria(){
+    loadFromSupabase();
+  }
+
+  async function enviarFormularioPaciente(){
+    const nome     = document.getElementById('pubNome').value.trim();
+    const telefone = formatTelefone(document.getElementById('pubTelefone').value.trim());
+    const cpf      = formatCPF(document.getElementById('pubCPF').value.trim());
+    if(!nome || !cpf || onlyDigits(cpf).length !== 11){ alert('Preencha nome, CPF válido (11 dígitos) e telefone.'); return; }
+    if(onlyDigits(telefone).length < 10){ alert('Informe um telefone válido com DDD.'); return; }
+    const btn = document.getElementById('pubSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    const pending = {
+      id: uid(), nome, telefone, cpf,
+      rua: document.getElementById('pubRua').value.trim(),
+      numero: document.getElementById('pubNumero').value.trim(),
+      bairro: document.getElementById('pubBairro').value.trim(),
+      cidade: document.getElementById('pubCidade').value.trim(),
+      estado: document.getElementById('pubEstado').value,
+      cep: formatCEP(document.getElementById('pubCEP').value.trim()),
+      nascimento: document.getElementById('pubNascimento').value,
+      email: document.getElementById('pubEmail').value.trim(),
+      dataEnvio: new Date().toISOString(),
+      status: 'pendente'
+    };
+    try {
+      const readRes = await fetch(`${SUPABASE_URL}/rest/v1/app_data?key=eq.${DB_KEY}&select=value`,
+        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+      let remoteDB = {};
+      if(readRes.ok){ const rows = await readRes.json(); if(rows.length && rows[0].value) remoteDB = rows[0].value; }
+      if(!Array.isArray(remoteDB.pendingPatients)) remoteDB.pendingPatients = [];
+      remoteDB.pendingPatients.push(pending);
+      const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
+                   'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: DB_KEY, value: remoteDB })
+      });
+      if(!saveRes.ok && saveRes.status !== 201) throw new Error(saveRes.status);
+      document.getElementById('pubFormFields').style.display = 'none';
+      const msg = document.getElementById('pubFormMsg');
+      msg.style.display = 'block';
+      msg.style.cssText += ';background:#e8f5e9;color:#2e7d32;';
+      msg.textContent = 'Formulário enviado com sucesso! Aguarde o contato da clínica para confirmar seu cadastro.';
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Enviar formulário';
+      alert('Erro ao enviar. Verifique sua conexão e tente novamente.');
+    }
+  }
+
   function limparPacienteForm(){
     ['pacienteId','pacienteNome','pacienteRua','pacienteNumero','pacienteBairro','pacienteCidade',
      'pacienteCEP','pacienteTelefone','pacienteNascimento','pacienteCPF','pacienteEmail'].forEach(id => {
@@ -2864,7 +3134,11 @@
     const peEl = document.getElementById('pacienteEstado');
     if(peEl) peEl.innerHTML = buildUFOptions();
     const cad = document.getElementById('pacienteCadastro');
-    if(cad) cad.value = todayStr(); // pré-preenche com a data atual
+    if(cad) cad.value = todayStr();
+    const codEl = document.getElementById('pacienteCodigo');
+    if(codEl) codEl.value = 'PAC' + String(db.patientSequence || 1).padStart(3, '0');
+    const linkEl = document.getElementById('linkFormularioPaciente');
+    if(linkEl) linkEl.value = window.location.origin + window.location.pathname + '?formulario=paciente';
     applyPatientMasks();
   }
 
@@ -2903,7 +3177,13 @@
       alert('Já existe paciente cadastrado com este CPF.');
       return;
     }
-    const payload = {id: id || uid(), nome, rua, numero, bairro, cidade, estado, cep, telefone, nascimento, cpf, email, dataCadastro};
+    let codigoPaciente = document.getElementById('pacienteCodigo').value || '';
+    if(!id){
+      if(!db.patientSequence) db.patientSequence = 1;
+      codigoPaciente = 'PAC' + String(db.patientSequence).padStart(3, '0');
+      db.patientSequence++;
+    }
+    const payload = {id: id || uid(), codigoPaciente, nome, rua, numero, bairro, cidade, estado, cep, telefone, nascimento, cpf, email, dataCadastro};
     if(id){
       db.patients = db.patients.map(p => p.id === id ? payload : p);
     } else {
@@ -2918,7 +3198,11 @@
   function editarPaciente(id){
     const p = (db.patients || []).find(x => x.id === id);
     if(!p) return;
+    const cadBtn = document.querySelector('#pacientesSubnav [data-pacientes-view="cadastrar"]');
+    if(cadBtn) cadBtn.click();
     document.getElementById('pacienteId').value = p.id;
+    const codEl = document.getElementById('pacienteCodigo');
+    if(codEl) codEl.value = p.codigoPaciente || '';
     document.getElementById('pacienteNome').value = p.nome || '';
     document.getElementById('pacienteRua').value = p.rua || '';
     document.getElementById('pacienteNumero').value = p.numero || '';
@@ -2957,6 +3241,7 @@
     tbody.innerHTML = items.length ? items.map(p => `
       <tr>
         <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="pacientes" value="${p.id}" onchange="updateBulkBar('pacientes')"></td>
+        <td style="font-weight:600;color:var(--wine);white-space:nowrap;">${p.codigoPaciente || ''}</td>
         <td>${p.nome || ''}</td>
         <td>${p.cpf || ''}</td>
         <td>${p.telefone || ''}</td>
@@ -2967,7 +3252,7 @@
           <button class="btn btn-danger" onclick="excluirPaciente('${p.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="7" class="empty">Nenhum paciente cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="8" class="empty">Nenhum paciente cadastrado.</td></tr>`;
   }
 
   function fillSelect(selectId, items, placeholder, valueField='id', labelField='nome'){
@@ -3594,11 +3879,25 @@
     renderCancelamentos();
     renderConfiguracoes();
     renderFinanceiro();
+    renderCuradoria();
     renderLogoEverywhere();
     document.title = `${db.clinicName} | Gestão de Vendas`;
   }
 
   function init(){
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('formulario') === 'paciente'){
+      document.getElementById('publicFormScreen').style.display = 'block';
+      document.getElementById('loginScreen').style.display = 'none';
+      initUFSelects();
+      const pubCPF = document.getElementById('pubCPF');
+      if(pubCPF) pubCPF.addEventListener('input', e => e.target.value = formatCPF(e.target.value));
+      const pubTel = document.getElementById('pubTelefone');
+      if(pubTel) pubTel.addEventListener('input', e => e.target.value = formatTelefone(e.target.value));
+      const pubCEP = document.getElementById('pubCEP');
+      if(pubCEP) pubCEP.addEventListener('input', e => e.target.value = formatCEP(e.target.value));
+      return;
+    }
     setupNav();
     try {
     setupSubnav('produtosSubnav', 'data-produtos-view', 'produtos');
@@ -4145,7 +4444,7 @@
   }
 
   function initUFSelects(){
-    ['medicoUF','pacienteEstado'].forEach(id => {
+    ['medicoUF','pacienteEstado','pubEstado','curEstado'].forEach(id => {
       const el = document.getElementById(id);
       if(el && el.tagName === 'SELECT') el.innerHTML = buildUFOptions();
     });
