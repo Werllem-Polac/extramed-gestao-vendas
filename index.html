@@ -958,6 +958,7 @@
         <div class="subnav" id="pacientesSubnav">
           <button class="subnav-btn active" data-pacientes-view="consultar">Consultar paciente</button>
           <button class="subnav-btn" data-pacientes-view="cadastrar">Cadastrar paciente</button>
+          <button class="subnav-btn" data-pacientes-view="formulario">Formulário de cadastro</button>
           <button class="subnav-btn" data-pacientes-view="curadoria">Curadoria <span id="curadoriaCount" style="display:inline-block;background:var(--wine);color:#fff;border-radius:10px;font-size:10px;padding:1px 7px;margin-left:4px;min-width:16px;text-align:center;">0</span></button>
         </div>
 
@@ -1064,20 +1065,28 @@
               <input id="pacienteCadastro" type="date" />
             </div>
           </div>
-          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;background:#fafafa;">
-            <label style="display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--wine);">Formulário de cadastro</label>
-            <p style="font-size:12px;color:#666;margin:0 0 10px;">Envie este link para o paciente preencher os próprios dados:</p>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <input id="linkFormularioPaciente" readonly style="flex:1;min-width:200px;font-size:12px;background:#fff;" />
-              <button class="btn btn-secondary" onclick="copiarLinkFormulario()" style="white-space:nowrap;font-size:12px;padding:6px 14px;">Copiar link</button>
-              <button class="btn btn-primary" onclick="compartilharWhatsApp()" style="white-space:nowrap;font-size:12px;padding:6px 14px;background:#25D366;border-color:#25D366;">WhatsApp</button>
-            </div>
-          </div>
           <div class="actions">
             <button class="btn btn-primary" onclick="salvarPaciente()">Salvar</button>
             <button class="btn btn-light" onclick="limparPacienteForm()">Limpar</button>
           </div>
 
+        </div>
+
+        <div class="subview" id="pacientesFormularioView">
+          <div class="section-header">
+            <div>
+              <h3>Formulário de cadastro</h3>
+              <div class="helper-text">Envie o link abaixo para o paciente preencher os próprios dados.</div>
+            </div>
+          </div>
+          <div style="max-width:600px;">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:8px;">Link do formulário</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input id="linkFormularioPaciente" readonly style="flex:1;min-width:220px;font-size:13px;background:#f5f5f5;" />
+              <button class="btn btn-secondary" onclick="copiarLinkFormulario()" style="white-space:nowrap;">Copiar link</button>
+              <button class="btn btn-primary" onclick="compartilharWhatsApp()" style="white-space:nowrap;background:#25D366;border-color:#25D366;">WhatsApp</button>
+            </div>
+          </div>
         </div>
 
         <div class="subview" id="pacientesCuradoriaView">
