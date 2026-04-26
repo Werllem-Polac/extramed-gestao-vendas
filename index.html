@@ -337,13 +337,6 @@
     #publicFormScreen .row > div {
       min-width:0;
     }
-    #publicFormScreen input[type="date"] {
-      box-sizing:border-box;
-      width:100%;
-      max-width:100%;
-      min-width:0;
-      display:block;
-    }
     #publicFormScreen label {
       font-size:14px;
     }
@@ -553,7 +546,7 @@
     <div id="pubFormFields">
       <div class="row row-2">
         <div><label>Nome completo *</label><input id="pubNome" placeholder="Seu nome completo" /></div>
-        <div><label>Data de nascimento</label><input id="pubNascimento" type="date" /></div>
+        <div><label>Data de nascimento</label><input id="pubNascimento" type="text" placeholder="DD/MM/AAAA" inputmode="numeric" maxlength="10" /></div>
       </div>
       <div class="row row-3">
         <div><label>Rua/Av.</label><input id="pubRua" /></div>
@@ -3988,6 +3981,13 @@
       if(pubTel) pubTel.addEventListener('input', e => e.target.value = formatTelefone(e.target.value));
       const pubCEP = document.getElementById('pubCEP');
       if(pubCEP) pubCEP.addEventListener('input', e => e.target.value = formatCEP(e.target.value));
+      const pubNasc = document.getElementById('pubNascimento');
+      if(pubNasc) pubNasc.addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g,'').slice(0,8);
+        if(v.length > 4) v = v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);
+        else if(v.length > 2) v = v.slice(0,2)+'/'+v.slice(2);
+        e.target.value = v;
+      });
       return;
     }
     setupNav();
