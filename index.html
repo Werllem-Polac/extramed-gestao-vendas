@@ -325,6 +325,56 @@
       main{padding:18px}
     }
 
+    /* ── FORMULÁRIO PÚBLICO — RESPONSIVO MOBILE ── */
+    #publicFormScreen input,
+    #publicFormScreen select {
+      font-size:16px; /* evita zoom automático no iOS/Android */
+      height:44px;
+    }
+    #publicFormScreen label {
+      font-size:14px;
+    }
+    @media (max-width:640px){
+      #publicFormScreen {
+        padding:12px 8px !important;
+      }
+      #publicFormScreen > div {
+        padding:20px 14px !important;
+        border-radius:12px !important;
+      }
+      #publicFormScreen .row-2,
+      #publicFormScreen .row-3,
+      #publicFormScreen .row-4 {
+        grid-template-columns:1fr !important;
+        gap:10px;
+      }
+      #publicFormScreen .actions {
+        flex-direction:column;
+        gap:10px;
+      }
+      #publicFormScreen .actions .btn {
+        width:100%;
+        text-align:center;
+        padding:12px;
+        font-size:15px;
+      }
+      #publicFormScreen h2 {
+        font-size:18px !important;
+      }
+      #publicFormScreen p {
+        font-size:13px !important;
+      }
+      #publicFormScreen strong {
+        font-size:12px;
+      }
+    }
+    @media (min-width:641px) and (max-width:860px){
+      #publicFormScreen .row-3,
+      #publicFormScreen .row-4 {
+        grid-template-columns:repeat(2,1fr) !important;
+      }
+    }
+
     /* ── SELEÇÃO EM MASSA ── */
     .bulk-bar{display:none;align-items:center;gap:10px;padding:8px 14px;background:#fff8e1;border:1px solid var(--gold);border-radius:10px;margin-bottom:10px;font-size:13px;font-weight:600;color:#7c5700}
     .bulk-bar.visible{display:flex}
@@ -473,7 +523,7 @@
 
 <!-- FORMULÁRIO PÚBLICO PARA PACIENTES -->
 <div id="publicFormScreen" style="display:none;position:fixed;inset:0;z-index:10000;overflow-y:auto;background:linear-gradient(135deg,#9B1C3E 0%,#6d0e27 100%);padding:24px 16px;box-sizing:border-box;">
-  <div style="width:100%;max-width:600px;margin:0 auto;background:#fff;border-radius:18px;padding:32px;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+  <div style="width:100%;max-width:600px;margin:0 auto;background:#fff;border-radius:18px;padding:clamp(16px,5vw,32px);box-shadow:0 8px 40px rgba(0,0,0,.25);">
     <div style="text-align:center;margin-bottom:24px;">
       <div style="width:64px;height:64px;margin:0 auto 12px;border-radius:14px;background:radial-gradient(circle at 50% 35%,#fff8dc 0%,#f4d97a 45%,#d0a321 100%);display:grid;place-items:center;box-shadow:0 2px 12px rgba(0,0,0,.15);">
         <svg viewBox="0 0 64 64" fill="none" style="width:34px;height:34px;">
@@ -488,7 +538,7 @@
     </div>
     <div id="pubFormMsg" style="display:none;padding:14px;border-radius:10px;margin-bottom:16px;text-align:center;font-weight:600;font-size:14px;"></div>
     <div id="pubFormFields">
-      <div style="background:#f8f9fa;border:1px solid #dee2e6;border-left:4px solid #9B1C3E;border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:#555;line-height:1.6;">
+      <div style="background:#f8f9fa;border:1px solid #dee2e6;border-left:4px solid #9B1C3E;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:#555;line-height:1.6;">
         <strong style="color:#9B1C3E;display:block;margin-bottom:8px;font-size:13px;">Aviso de Privacidade — LGPD (Lei 13.709/2018)</strong>
         <p style="margin:0 0 6px;">A <strong>Extra Diagnósticos</strong> coleta os dados deste formulário exclusivamente para <strong>cadastro e prestação de serviços de saúde</strong>, incluindo agendamento de consultas, emissão de documentos médicos e contato para confirmação de atendimento.</p>
         <p style="margin:0 0 6px;"><strong>Base legal:</strong> Consentimento do titular (Art. 7º, I) e execução de contrato de serviços de saúde (Art. 7º, V da LGPD).</p>
@@ -516,7 +566,7 @@
       </div>
       <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding:12px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;">
         <input type="checkbox" id="pubConsentimento" style="width:18px;height:18px;margin-top:2px;cursor:pointer;accent-color:#9B1C3E;flex:0 0 18px;" />
-        <label for="pubConsentimento" style="font-size:12px;color:#555;cursor:pointer;line-height:1.6;">
+        <label for="pubConsentimento" style="font-size:13px;color:#555;cursor:pointer;line-height:1.6;">
           Li e concordo com a coleta e tratamento dos meus dados pessoais pela <strong>Extra Diagnósticos</strong> conforme descrito no Aviso de Privacidade acima, para fins de cadastro e prestação de serviços de saúde. <strong style="color:#c0392b;">*</strong>
         </label>
       </div>
