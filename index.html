@@ -3043,11 +3043,11 @@
     document.getElementById('curTelefone').value = p.telefone || '';
     document.getElementById('curCPF').value = p.cpf || '';
     document.getElementById('curEmail').value = p.email || '';
-    document.getElementById('curadoriaDetalheModal').classList.add('active');
+    document.getElementById('curadoriaDetalheModal').classList.add('open');
   }
 
   function fecharCuradoriaDetalhe(){
-    document.getElementById('curadoriaDetalheModal').classList.remove('active');
+    document.getElementById('curadoriaDetalheModal').classList.remove('open');
   }
 
   function aprovarPacientePendente(){
