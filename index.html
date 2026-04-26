@@ -325,6 +325,12 @@
       main{padding:18px}
     }
 
+    /* ── SELEÇÃO EM MASSA ── */
+    .bulk-bar{display:none;align-items:center;gap:10px;padding:8px 14px;background:#fff8e1;border:1px solid var(--gold);border-radius:10px;margin-bottom:10px;font-size:13px;font-weight:600;color:#7c5700}
+    .bulk-bar.visible{display:flex}
+    .th-cb,.td-cb{width:36px!important;text-align:center!important;padding:8px 6px!important}
+    input.bulk-cb{width:15px;height:15px;cursor:pointer;accent-color:var(--wine);margin:0}
+
     /* ── CONTAS A PAGAR ── */
     .fin-abas{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px}
     .fin-aba-btn{padding:9px 20px;border:none;background:none;cursor:pointer;font-weight:700;font-size:13px;color:var(--gray);border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s}
@@ -655,10 +661,14 @@
             </select>
           </div>
         </div>
+        <div class="bulk-bar" id="bulkBar-produtos">
+          <button class="btn btn-danger" id="bulkBtn-produtos" onclick="excluirBulk('produtos')">Excluir selecionados</button>
+        </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
+                <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-produtos" onchange="bulkToggleAll('produtos',this.checked)"></th>
                 <th>Código</th>
                 <th>Tipo</th>
                 <th>Categoria</th>
@@ -906,10 +916,14 @@
               <input id="pacienteBusca" placeholder="Buscar por nome, CPF ou telefone" />
             </div>
           </div>
-          <div class="table-wrap" style="margin-top:16px">
+          <div class="bulk-bar" id="bulkBar-pacientes" style="margin-top:16px">
+            <button class="btn btn-danger" id="bulkBtn-pacientes" onclick="excluirBulk('pacientes')">Excluir selecionados</button>
+          </div>
+          <div class="table-wrap">
             <table>
               <thead>
                 <tr>
+                  <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-pacientes" onchange="bulkToggleAll('pacientes',this.checked)"></th>
                   <th>Nome</th>
                   <th>CPF</th>
                   <th>Telefone</th>
@@ -1019,10 +1033,14 @@
               </select>
             </div>
           </div>
+          <div class="bulk-bar" id="bulkBar-medicos">
+            <button class="btn btn-danger" id="bulkBtn-medicos" onclick="excluirBulk('medicos')">Excluir selecionados</button>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
+                  <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-medicos" onchange="bulkToggleAll('medicos',this.checked)"></th>
                   <th>Nome</th>
                   <th>Especialidade</th>
                   <th>Conselho/UF</th>
@@ -1566,10 +1584,14 @@
                 </select>
               </div>
             </div>
+            <div class="bulk-bar" id="bulkBar-usuarios">
+              <button class="btn btn-danger" id="bulkBtn-usuarios" onclick="excluirBulk('usuarios')">Excluir selecionados</button>
+            </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
+                    <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-usuarios" onchange="bulkToggleAll('usuarios',this.checked)"></th>
                     <th>Nome de usuário</th>
                     <th>Cargo</th>
                     <th>Perfil</th>
@@ -1706,11 +1728,15 @@
           </div>
         </div>
         <!-- Tabela -->
+        <div class="bulk-bar" id="bulkBar-finLanc">
+          <button class="btn btn-danger" id="bulkBtn-finLanc" onclick="excluirBulk('finLanc')">Excluir selecionados</button>
+        </div>
         <div class="card" style="padding:0">
           <div class="table-wrap" style="border-radius:16px;border:none">
             <table>
               <thead>
                 <tr>
+                  <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-finLanc" onchange="bulkToggleAll('finLanc',this.checked)"></th>
                   <th>Descrição / Fornecedor</th>
                   <th>Categoria</th>
                   <th>Vencimento</th>
@@ -2423,6 +2449,7 @@
     tbody.innerHTML = items.length ? items.map(p => {
       const status = getVencimentoStatus(p);
       return `<tr>
+        <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="produtos" value="${p.id}" onchange="updateBulkBar('produtos')"></td>
         <td>${p.codigo || '-'}</td>
         <td>${p.tipo || 'Produto'}</td>
         <td>${p.categoria || '-'}</td>
@@ -2438,7 +2465,7 @@
           <button class="btn btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
         </td>
       </tr>`;
-    }).join('') : `<tr><td colspan="11" class="empty">Nenhum produto ou serviço cadastrado.</td></tr>`;
+    }).join('') : `<tr><td colspan="12" class="empty">Nenhum produto ou serviço cadastrado.</td></tr>`;
   }
 
   function setupSubnav(containerId, attrName, prefix){
@@ -2668,6 +2695,7 @@
     });
     tbody.innerHTML = items.length ? items.map(m => `
       <tr>
+        <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="medicos" value="${m.id}" onchange="updateBulkBar('medicos')"></td>
         <td>${m.nome}</td>
         <td>${m.especialidade || '-'}</td>
         <td>${m.conselho || (m.crm ? 'CRM' : '-')} ${m.numConselho || m.crm || ''}${m.uf ? '/' + m.uf : ''}</td>
@@ -2682,7 +2710,7 @@
           <button class="btn btn-danger" onclick="excluirMedico('${m.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="10" class="empty">Nenhum médico cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="11" class="empty">Nenhum médico cadastrado.</td></tr>`;
   }
 
   function limparUsuarioForm(){
@@ -2759,6 +2787,7 @@
     });
     tbody.innerHTML = items.length ? items.map(u => `
       <tr>
+        <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="usuarios" value="${u.id}" onchange="updateBulkBar('usuarios')"></td>
         <td>${escapeHtml(u.nome)}</td>
         <td>${escapeHtml(u.cargo || '-')}</td>
         <td>${escapeHtml(u.perfil)}</td>
@@ -2770,7 +2799,7 @@
           <button class="btn btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="7" class="empty">Nenhum usuário cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="8" class="empty">Nenhum usuário cadastrado.</td></tr>`;
     updateProtectedMenuVisibility();
   }
 
@@ -2910,6 +2939,7 @@
     const items = (db.patients || []).filter(p => [p.nome,p.cpf,p.telefone,p.cidade,p.estado].join(' ').toLowerCase().includes(busca));
     tbody.innerHTML = items.length ? items.map(p => `
       <tr>
+        <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="pacientes" value="${p.id}" onchange="updateBulkBar('pacientes')"></td>
         <td>${p.nome || ''}</td>
         <td>${p.cpf || ''}</td>
         <td>${p.telefone || ''}</td>
@@ -2920,7 +2950,7 @@
           <button class="btn btn-danger" onclick="excluirPaciente('${p.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="6" class="empty">Nenhum paciente cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="7" class="empty">Nenhum paciente cadastrado.</td></tr>`;
   }
 
   function fillSelect(selectId, items, placeholder, valueField='id', labelField='nome'){
@@ -3568,6 +3598,50 @@
   }
 
   // ══════════════════════════════════════════════════════════════
+  // ── SELEÇÃO EM MASSA ──────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════
+
+  function bulkToggleAll(key, checked){
+    document.querySelectorAll(`input.bulk-cb[data-bulk="${key}"]`).forEach(cb => cb.checked = checked);
+    updateBulkBar(key);
+  }
+
+  function updateBulkBar(key){
+    const cbs   = document.querySelectorAll(`input.bulk-cb[data-bulk="${key}"]`);
+    const count = Array.from(cbs).filter(cb => cb.checked).length;
+    const bar   = document.getElementById(`bulkBar-${key}`);
+    const btn   = document.getElementById(`bulkBtn-${key}`);
+    const all   = document.getElementById(`bulkAll-${key}`);
+    if(bar){ bar.classList.toggle('visible', count > 0); }
+    if(btn){ btn.textContent = `Excluir selecionados (${count})`; }
+    if(all){ all.indeterminate = count > 0 && count < cbs.length; all.checked = count > 0 && count === cbs.length; }
+  }
+
+  function getBulkSelected(key){
+    return Array.from(document.querySelectorAll(`input.bulk-cb[data-bulk="${key}"]:checked`)).map(cb => cb.value);
+  }
+
+  const _BULK_MAP = {
+    produtos:  { array:'products',    render: () => renderProdutos(),  label:'produto(s)' },
+    medicos:   { array:'doctors',     render: () => renderMedicos(),   label:'profissional(is)' },
+    usuarios:  { array:'users',       render: () => renderUsuarios(),  label:'usuário(s)' },
+    pacientes: { array:'patients',    render: () => renderPacientes(), label:'paciente(s)' },
+    finLanc:   { array:'contasPagar', render: () => renderFinLancamentos(), label:'lançamento(s)' },
+  };
+
+  function excluirBulk(key){
+    const cfg = _BULK_MAP[key];
+    if(!cfg) return;
+    const ids = getBulkSelected(key);
+    if(!ids.length) return;
+    if(!confirm(`Excluir ${ids.length} ${cfg.label} selecionado(s)? Esta ação não pode ser desfeita.`)) return;
+    db[cfg.array] = (db[cfg.array] || []).filter(x => !ids.includes(x.id));
+    saveDB();
+    cfg.render();
+    updateBulkBar(key);
+  }
+
+  // ══════════════════════════════════════════════════════════════
   // ── MÓDULO CONTAS A PAGAR ─────────────────────────────────────
   // ══════════════════════════════════════════════════════════════
 
@@ -3792,6 +3866,7 @@
     if(tbody) tbody.innerHTML = pagina.length ? pagina.map(l => {
       const centro = db.centrosCusto.find(c => c.id === l.centroCusto);
       return `<tr>
+        <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="finLanc" value="${l.id}" onchange="updateBulkBar('finLanc')"></td>
         <td><div style="font-weight:600">${l.descricao}</div><div style="font-size:11px;color:var(--gray)">${l.fornecedor}</div></td>
         <td>${finCatBadge(l.categoria)}</td>
         <td>${fmtData(l.vencimento)}</td>
@@ -3803,7 +3878,7 @@
           <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="excluirFinLanc('${l.id}')">Excluir</button>
         </td>
       </tr>`;
-    }).join('') : `<tr><td colspan="7" class="empty">Nenhum lançamento encontrado para este período.</td></tr>`;
+    }).join('') : `<tr><td colspan="8" class="empty">Nenhum lançamento encontrado para este período.</td></tr>`;
 
     const pag = document.getElementById('finPag');
     if(pag) pag.innerHTML = `<span>${todos.length} lançamento(s)</span>
