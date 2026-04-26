@@ -505,7 +505,7 @@
       </div>
       <div>
         <h1>Extra Med</h1>
-        <p>Gestão de Vendas da Clínica</p>
+        <p>Gestão Extra Med</p>
       </div>
     </div>
 
@@ -529,6 +529,9 @@
       <button class="nav-btn" data-target="cancelamentos" id="cancelamentosMenuBtn" style="display:none" onclick="showMainSection('cancelamentos', this, 'Cancelamentos')">Cancelamentos</button>
       <button class="nav-btn" data-target="configuracoes" onclick="showMainSection('configuracoes', this, 'Configurações')">Configurações</button>
       <button class="logout-btn" onclick="doLogout()">&#x2192; Sair</button>
+      <div style="padding:14px 18px 10px;font-size:11px;color:var(--gray);text-align:center;border-top:1px solid var(--border);margin-top:8px">
+        Desenvolvido por Werllem Polac
+      </div>
     </nav>
   </aside>
 
@@ -536,7 +539,7 @@
     <div class="topbar">
       <div>
         <h2 id="sectionTitle">Dashboard</h2>
-        <p>Sistema gerencial para controle comercial, lucratividade e repasse médico.</p>
+        <p></p>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <span id="syncStatus" style="font-size:11px;font-weight:600;letter-spacing:.4px;"></span>
@@ -815,9 +818,9 @@
             </div>
           </div>
           <div class="actions">
-            <button class="btn btn-primary" onclick="adicionarCategoria()">Salvar categoria</button>
-            <button class="btn btn-secondary" onclick="editarCategoriaSelecionada()">Editar categoria</button>
-            <button class="btn btn-danger" onclick="excluirCategoriaSelecionada()">Excluir categoria</button>
+            <button class="btn btn-primary" onclick="adicionarCategoria()">Salvar</button>
+            <button class="btn btn-secondary" onclick="editarCategoriaSelecionada()">Editar</button>
+            <button class="btn btn-danger" onclick="excluirCategoriaSelecionada()">Excluir</button>
             <button class="btn btn-light" onclick="limparCategoriaForm()">Limpar</button>
           </div>
         </div>
