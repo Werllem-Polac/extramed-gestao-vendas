@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Extra Med Clínica de Especialidades | Gestão de Vendas</title>
+  <title>Extra Diagnósticos | Gestão de Vendas</title>
   <style>
     :root{
       --wine:#9B1C3E;
@@ -482,8 +482,8 @@
         <path d="M32 31c9 0 16 6 19 16-7-2-13-2-19 1-6-3-12-3-19-1 3-10 10-16 19-16Z" fill="#C9A84C"/>
       </svg>
     </div>
-    <h1>Extra Med</h1>
-    <p>Gestão Extra Med</p>
+    <h1>Extra Diagnósticos</h1>
+    <p>Gestão Extra Diagnósticos</p>
     <div class="login-err" id="loginErr">Usuário ou senha incorretos.</div>
     <div class="login-field">
       <label for="loginUser">Usuário</label>
@@ -510,8 +510,8 @@
         </svg>
       </div>
       <div>
-        <h1>Extra Med</h1>
-        <p>Gestão Extra Med</p>
+        <h1>Extra Diagnósticos</h1>
+        <p>Gestão Extra Diagnósticos</p>
       </div>
     </div>
 
@@ -1927,14 +1927,14 @@
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0Y29ramlrdGhubmVnbnN4bGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTk1MDMsImV4cCI6MjA5MjczNTUwM30.qd9aiV16f2QPQbk7CufQpZYgIa6NvHwQgvq_Uyj1jhs';
 
   const defaultDB = {
-    clinicName: 'Extra Med Clínica de Especialidades',
+    clinicName: 'Extra Diagnósticos',
     settings: {
       calcMode: 'medico',
       globalPct: 30
     },
     company: {
       razaoSocial: '',
-      nomeFantasia: 'Extra Med Clínica de Especialidades',
+      nomeFantasia: 'Extra Diagnósticos',
       cnpj: '',
       rua: '',
       numero: '',
@@ -2082,8 +2082,8 @@
 
   function ensureCompanyConfig(){
     db.company = Object.assign({}, structuredClone(defaultDB.company), db.company || {});
-    if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Med Clínica de Especialidades';
-    if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Med Clínica de Especialidades';
+    if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Diagnósticos';
+    if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Diagnósticos';
   }
 
   function calculateProductProfit(){
@@ -3213,7 +3213,7 @@
 
   function getReceiptHtml(venda){
     const company = db.company || {};
-    const clinicName = db.clinicName || company.nomeFantasia || 'Extra Med Clínica de Especialidades';
+    const clinicName = db.clinicName || company.nomeFantasia || 'Extra Diagnósticos';
     const endereco = [company.rua, company.numero, company.bairro, company.cidade, company.estado].filter(Boolean).join(', ');
     const pagamentos = (venda.pagamentos || []).map(p => `${p.forma}: ${formatCurrency(p.valor)}${p.parcelas && p.parcelas > 1 ? ` (${p.parcelas}x)` : ''}`).join('<br>') || '-';
     const itensHtml = (venda.itens || []).map(item => `
@@ -3511,7 +3511,7 @@
   function salvarConfiguracoes(){
     db.settings.calcMode = document.getElementById('configCalcMode').value;
     db.settings.globalPct = Number(document.getElementById('configGlobalPct').value || 0);
-    db.clinicName = document.getElementById('configClinicName').value || 'Extra Med Clínica de Especialidades';
+    db.clinicName = document.getElementById('configClinicName').value || 'Extra Diagnósticos';
     db.company = {
       razaoSocial: document.getElementById('configRazaoSocial').value.trim(),
       nomeFantasia: document.getElementById('configNomeFantasia').value.trim(),
