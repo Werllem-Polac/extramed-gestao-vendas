@@ -488,6 +488,13 @@
     </div>
     <div id="pubFormMsg" style="display:none;padding:14px;border-radius:10px;margin-bottom:16px;text-align:center;font-weight:600;font-size:14px;"></div>
     <div id="pubFormFields">
+      <div style="background:#f8f9fa;border:1px solid #dee2e6;border-left:4px solid #9B1C3E;border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:#555;line-height:1.6;">
+        <strong style="color:#9B1C3E;display:block;margin-bottom:8px;font-size:13px;">Aviso de Privacidade — LGPD (Lei 13.709/2018)</strong>
+        <p style="margin:0 0 6px;">A <strong>Extra Diagnósticos</strong> coleta os dados deste formulário exclusivamente para <strong>cadastro e prestação de serviços de saúde</strong>, incluindo agendamento de consultas, emissão de documentos médicos e contato para confirmação de atendimento.</p>
+        <p style="margin:0 0 6px;"><strong>Base legal:</strong> Consentimento do titular (Art. 7º, I) e execução de contrato de serviços de saúde (Art. 7º, V da LGPD).</p>
+        <p style="margin:0 0 6px;"><strong>Seus direitos:</strong> A qualquer momento você pode solicitar acesso, correção, exclusão, portabilidade dos seus dados ou revogar este consentimento pelo nosso canal de atendimento.</p>
+        <p style="margin:0;"><strong>Responsável pelo tratamento:</strong> Extra Diagnósticos &nbsp;|&nbsp; <strong>Contato DPO:</strong> contato@extradiagnosticos.com.br</p>
+      </div>
       <div class="row row-2">
         <div><label>Nome completo *</label><input id="pubNome" placeholder="Seu nome completo" /></div>
         <div><label>Data de nascimento</label><input id="pubNascimento" type="date" /></div>
@@ -506,6 +513,12 @@
       <div class="row row-2">
         <div><label>CPF *</label><input id="pubCPF" /></div>
         <div><label>E-mail</label><input id="pubEmail" type="email" /></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding:12px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;">
+        <input type="checkbox" id="pubConsentimento" style="width:18px;height:18px;margin-top:2px;cursor:pointer;accent-color:#9B1C3E;flex:0 0 18px;" />
+        <label for="pubConsentimento" style="font-size:12px;color:#555;cursor:pointer;line-height:1.6;">
+          Li e concordo com a coleta e tratamento dos meus dados pessoais pela <strong>Extra Diagnósticos</strong> conforme descrito no Aviso de Privacidade acima, para fins de cadastro e prestação de serviços de saúde. <strong style="color:#c0392b;">*</strong>
+        </label>
       </div>
       <div class="actions">
         <button id="pubSubmitBtn" class="btn btn-primary" onclick="enviarFormularioPaciente()">Enviar formulário</button>
@@ -3081,6 +3094,8 @@
   }
 
   async function enviarFormularioPaciente(){
+    const consent = document.getElementById('pubConsentimento');
+    if(!consent || !consent.checked){ alert('É necessário aceitar o Aviso de Privacidade (LGPD) para enviar o formulário.'); return; }
     const nome     = document.getElementById('pubNome').value.trim();
     const telefone = formatTelefone(document.getElementById('pubTelefone').value.trim());
     const cpf      = formatCPF(document.getElementById('pubCPF').value.trim());
@@ -3099,6 +3114,8 @@
       nascimento: document.getElementById('pubNascimento').value,
       email: document.getElementById('pubEmail').value.trim(),
       dataEnvio: new Date().toISOString(),
+      consentimentoLGPD: true,
+      dataConsentimento: new Date().toISOString(),
       status: 'pendente'
     };
     try {
@@ -3881,6 +3898,10 @@
     renderFinanceiro();
     renderCuradoria();
     renderLogoEverywhere();
+    const _linkEl = document.getElementById('linkFormularioPaciente');
+    if(_linkEl) _linkEl.value = window.location.origin + window.location.pathname + '?formulario=paciente';
+    const _codEl = document.getElementById('pacienteCodigo');
+    if(_codEl && !_codEl.value) _codEl.value = 'PAC' + String(db.patientSequence || 1).padStart(3, '0');
     document.title = `${db.clinicName} | Gestão de Vendas`;
   }
 
