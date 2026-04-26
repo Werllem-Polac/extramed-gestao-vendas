@@ -329,7 +329,15 @@
     #publicFormScreen input,
     #publicFormScreen select {
       font-size:16px; /* evita zoom automático no iOS/Android */
+    }
+    #publicFormScreen input:not([type="date"]),
+    #publicFormScreen select {
       height:44px;
+    }
+    #publicFormScreen input[type="date"] {
+      padding:10px 12px;
+      box-sizing:border-box;
+      width:100%;
     }
     #publicFormScreen label {
       font-size:14px;
@@ -538,13 +546,6 @@
     </div>
     <div id="pubFormMsg" style="display:none;padding:14px;border-radius:10px;margin-bottom:16px;text-align:center;font-weight:600;font-size:14px;"></div>
     <div id="pubFormFields">
-      <div style="background:#f8f9fa;border:1px solid #dee2e6;border-left:4px solid #9B1C3E;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:#555;line-height:1.6;">
-        <strong style="color:#9B1C3E;display:block;margin-bottom:8px;font-size:13px;">Aviso de Privacidade — LGPD (Lei 13.709/2018)</strong>
-        <p style="margin:0 0 6px;">A <strong>Extra Diagnósticos</strong> coleta os dados deste formulário exclusivamente para <strong>cadastro e prestação de serviços de saúde</strong>, incluindo agendamento de consultas, emissão de documentos médicos e contato para confirmação de atendimento.</p>
-        <p style="margin:0 0 6px;"><strong>Base legal:</strong> Consentimento do titular (Art. 7º, I) e execução de contrato de serviços de saúde (Art. 7º, V da LGPD).</p>
-        <p style="margin:0 0 6px;"><strong>Seus direitos:</strong> A qualquer momento você pode solicitar acesso, correção, exclusão, portabilidade dos seus dados ou revogar este consentimento pelo nosso canal de atendimento.</p>
-        <p style="margin:0;"><strong>Responsável pelo tratamento:</strong> Extra Diagnósticos &nbsp;|&nbsp; <strong>Contato DPO:</strong> contato@extradiagnosticos.com.br</p>
-      </div>
       <div class="row row-2">
         <div><label>Nome completo *</label><input id="pubNome" placeholder="Seu nome completo" /></div>
         <div><label>Data de nascimento</label><input id="pubNascimento" type="date" /></div>
@@ -563,6 +564,13 @@
       <div class="row row-2">
         <div><label>CPF *</label><input id="pubCPF" /></div>
         <div><label>E-mail</label><input id="pubEmail" type="email" /></div>
+      </div>
+      <div style="background:#f8f9fa;border:1px solid #dee2e6;border-left:4px solid #9B1C3E;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:#555;line-height:1.6;">
+        <strong style="color:#9B1C3E;display:block;margin-bottom:8px;font-size:13px;">Aviso de Privacidade — LGPD (Lei 13.709/2018)</strong>
+        <p style="margin:0 0 6px;">A <strong>Extra Diagnósticos</strong> coleta os dados deste formulário exclusivamente para <strong>cadastro e prestação de serviços de saúde</strong>, incluindo agendamento de consultas, emissão de documentos médicos e contato para confirmação de atendimento.</p>
+        <p style="margin:0 0 6px;"><strong>Base legal:</strong> Consentimento do titular (Art. 7º, I) e execução de contrato de serviços de saúde (Art. 7º, V da LGPD).</p>
+        <p style="margin:0 0 6px;"><strong>Seus direitos:</strong> A qualquer momento você pode solicitar acesso, correção, exclusão, portabilidade dos seus dados ou revogar este consentimento pelo nosso canal de atendimento.</p>
+        <p style="margin:0;"><strong>Responsável pelo tratamento:</strong> Extra Diagnósticos &nbsp;|&nbsp; <strong>Contato DPO:</strong> contato@extradiagnosticos.com.br</p>
       </div>
       <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;padding:12px;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;">
         <input type="checkbox" id="pubConsentimento" style="width:18px;height:18px;margin-top:2px;cursor:pointer;accent-color:#9B1C3E;flex:0 0 18px;" />
