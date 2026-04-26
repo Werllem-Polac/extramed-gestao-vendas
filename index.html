@@ -325,6 +325,49 @@
       main{padding:18px}
     }
 
+    /* ── CONTAS A PAGAR ── */
+    .fin-abas{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px}
+    .fin-aba-btn{padding:9px 20px;border:none;background:none;cursor:pointer;font-weight:700;font-size:13px;color:var(--gray);border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s}
+    .fin-aba-btn.active{color:var(--wine);border-bottom-color:var(--wine)}
+    .fin-aba-btn:hover:not(.active){color:var(--wine-dark);background:#faf6f8;border-radius:8px 8px 0 0}
+    .fin-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .fin-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px 20px}
+    .fin-card h4{margin:0 0 8px;font-size:12px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+    .fin-card .fin-val{font-size:22px;font-weight:800;margin:0}
+    .fin-val-blue{color:#1d4ed8}.fin-val-green{color:#16a34a}.fin-val-amber{color:#b45309}.fin-val-red{color:#b91c1c}
+    .cat-fixo{background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+    .cat-variavel{background:#fef3c7;color:#b45309;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+    .cat-mercadoria{background:#d1fae5;color:#065f46;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+    .fin-st{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+    .fin-st-pago{background:#dcfce7;color:#15803d}.fin-st-pendente{background:#fef9c3;color:#92400e}
+    .fin-st-vencido{background:#fee2e2;color:#b91c1c}.fin-st-previsto{background:#f1f5f9;color:#475569}
+    .fin-dot-pago::before{content:"● ";font-size:10px;color:#16a34a}
+    .fin-dot-pendente::before{content:"● ";font-size:10px;color:#ca8a04}
+    .fin-dot-vencido::before{content:"● ";font-size:10px;color:#dc2626}
+    .fin-dot-previsto::before{content:"● ";font-size:10px;color:#94a3b8}
+    .fin-filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:center}
+    .fin-month-nav{display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .fin-nav-btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--wine);font-weight:700;transition:.1s}
+    .fin-nav-btn:hover{background:var(--soft)}
+    .fin-pag{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid #eee5f7;font-size:13px;color:var(--gray)}
+    .fin-modal{width:min(680px,100%);background:#fff;border-radius:24px;border:1px solid var(--border);box-shadow:0 25px 60px rgba(36,21,47,.25);padding:0;overflow:hidden}
+    .fin-modal-hdr{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .fin-modal-hdr h3{margin:0;font-size:16px;color:var(--wine)}
+    .fin-modal-body{padding:22px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .fin-modal-body .full{grid-column:1/-1}
+    .fin-modal-ftr{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+    .fin-form-row label{display:block;font-size:12px;font-weight:600;color:var(--gray);margin-bottom:4px}
+    .fin-form-row input,.fin-form-row select,.fin-form-row textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;background:#fff;outline:none;box-sizing:border-box}
+    .fin-form-row input:focus,.fin-form-row select:focus,.fin-form-row textarea:focus{border-color:var(--wine);box-shadow:0 0 0 3px rgba(155,28,62,.08)}
+    .fin-trim-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+    .fin-trim-table th{background:#faf6f8;color:var(--wine);padding:9px 12px;text-align:right;font-weight:700;border-bottom:2px solid var(--border)}
+    .fin-trim-table th:first-child{text-align:left}
+    .fin-trim-table td{padding:9px 12px;border-bottom:1px solid #f3eef5;text-align:right}
+    .fin-trim-table td:first-child{text-align:left;font-weight:600;color:#374151}
+    .fin-trim-table tr.total-row td{background:#faf6f8;font-weight:800;border-top:2px solid var(--border)}
+    .fin-chart-legend{display:flex;gap:18px;margin-top:8px;font-size:12px;color:var(--gray)}
+    .fin-chart-legend span{display:flex;align-items:center;gap:6px}
+
     /* ── LOGIN SCREEN ── */
     #loginScreen{
       position:fixed;inset:0;z-index:9999;
@@ -1600,16 +1643,169 @@
     </section>
 
     <section class="section" id="financeiro">
-      <div class="card">
-        <h3>Financeiro</h3>
-        <p class="muted">Módulo financeiro incluído no menu lateral para evolução da próxima etapa.</p>
-        <div class="grid grid-3" style="margin-top:18px">
-          <div class="metric m1"><h4>Contas a receber</h4><div class="value">R$ 0,00</div><div class="sub">Estrutura inicial</div></div>
-          <div class="metric m2"><h4>Contas a pagar</h4><div class="value">R$ 0,00</div><div class="sub">Estrutura inicial</div></div>
-          <div class="metric m3"><h4>Fluxo de caixa</h4><div class="value">R$ 0,00</div><div class="sub">Estrutura inicial</div></div>
+      <!-- Sub-nav -->
+      <div class="fin-abas">
+        <button class="fin-aba-btn active" onclick="showFinView('finDashboard',this)">Dashboard</button>
+        <button class="fin-aba-btn" onclick="showFinView('finLancamentos',this)">Lançamentos</button>
+        <button class="fin-aba-btn" onclick="showFinView('finCentros',this)">Centros de Custo</button>
+      </div>
+
+      <!-- ── DASHBOARD ── -->
+      <div id="finDashboard">
+        <div class="fin-grid4" id="finCards"></div>
+        <div class="card">
+          <div class="section-header">
+            <h3>Previsão Mensal <span id="finChartYear"></span></h3>
+          </div>
+          <svg id="finChart" width="100%" style="overflow:visible;display:block"></svg>
+          <div class="fin-chart-legend">
+            <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="var(--wine)"/></svg>Realizado</span>
+            <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="#e8d8de"/></svg>Previsto</span>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3>Previsão Trimestral por Categoria</h3>
+          <table class="fin-trim-table" id="finTrimestral"></table>
+        </div>
+      </div>
+
+      <!-- ── LANÇAMENTOS ── -->
+      <div id="finLancamentos" style="display:none">
+        <div class="section-header">
+          <div><h3>Contas a Pagar — Lançamentos</h3></div>
+          <button class="btn btn-primary" onclick="abrirModalFinLanc()">+ Novo Lançamento</button>
+        </div>
+        <!-- Abas rápidas -->
+        <div class="fin-abas" style="margin-bottom:14px">
+          <button class="fin-aba-btn active" onclick="setFinAba('Todos',this)">Todos</button>
+          <button class="fin-aba-btn" onclick="setFinAba('Fixo',this)">Fixos</button>
+          <button class="fin-aba-btn" onclick="setFinAba('Variável',this)">Variáveis</button>
+          <button class="fin-aba-btn" onclick="setFinAba('Mercadoria',this)">Mercadorias</button>
+        </div>
+        <!-- Filtros -->
+        <div class="card" style="margin-bottom:14px;padding:14px 18px">
+          <div class="fin-filters">
+            <input id="finBusca" placeholder="Buscar por descrição ou fornecedor…" oninput="renderFinLancamentos()" />
+            <select id="finFiltroStatus" onchange="renderFinLancamentos()">
+              <option>Todos</option><option>Pago</option><option>Pendente</option><option>Vencido</option><option>Previsto</option>
+            </select>
+            <select id="finFiltroCategoria" onchange="renderFinLancamentos()">
+              <option>Todas</option><option>Fixo</option><option>Variável</option><option>Mercadoria</option>
+            </select>
+            <select id="finFiltroCentro" onchange="renderFinLancamentos()">
+              <option value="Todos">Todos C.C.</option>
+            </select>
+            <div class="fin-month-nav">
+              <button class="fin-nav-btn" onclick="finMesAnterior()">←</button>
+              <span id="finMesLabel" style="font-weight:700;font-size:13px;min-width:90px;text-align:center"></span>
+              <button class="fin-nav-btn" onclick="finMesSeguinte()">→</button>
+            </div>
+          </div>
+        </div>
+        <!-- Tabela -->
+        <div class="card" style="padding:0">
+          <div class="table-wrap" style="border-radius:16px;border:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Descrição / Fornecedor</th>
+                  <th>Categoria</th>
+                  <th>Vencimento</th>
+                  <th class="right">Valor</th>
+                  <th>Centro de Custo</th>
+                  <th>Status</th>
+                  <th class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="finLancTabela"></tbody>
+            </table>
+          </div>
+          <div class="fin-pag" id="finPag"></div>
+        </div>
+      </div>
+
+      <!-- ── CENTROS DE CUSTO ── -->
+      <div id="finCentros" style="display:none">
+        <div class="section-header">
+          <div><h3>Centros de Custo</h3></div>
+          <button class="btn btn-primary" onclick="abrirModalFinCentro()">+ Novo Centro de Custo</button>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="table-wrap" style="border-radius:16px;border:none">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Descrição</th>
+                  <th class="right">Total no Mês Atual</th>
+                  <th class="right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="finCentrosTabela"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>
+
+    <!-- Modal Lançamento -->
+    <div class="modal-screen" id="finModalLanc">
+      <div class="fin-modal">
+        <div class="fin-modal-hdr">
+          <h3 id="finModalLancTitulo">Novo Lançamento</h3>
+          <button class="icon-btn" onclick="fecharModalFinLanc()">✕</button>
+        </div>
+        <div class="fin-modal-body">
+          <input type="hidden" id="finLancId"/>
+          <div class="fin-form-row full"><label>Descrição *</label><input id="finLancDescricao" placeholder="Descrição do lançamento"/></div>
+          <div class="fin-form-row"><label>Fornecedor *</label><input id="finLancFornecedor" placeholder="Nome do fornecedor"/></div>
+          <div class="fin-form-row"><label>Categoria *</label>
+            <select id="finLancCategoria"><option>Fixo</option><option>Variável</option><option>Mercadoria</option></select>
+          </div>
+          <div class="fin-form-row"><label>Centro de Custo *</label><select id="finLancCentro"></select></div>
+          <div class="fin-form-row"><label>Data de Vencimento *</label><input type="date" id="finLancVencimento"/></div>
+          <div class="fin-form-row"><label>Valor (R$) *</label><input type="number" step="0.01" min="0" id="finLancValor" placeholder="0,00"/></div>
+          <div class="fin-form-row"><label>Forma de Pagamento</label>
+            <select id="finLancForma"><option>Boleto</option><option>PIX</option><option>Transferência</option><option>Cartão</option><option>Dinheiro</option></select>
+          </div>
+          <div class="fin-form-row"><label>Status</label>
+            <select id="finLancStatus"><option>Previsto</option><option>Pendente</option><option>Pago</option><option>Vencido</option></select>
+          </div>
+          <div class="fin-form-row" id="finRecRow"><label>Recorrência</label>
+            <select id="finLancRecorrencia" onchange="toggleFinRecFields()"><option>Único</option><option>Mensal</option><option>Parcelado</option></select>
+          </div>
+          <div class="fin-form-row" id="finRecMesesRow" style="display:none"><label>Repetir por quantos meses</label><input type="number" min="2" max="60" id="finLancMeses" value="3"/></div>
+          <div class="fin-form-row" id="finRecParcelasRow" style="display:none"><label>Número de parcelas</label><input type="number" min="2" max="60" id="finLancParcelas" value="2"/></div>
+          <div class="fin-form-row full"><label>Observação</label><textarea id="finLancObs" rows="2" placeholder="Observações opcionais…"></textarea></div>
+          <div class="fin-form-row full"><label>Anexo (NF / Comprovante)</label>
+            <input type="file" id="finLancAnexo" accept=".pdf,.jpg,.jpeg,.png"/>
+          </div>
+        </div>
+        <div class="fin-modal-ftr">
+          <button class="btn btn-light" onclick="fecharModalFinLanc()">Cancelar</button>
+          <button class="btn btn-primary" id="finLancSalvarBtn" onclick="salvarFinLanc()">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Centro de Custo -->
+    <div class="modal-screen" id="finModalCentro">
+      <div class="fin-modal" style="max-width:420px">
+        <div class="fin-modal-hdr">
+          <h3 id="finModalCentroTitulo">Novo Centro de Custo</h3>
+          <button class="icon-btn" onclick="fecharModalFinCentro()">✕</button>
+        </div>
+        <div class="fin-modal-body" style="grid-template-columns:1fr">
+          <input type="hidden" id="finCentroId"/>
+          <div class="fin-form-row"><label>Nome *</label><input id="finCentroNome" placeholder="Nome do centro de custo"/></div>
+          <div class="fin-form-row"><label>Descrição</label><textarea id="finCentroDesc" rows="2" placeholder="Descrição opcional…"></textarea></div>
+        </div>
+        <div class="fin-modal-ftr">
+          <button class="btn btn-light" onclick="fecharModalFinCentro()">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarFinCentro()">Salvar</button>
+        </div>
+      </div>
+    </div>
       <section class="section" id="cancelamentos">
       <div class="card">
         <h3>Cancelamentos e Estornos</h3>
@@ -1715,7 +1911,29 @@
     patients: [],
     users: [],
     sales: [],
-    saleSequence: 1
+    saleSequence: 1,
+    centrosCusto: [
+      {id:'adm', nome:'Administrativo', descricao:'Despesas administrativas gerais'},
+      {id:'med', nome:'Médico', descricao:'Insumos e equipamentos médicos'},
+      {id:'est', nome:'Estoque', descricao:'Compras e reposição de estoque'},
+      {id:'rh',  nome:'RH',     descricao:'Recursos humanos e folha'},
+      {id:'ti',  nome:'TI',     descricao:'Tecnologia e sistemas'},
+      {id:'mkt', nome:'Marketing', descricao:'Publicidade e marketing'}
+    ],
+    contasPagar: [
+      {id:'cp1',  descricao:'Aluguel Clínica',        fornecedor:'Imobiliária Silva',      categoria:'Fixo',       centroCusto:'adm', vencimento:'2026-04-05', valor:8500,  formaPagamento:'Transferência', status:'Pago',     recorrencia:'Mensal', observacao:'',         anexo:null},
+      {id:'cp2',  descricao:'Folha de Pagamento',      fornecedor:'RH Interno',             categoria:'Fixo',       centroCusto:'rh',  vencimento:'2026-04-10', valor:45000, formaPagamento:'Transferência', status:'Pago',     recorrencia:'Mensal', observacao:'',         anexo:null},
+      {id:'cp3',  descricao:'Material de Limpeza',     fornecedor:'Distribuidora Clean',    categoria:'Variável',   centroCusto:'adm', vencimento:'2026-04-15', valor:1200,  formaPagamento:'Boleto',        status:'Pago',     recorrencia:'Único',  observacao:'',         anexo:null},
+      {id:'cp4',  descricao:'Medicamentos UCI',         fornecedor:'Farmacêutica Brasil',    categoria:'Mercadoria', centroCusto:'est', vencimento:'2026-04-20', valor:12500, formaPagamento:'Boleto',        status:'Pendente', recorrencia:'Único',  observacao:'NF 4521',  anexo:null},
+      {id:'cp5',  descricao:'Sistema de Gestão',        fornecedor:'TechMed Soluções',       categoria:'Fixo',       centroCusto:'ti',  vencimento:'2026-04-12', valor:2800,  formaPagamento:'PIX',           status:'Pago',     recorrencia:'Mensal', observacao:'',         anexo:null},
+      {id:'cp6',  descricao:'Campanha Redes Sociais',   fornecedor:'Digital Agency',         categoria:'Variável',   centroCusto:'mkt', vencimento:'2026-04-18', valor:3500,  formaPagamento:'PIX',           status:'Vencido',  recorrencia:'Único',  observacao:'',         anexo:null},
+      {id:'cp7',  descricao:'Equipamento Ultrassom',    fornecedor:'MedEquip Ltda',          categoria:'Mercadoria', centroCusto:'med', vencimento:'2026-03-31', valor:28000, formaPagamento:'Boleto',        status:'Vencido',  recorrencia:'Único',  observacao:'Parcela 2/3', anexo:null},
+      {id:'cp8',  descricao:'Água e Energia',           fornecedor:'COPASA / CEMIG',         categoria:'Fixo',       centroCusto:'adm', vencimento:'2026-04-25', valor:4200,  formaPagamento:'Transferência', status:'Pendente', recorrencia:'Mensal', observacao:'',         anexo:null},
+      {id:'cp9',  descricao:'Seguro Predial',           fornecedor:'Seguradora Nacional',    categoria:'Fixo',       centroCusto:'adm', vencimento:'2026-05-05', valor:1800,  formaPagamento:'Boleto',        status:'Previsto', recorrencia:'Mensal', observacao:'',         anexo:null},
+      {id:'cp10', descricao:'Reagentes Laboratório',    fornecedor:'BioLab Diagnósticos',    categoria:'Mercadoria', centroCusto:'est', vencimento:'2026-05-10', valor:9800,  formaPagamento:'Boleto',        status:'Previsto', recorrencia:'Único',  observacao:'',         anexo:null},
+      {id:'cp11', descricao:'Treinamento Equipe',       fornecedor:'Instituto Saúde+',       categoria:'Variável',   centroCusto:'rh',  vencimento:'2026-05-20', valor:5600,  formaPagamento:'PIX',           status:'Previsto', recorrencia:'Único',  observacao:'',         anexo:null},
+      {id:'cp12', descricao:'Manutenção AC',            fornecedor:'FrioTec Serviços',       categoria:'Variável',   centroCusto:'adm', vencimento:'2026-04-22', valor:2100,  formaPagamento:'PIX',           status:'Pago',     recorrencia:'Único',  observacao:'',         anexo:null}
+    ]
   };
 
   let db = loadDB();
@@ -3277,6 +3495,7 @@
     renderRepasse();
     renderCancelamentos();
     renderConfiguracoes();
+    renderFinanceiro();
     document.title = `${db.clinicName} | Gestão de Vendas`;
   }
 
@@ -3343,6 +3562,422 @@
     } catch (error) {
       console.error('Erro na inicialização do sistema:', error);
     }
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // ── MÓDULO CONTAS A PAGAR ─────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════
+
+  const FIN_MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const FIN_MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const FIN_POR_PAGINA = 8;
+
+  let _finView = 'finDashboard';
+  let _finMes  = new Date().getMonth();
+  let _finAno  = new Date().getFullYear();
+  let _finAba  = 'Todos';
+  let _finPag  = 1;
+
+  function finEnsure(){
+    if(!Array.isArray(db.centrosCusto)) db.centrosCusto = structuredClone(defaultDB.centrosCusto);
+    if(!Array.isArray(db.contasPagar))  db.contasPagar  = [];
+  }
+
+  function finAddMonths(dateStr, n){
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m-1+n, d);
+    return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+  }
+
+  function finStatusEfetivo(l){
+    if(l.status === 'Pago') return 'Pago';
+    const v = new Date(l.vencimento + 'T00:00:00');
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    if(v < hoje) return 'Vencido';
+    return l.status;
+  }
+
+  function finFmtK(v){
+    if(v >= 1000000) return 'R$'+(v/1000000).toFixed(1)+'M';
+    if(v >= 1000)    return 'R$'+(v/1000).toFixed(0)+'k';
+    return 'R$'+Number(v).toFixed(0);
+  }
+
+  function finStatusBadge(s){
+    const map = {Pago:'pago',Pendente:'pendente',Vencido:'vencido',Previsto:'previsto'};
+    const k = map[s]||'previsto';
+    return `<span class="fin-st fin-st-${k} fin-dot-${k}">${s}</span>`;
+  }
+
+  function finCatBadge(c){
+    const map = {Fixo:'fixo',Variável:'variavel',Mercadoria:'mercadoria'};
+    return `<span class="cat-${map[c]||'fixo'}">${c}</span>`;
+  }
+
+  // ── Navegação de views ──────────────────────────────────────
+  function showFinView(id, btn){
+    ['finDashboard','finLancamentos','finCentros'].forEach(v => {
+      const el = document.getElementById(v);
+      if(el) el.style.display = v === id ? '' : 'none';
+    });
+    document.querySelectorAll('#financeiro > .fin-abas .fin-aba-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    _finView = id;
+    if(id === 'finDashboard')    renderFinDashboard();
+    if(id === 'finLancamentos')  renderFinLancamentos();
+    if(id === 'finCentros')      renderFinCentros();
+  }
+
+  function setFinAba(aba, btn){
+    _finAba = aba; _finPag = 1;
+    document.querySelectorAll('#finLancamentos .fin-abas .fin-aba-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    renderFinLancamentos();
+  }
+
+  function finMesAnterior(){ const d = new Date(_finAno, _finMes-1); _finMes=d.getMonth(); _finAno=d.getFullYear(); _finPag=1; renderFinLancamentos(); }
+  function finMesSeguinte(){ const d = new Date(_finAno, _finMes+1); _finMes=d.getMonth(); _finAno=d.getFullYear(); _finPag=1; renderFinLancamentos(); }
+
+  // ── Render principal ────────────────────────────────────────
+  function renderFinanceiro(){
+    finEnsure();
+    preencherSelectFinCentro();
+    if(_finView === 'finDashboard')   renderFinDashboard();
+    if(_finView === 'finLancamentos') renderFinLancamentos();
+    if(_finView === 'finCentros')     renderFinCentros();
+  }
+
+  function preencherSelectFinCentro(){
+    const sel = document.getElementById('finFiltroCentro');
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="Todos">Todos C.C.</option>' +
+      db.centrosCusto.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+    sel.value = cur || 'Todos';
+  }
+
+  // ── Dashboard ───────────────────────────────────────────────
+  function renderFinDashboard(){
+    finEnsure();
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const ano  = hoje.getFullYear();
+    const all  = db.contasPagar.map(l => ({...l, se: finStatusEfetivo(l)}));
+
+    // Cards
+    const totPrevisto = all.reduce((s,l) => s + l.valor, 0);
+    const totPago     = all.filter(l => l.se === 'Pago').reduce((s,l) => s + l.valor, 0);
+    const totAPagar   = all.filter(l => ['Pendente','Previsto'].includes(l.se)).reduce((s,l) => s + l.valor, 0);
+    const totVencido  = all.filter(l => l.se === 'Vencido').reduce((s,l) => s + l.valor, 0);
+
+    const cards = document.getElementById('finCards');
+    if(cards) cards.innerHTML = [
+      {t:'Total Previsto',    v:totPrevisto, cls:'fin-val-blue'},
+      {t:'Já Pago',           v:totPago,     cls:'fin-val-green'},
+      {t:'A Pagar',           v:totAPagar,   cls:'fin-val-amber'},
+      {t:'Vencido',           v:totVencido,  cls:'fin-val-red'},
+    ].map(c => `<div class="fin-card"><h4>${c.t}</h4><div class="fin-val ${c.cls}">${formatCurrency(c.v)}</div></div>`).join('');
+
+    // Chart
+    const yrLabel = document.getElementById('finChartYear');
+    if(yrLabel) yrLabel.textContent = ano;
+    renderFinChart(all, ano, hoje.getMonth());
+
+    // Quarterly table
+    renderFinTrimestral(all, hoje.getMonth(), ano);
+  }
+
+  function renderFinChart(all, ano, mesAtual){
+    const svg = document.getElementById('finChart');
+    if(!svg) return;
+    const monthly = new Array(12).fill(0);
+    all.forEach(l => {
+      const d = new Date(l.vencimento+'T00:00:00');
+      if(d.getFullYear() === ano) monthly[d.getMonth()] += l.valor;
+    });
+    const maxV = Math.max(...monthly, 1);
+    const H=160, barW=40, gap=16, leftPad=72, topPad=12, totalW = leftPad + 12*(barW+gap);
+    svg.setAttribute('viewBox', `0 0 ${totalW} ${H+44}`);
+    svg.setAttribute('height', H+44);
+    let s = '';
+    [0,.25,.5,.75,1].forEach(f => {
+      const y = topPad + H - H*f;
+      s += `<line x1="${leftPad}" y1="${y}" x2="${totalW}" y2="${y}" stroke="#f0eef5" stroke-width="1"/>`;
+      s += `<text x="${leftPad-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#9ca3af">${finFmtK(maxV*f)}</text>`;
+    });
+    FIN_MESES.forEach((m,i) => {
+      const val = monthly[i]||0;
+      const h   = (val/maxV)*H;
+      const x   = leftPad + i*(barW+gap);
+      const y   = topPad + H - h;
+      const isPast = i <= mesAtual;
+      if(h > 0){
+        s += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${isPast ? 'var(--wine)' : '#e8d8de'}" rx="4" opacity="${isPast?1:.75}"/>`;
+        s += `<text x="${x+barW/2}" y="${y-4}" text-anchor="middle" font-size="10" fill="${isPast?'var(--wine)':'#b0a0b5'}">${finFmtK(val)}</text>`;
+      } else {
+        s += `<rect x="${x}" y="${topPad+H-2}" width="${barW}" height="2" fill="#ede8f0" rx="1"/>`;
+      }
+      s += `<text x="${x+barW/2}" y="${topPad+H+20}" text-anchor="middle" font-size="11" fill="#6b7280">${m}</text>`;
+    });
+    svg.innerHTML = s;
+  }
+
+  function renderFinTrimestral(all, mesAtual, ano){
+    const tbl = document.getElementById('finTrimestral');
+    if(!tbl) return;
+    const meses = [mesAtual, mesAtual+1, mesAtual+2];
+    const cats  = ['Fixo','Variável','Mercadoria'];
+    const getVal = (cat, mIdx) => {
+      const ma = mIdx%12, ya = ano + Math.floor(mIdx/12);
+      return all.filter(l => {
+        const d = new Date(l.vencimento+'T00:00:00');
+        return l.categoria===cat && d.getMonth()===ma && d.getFullYear()===ya;
+      }).reduce((s,l)=>s+l.valor,0);
+    };
+    const rows = cats.map(cat => {
+      const vals = meses.map(m => getVal(cat, m));
+      return {cat, vals, total: vals.reduce((a,b)=>a+b,0)};
+    });
+    const colTotals = meses.map(m => cats.reduce((s,cat)=>s+getVal(cat,m),0));
+    const grandTotal = colTotals.reduce((a,b)=>a+b,0);
+    tbl.innerHTML = `
+      <thead><tr>
+        <th>Categoria</th>
+        ${meses.map(m=>`<th>${FIN_MESES_FULL[m%12]}</th>`).join('')}
+        <th>Total Trim.</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r=>`<tr>
+          <td>${r.cat}</td>
+          ${r.vals.map(v=>`<td>${formatCurrency(v)}</td>`).join('')}
+          <td>${formatCurrency(r.total)}</td>
+        </tr>`).join('')}
+        <tr class="total-row">
+          <td>Total</td>
+          ${colTotals.map(v=>`<td>${formatCurrency(v)}</td>`).join('')}
+          <td>${formatCurrency(grandTotal)}</td>
+        </tr>
+      </tbody>`;
+  }
+
+  // ── Lançamentos ─────────────────────────────────────────────
+  function renderFinLancamentos(){
+    finEnsure();
+    const busca    = (document.getElementById('finBusca')||{}).value||'';
+    const fStatus  = (document.getElementById('finFiltroStatus')||{}).value||'Todos';
+    const fCat     = (document.getElementById('finFiltroCategoria')||{}).value||'Todas';
+    const fCentro  = (document.getElementById('finFiltroCentro')||{}).value||'Todos';
+    const label    = document.getElementById('finMesLabel');
+    if(label) label.textContent = `${FIN_MESES_FULL[_finMes]} ${_finAno}`;
+
+    const todos = db.contasPagar.map(l => ({...l, se: finStatusEfetivo(l)}))
+      .filter(l => {
+        const d = new Date(l.vencimento+'T00:00:00');
+        if(d.getMonth() !== _finMes || d.getFullYear() !== _finAno) return false;
+        if(busca && !l.descricao.toLowerCase().includes(busca.toLowerCase()) && !l.fornecedor.toLowerCase().includes(busca.toLowerCase())) return false;
+        if(fStatus !== 'Todos' && l.se !== fStatus) return false;
+        if(fCat !== 'Todas' && l.categoria !== fCat) return false;
+        if(fCentro !== 'Todos' && l.centroCusto !== fCentro) return false;
+        if(_finAba !== 'Todos' && l.categoria !== _finAba) return false;
+        return true;
+      });
+
+    const totalPag = Math.max(1, Math.ceil(todos.length/FIN_POR_PAGINA));
+    if(_finPag > totalPag) _finPag = totalPag;
+    const pagina = todos.slice((_finPag-1)*FIN_POR_PAGINA, _finPag*FIN_POR_PAGINA);
+
+    const tbody = document.getElementById('finLancTabela');
+    if(tbody) tbody.innerHTML = pagina.length ? pagina.map(l => {
+      const centro = db.centrosCusto.find(c => c.id === l.centroCusto);
+      return `<tr>
+        <td><div style="font-weight:600">${l.descricao}</div><div style="font-size:11px;color:var(--gray)">${l.fornecedor}</div></td>
+        <td>${finCatBadge(l.categoria)}</td>
+        <td>${fmtData(l.vencimento)}</td>
+        <td class="right" style="font-weight:700">${formatCurrency(l.valor)}</td>
+        <td>${centro ? centro.nome : '-'}</td>
+        <td>${finStatusBadge(l.se)}</td>
+        <td class="right">
+          <button class="btn btn-light" style="padding:4px 10px;font-size:12px" onclick="abrirModalFinLanc('${l.id}')">Editar</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="excluirFinLanc('${l.id}')">Excluir</button>
+        </td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="7" class="empty">Nenhum lançamento encontrado para este período.</td></tr>`;
+
+    const pag = document.getElementById('finPag');
+    if(pag) pag.innerHTML = `<span>${todos.length} lançamento(s)</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="fin-nav-btn" onclick="finPagAnterior()" ${_finPag===1?'disabled style="opacity:.4"':''}>Anterior</button>
+        <span style="font-size:13px">${_finPag} / ${totalPag}</span>
+        <button class="fin-nav-btn" onclick="finPagSeguinte(${totalPag})" ${_finPag===totalPag?'disabled style="opacity:.4"':''}>Próxima</button>
+      </div>`;
+  }
+
+  function finPagAnterior(){ if(_finPag > 1){ _finPag--; renderFinLancamentos(); } }
+  function finPagSeguinte(tot){ if(_finPag < tot){ _finPag++; renderFinLancamentos(); } }
+
+  // ── CRUD Lançamentos ─────────────────────────────────────────
+  function abrirModalFinLanc(id){
+    finEnsure();
+    const isEdit = !!id;
+    document.getElementById('finModalLancTitulo').textContent = isEdit ? 'Editar Lançamento' : 'Novo Lançamento';
+    document.getElementById('finLancSalvarBtn').textContent   = isEdit ? 'Salvar Alterações' : 'Salvar';
+    // Preenche select de centros
+    const sel = document.getElementById('finLancCentro');
+    sel.innerHTML = db.centrosCusto.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+    // Desabilita recorrência em edição
+    document.getElementById('finLancRecorrencia').disabled = isEdit;
+    document.getElementById('finRecRow').style.opacity = isEdit ? '.5' : '1';
+    if(isEdit){
+      const l = db.contasPagar.find(x => x.id === id);
+      if(!l) return;
+      document.getElementById('finLancId').value         = l.id;
+      document.getElementById('finLancDescricao').value  = l.descricao;
+      document.getElementById('finLancFornecedor').value = l.fornecedor;
+      document.getElementById('finLancCategoria').value  = l.categoria;
+      sel.value = l.centroCusto;
+      document.getElementById('finLancVencimento').value = l.vencimento;
+      document.getElementById('finLancValor').value      = l.valor;
+      document.getElementById('finLancForma').value      = l.formaPagamento;
+      document.getElementById('finLancStatus').value     = l.status;
+      document.getElementById('finLancRecorrencia').value= l.recorrencia;
+      document.getElementById('finLancObs').value        = l.observacao||'';
+    } else {
+      document.getElementById('finLancId').value         = '';
+      document.getElementById('finLancDescricao').value  = '';
+      document.getElementById('finLancFornecedor').value = '';
+      document.getElementById('finLancCategoria').value  = 'Fixo';
+      document.getElementById('finLancVencimento').value = new Date().toISOString().slice(0,10);
+      document.getElementById('finLancValor').value      = '';
+      document.getElementById('finLancForma').value      = 'Boleto';
+      document.getElementById('finLancStatus').value     = 'Previsto';
+      document.getElementById('finLancRecorrencia').value= 'Único';
+      document.getElementById('finLancObs').value        = '';
+    }
+    toggleFinRecFields();
+    document.getElementById('finModalLanc').classList.add('open');
+  }
+
+  function fecharModalFinLanc(){ document.getElementById('finModalLanc').classList.remove('open'); }
+
+  function toggleFinRecFields(){
+    const rec = document.getElementById('finLancRecorrencia').value;
+    document.getElementById('finRecMesesRow').style.display   = rec==='Mensal'    ? '' : 'none';
+    document.getElementById('finRecParcelasRow').style.display = rec==='Parcelado' ? '' : 'none';
+  }
+
+  function salvarFinLanc(){
+    finEnsure();
+    const id     = document.getElementById('finLancId').value;
+    const desc   = document.getElementById('finLancDescricao').value.trim();
+    const forn   = document.getElementById('finLancFornecedor').value.trim();
+    const venc   = document.getElementById('finLancVencimento').value;
+    const val    = parseFloat(document.getElementById('finLancValor').value)||0;
+    if(!desc || !forn || !venc || !val){ alert('Preencha os campos obrigatórios.'); return; }
+    const base = {
+      descricao: desc, fornecedor: forn,
+      categoria:      document.getElementById('finLancCategoria').value,
+      centroCusto:    document.getElementById('finLancCentro').value,
+      vencimento: venc, valor: val,
+      formaPagamento: document.getElementById('finLancForma').value,
+      status:         document.getElementById('finLancStatus').value,
+      recorrencia:    document.getElementById('finLancRecorrencia').value,
+      observacao:     document.getElementById('finLancObs').value,
+      anexo: null
+    };
+    if(id){
+      db.contasPagar = db.contasPagar.map(l => l.id === id ? {...l, ...base} : l);
+    } else {
+      const novos = [];
+      if(base.recorrencia === 'Mensal'){
+        const n = parseInt(document.getElementById('finLancMeses').value)||3;
+        for(let i=0; i<n; i++) novos.push({...base, id:uid(), vencimento: finAddMonths(venc,i), status: i===0 ? base.status : 'Previsto'});
+      } else if(base.recorrencia === 'Parcelado'){
+        const n = parseInt(document.getElementById('finLancParcelas').value)||2;
+        for(let i=0; i<n; i++) novos.push({...base, id:uid(), vencimento: finAddMonths(venc,i), descricao:`${desc} (${i+1}/${n})`, status: i===0 ? base.status : 'Previsto'});
+      } else {
+        novos.push({...base, id:uid()});
+      }
+      db.contasPagar.push(...novos);
+    }
+    fecharModalFinLanc();
+    saveDB();
+    renderFinLancamentos();
+    renderFinDashboard();
+  }
+
+  function excluirFinLanc(id){
+    if(!confirm('Excluir este lançamento?')) return;
+    db.contasPagar = db.contasPagar.filter(l => l.id !== id);
+    saveDB();
+    renderFinLancamentos();
+    renderFinDashboard();
+  }
+
+  // ── Centros de Custo ─────────────────────────────────────────
+  function renderFinCentros(){
+    finEnsure();
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const mes = hoje.getMonth(), ano = hoje.getFullYear();
+    const tbody = document.getElementById('finCentrosTabela');
+    if(!tbody) return;
+    tbody.innerHTML = db.centrosCusto.map(c => {
+      const total = db.contasPagar.filter(l => {
+        const d = new Date(l.vencimento+'T00:00:00');
+        return l.centroCusto===c.id && d.getMonth()===mes && d.getFullYear()===ano;
+      }).reduce((s,l)=>s+l.valor, 0);
+      return `<tr>
+        <td style="font-weight:600">${c.nome}</td>
+        <td style="color:var(--gray)">${c.descricao||'-'}</td>
+        <td class="right" style="font-weight:700">${formatCurrency(total)}</td>
+        <td class="right">
+          <button class="btn btn-light" style="padding:4px 10px;font-size:12px" onclick="abrirModalFinCentro('${c.id}')">Editar</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px" onclick="excluirFinCentro('${c.id}')">Excluir</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function abrirModalFinCentro(id){
+    finEnsure();
+    document.getElementById('finModalCentroTitulo').textContent = id ? 'Editar Centro de Custo' : 'Novo Centro de Custo';
+    document.getElementById('finCentroId').value = id||'';
+    const c = id ? db.centrosCusto.find(x => x.id===id) : null;
+    document.getElementById('finCentroNome').value = c ? c.nome : '';
+    document.getElementById('finCentroDesc').value = c ? c.descricao||'' : '';
+    document.getElementById('finModalCentro').classList.add('open');
+  }
+
+  function fecharModalFinCentro(){ document.getElementById('finModalCentro').classList.remove('open'); }
+
+  function salvarFinCentro(){
+    finEnsure();
+    const id   = document.getElementById('finCentroId').value;
+    const nome = document.getElementById('finCentroNome').value.trim();
+    if(!nome){ alert('Informe o nome do centro de custo.'); return; }
+    const desc = document.getElementById('finCentroDesc').value.trim();
+    if(id){
+      db.centrosCusto = db.centrosCusto.map(c => c.id===id ? {...c, nome, descricao:desc} : c);
+    } else {
+      db.centrosCusto.push({id:uid(), nome, descricao:desc});
+    }
+    fecharModalFinCentro();
+    saveDB();
+    renderFinCentros();
+    preencherSelectFinCentro();
+  }
+
+  function excluirFinCentro(id){
+    if(!confirm('Excluir este centro de custo? Lançamentos vinculados não serão afetados.')) return;
+    db.centrosCusto = db.centrosCusto.filter(c => c.id!==id);
+    saveDB();
+    renderFinCentros();
+    preencherSelectFinCentro();
+  }
+
+  // Helper para formatação de data
+  function fmtData(s){
+    if(!s) return '-';
+    const [y,m,d] = s.split('-');
+    return `${d}/${m}/${y}`;
   }
 
   window.addEventListener('DOMContentLoaded', init);
