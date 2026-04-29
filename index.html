@@ -4495,7 +4495,7 @@
     const d26 = monthly(2026);
     const maxV = Math.max(...d25, ...d26, 1);
 
-    const H=160, topPad=20, botPad=28, leftPad=72, rightPad=12;
+    const H=96, topPad=14, botPad=24, leftPad=64, rightPad=10;
     const totalW = 720, chartW = totalW - leftPad - rightPad;
     const stepX = chartW / 11;
     svg.setAttribute('viewBox', `0 0 ${totalW} ${H + topPad + botPad}`);
@@ -4503,39 +4503,51 @@
 
     const xOf = i => leftPad + i * stepX;
     const yOf = v => topPad + H - (v / maxV) * H;
+
+    // Catmull-Rom → Bezier: curva suave que passa por todos os pontos
+    const smoothD = data => {
+      const pts = data.map((v,i) => [xOf(i), yOf(v)]);
+      const t = 0.35;
+      let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+      for(let i = 0; i < pts.length - 1; i++){
+        const p0 = pts[Math.max(i-1,0)], p1 = pts[i], p2 = pts[i+1], p3 = pts[Math.min(i+2,pts.length-1)];
+        const cp1x = p1[0] + (p2[0]-p0[0])*t, cp1y = p1[1] + (p2[1]-p0[1])*t;
+        const cp2x = p2[0] - (p3[0]-p1[0])*t, cp2y = p2[1] - (p3[1]-p1[1])*t;
+        d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+      }
+      return d;
+    };
+
     let s = '';
 
-    // Grid
-    [0,.25,.5,.75,1].forEach(f => {
+    // Grid (apenas 3 linhas para chart menor)
+    [0,.5,1].forEach(f => {
       const y = (topPad + H - H*f).toFixed(1);
       s += `<line x1="${leftPad}" y1="${y}" x2="${totalW-rightPad}" y2="${y}" stroke="#f0eef5" stroke-width="1"/>`;
-      s += `<text x="${leftPad-8}" y="${(parseFloat(y)+4).toFixed(1)}" text-anchor="end" font-size="11" fill="#9ca3af">${finFmtK(maxV*f)}</text>`;
+      s += `<text x="${leftPad-6}" y="${(parseFloat(y)+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#b0b8c9">${finFmtK(maxV*f)}</text>`;
     });
 
-    // Area fills (suave)
+    // Area fills com curva suave
     const makeArea = (data, color) => {
-      const pts = data.map((v,i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' L ');
       const bot = (topPad+H).toFixed(1);
-      return `<path d="M ${pts} L ${xOf(11).toFixed(1)},${bot} L ${xOf(0).toFixed(1)},${bot} Z" fill="${color}" opacity="0.09"/>`;
+      const line = smoothD(data);
+      const last = xOf(11).toFixed(1), first = xOf(0).toFixed(1);
+      return `<path d="${line} L ${last},${bot} L ${first},${bot} Z" fill="${color}" opacity="0.07"/>`;
     };
     s += makeArea(d25, '#9B1C3E');
     s += makeArea(d26, '#C9A84C');
 
-    // Linhas
-    const makeLine = (data, color) => {
-      const pts = data.map((v,i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' L ');
-      return `<path d="M ${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
-    };
-    s += makeLine(d25, '#9B1C3E');
-    s += makeLine(d26, '#C9A84C');
+    // Linhas suaves
+    s += `<path d="${smoothD(d25)}" fill="none" stroke="#9B1C3E" stroke-width="2" stroke-linecap="round"/>`;
+    s += `<path d="${smoothD(d26)}" fill="none" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>`;
 
-    // Círculos e bandas de hover por mês
+    // Círculos e bandas de hover
     FIN_MESES.forEach((m,i) => {
       const x = xOf(i).toFixed(1);
       const y25 = yOf(d25[i]).toFixed(1), y26 = yOf(d26[i]).toFixed(1);
-      if(d25[i] > 0) s += `<circle cx="${x}" cy="${y25}" r="4" fill="#9B1C3E" stroke="#fff" stroke-width="1.5"/>`;
-      if(d26[i] > 0) s += `<circle cx="${x}" cy="${y26}" r="4" fill="#C9A84C" stroke="#fff" stroke-width="1.5"/>`;
-      s += `<text x="${x}" y="${(topPad+H+18).toFixed(1)}" text-anchor="middle" font-size="11" fill="#6b7280">${m}</text>`;
+      if(d25[i] > 0) s += `<circle cx="${x}" cy="${y25}" r="3.5" fill="#9B1C3E" stroke="#fff" stroke-width="1.5"/>`;
+      if(d26[i] > 0) s += `<circle cx="${x}" cy="${y26}" r="3.5" fill="#C9A84C" stroke="#fff" stroke-width="1.5"/>`;
+      s += `<text x="${x}" y="${(topPad+H+15).toFixed(1)}" text-anchor="middle" font-size="10" fill="#9ca3af">${m}</text>`;
       const bx = (xOf(i) - stepX/2).toFixed(1);
       s += `<rect x="${bx}" y="${topPad}" width="${stepX.toFixed(1)}" height="${H}" fill="transparent"
         data-mes="${FIN_MESES_FULL[i]}" data-v25="${d25[i].toFixed(2)}" data-v26="${d26[i].toFixed(2)}"
