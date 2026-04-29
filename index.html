@@ -1878,6 +1878,23 @@
           <h3>Previsão Trimestral por Categoria</h3>
           <table class="fin-trim-table" id="finTrimestral"></table>
         </div>
+        <div class="card" style="margin-top:16px;position:relative">
+          <div class="section-header" style="margin-bottom:12px">
+            <h3>Evolução de Despesas</h3>
+            <div style="display:flex;gap:16px;align-items:center;font-size:12px;color:var(--gray)">
+              <span style="display:flex;align-items:center;gap:5px">
+                <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#9B1C3E" stroke-width="2.5" stroke-linecap="round"/></svg>2025
+              </span>
+              <span style="display:flex;align-items:center;gap:5px">
+                <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round"/></svg>2026
+              </span>
+            </div>
+          </div>
+          <div style="position:relative;overflow:hidden">
+            <svg id="finEvolChart" width="100%" style="overflow:visible;display:block"></svg>
+            <div id="finEvolTooltip" style="position:absolute;background:#1f2937;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.35)"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ── LANÇAMENTOS ── -->
@@ -4387,6 +4404,9 @@
 
     // Tabela trimestral a partir do mês selecionado (ou mês atual)
     renderFinTrimestral(filtered, fMes !== -1 ? fMes : hoje.getMonth(), fAno);
+
+    // Gráfico de evolução 2025 vs 2026 (sempre usa todos os dados, independente do filtro)
+    renderFinEvolucao();
   }
 
   function renderFinChart(all, ano, mesAtual){
@@ -4460,6 +4480,94 @@
           <td>${formatCurrency(grandTotal)}</td>
         </tr>
       </tbody>`;
+  }
+
+  // ── Evolução 2025 vs 2026 ────────────────────────────────────
+  function renderFinEvolucao(){
+    const svg = document.getElementById('finEvolChart');
+    if(!svg) return;
+    const all = db.contasPagar || [];
+    const monthly = yr => Array.from({length:12}, (_,m) =>
+      all.filter(l => { const d = new Date(l.vencimento+'T00:00:00'); return d.getFullYear()===yr && d.getMonth()===m; })
+         .reduce((s,l) => s + l.valor, 0)
+    );
+    const d25 = monthly(2025);
+    const d26 = monthly(2026);
+    const maxV = Math.max(...d25, ...d26, 1);
+
+    const H=160, topPad=20, botPad=28, leftPad=72, rightPad=12;
+    const totalW = 720, chartW = totalW - leftPad - rightPad;
+    const stepX = chartW / 11;
+    svg.setAttribute('viewBox', `0 0 ${totalW} ${H + topPad + botPad}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    const xOf = i => leftPad + i * stepX;
+    const yOf = v => topPad + H - (v / maxV) * H;
+    let s = '';
+
+    // Grid
+    [0,.25,.5,.75,1].forEach(f => {
+      const y = (topPad + H - H*f).toFixed(1);
+      s += `<line x1="${leftPad}" y1="${y}" x2="${totalW-rightPad}" y2="${y}" stroke="#f0eef5" stroke-width="1"/>`;
+      s += `<text x="${leftPad-8}" y="${(parseFloat(y)+4).toFixed(1)}" text-anchor="end" font-size="11" fill="#9ca3af">${finFmtK(maxV*f)}</text>`;
+    });
+
+    // Area fills (suave)
+    const makeArea = (data, color) => {
+      const pts = data.map((v,i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' L ');
+      const bot = (topPad+H).toFixed(1);
+      return `<path d="M ${pts} L ${xOf(11).toFixed(1)},${bot} L ${xOf(0).toFixed(1)},${bot} Z" fill="${color}" opacity="0.09"/>`;
+    };
+    s += makeArea(d25, '#9B1C3E');
+    s += makeArea(d26, '#C9A84C');
+
+    // Linhas
+    const makeLine = (data, color) => {
+      const pts = data.map((v,i) => `${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`).join(' L ');
+      return `<path d="M ${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    };
+    s += makeLine(d25, '#9B1C3E');
+    s += makeLine(d26, '#C9A84C');
+
+    // Círculos e bandas de hover por mês
+    FIN_MESES.forEach((m,i) => {
+      const x = xOf(i).toFixed(1);
+      const y25 = yOf(d25[i]).toFixed(1), y26 = yOf(d26[i]).toFixed(1);
+      if(d25[i] > 0) s += `<circle cx="${x}" cy="${y25}" r="4" fill="#9B1C3E" stroke="#fff" stroke-width="1.5"/>`;
+      if(d26[i] > 0) s += `<circle cx="${x}" cy="${y26}" r="4" fill="#C9A84C" stroke="#fff" stroke-width="1.5"/>`;
+      s += `<text x="${x}" y="${(topPad+H+18).toFixed(1)}" text-anchor="middle" font-size="11" fill="#6b7280">${m}</text>`;
+      const bx = (xOf(i) - stepX/2).toFixed(1);
+      s += `<rect x="${bx}" y="${topPad}" width="${stepX.toFixed(1)}" height="${H}" fill="transparent"
+        data-mes="${FIN_MESES_FULL[i]}" data-v25="${d25[i].toFixed(2)}" data-v26="${d26[i].toFixed(2)}"
+        onmouseover="finEvolHover(event,this)" onmouseout="finEvolOut()"/>`;
+    });
+    svg.innerHTML = s;
+  }
+
+  function finEvolHover(evt, rect){
+    const tip = document.getElementById('finEvolTooltip');
+    if(!tip) return;
+    const mes = rect.getAttribute('data-mes');
+    const v25 = parseFloat(rect.getAttribute('data-v25'));
+    const v26 = parseFloat(rect.getAttribute('data-v26'));
+    const diff = v26 - v25;
+    const diffTxt = diff === 0 ? '' : `<div style="margin-top:4px;font-size:11px;color:${diff>0?'#f87171':'#4ade80'}">${diff>0?'▲':'▼'} ${formatCurrency(Math.abs(diff))}</div>`;
+    tip.innerHTML = `<div style="font-weight:700;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:4px">${mes}</div>
+      <div style="color:#f0a0b0;margin-bottom:2px">2025: ${formatCurrency(v25)}</div>
+      <div style="color:#C9A84C">2026: ${formatCurrency(v26)}</div>${diffTxt}`;
+    const cr = tip.parentElement.getBoundingClientRect();
+    let tx = evt.clientX - cr.left + 14;
+    let ty = evt.clientY - cr.top - 80;
+    if(tx + 190 > cr.width) tx = evt.clientX - cr.left - 200;
+    if(ty < 0) ty = 4;
+    tip.style.left = tx + 'px';
+    tip.style.top = ty + 'px';
+    tip.style.opacity = '1';
+  }
+
+  function finEvolOut(){
+    const tip = document.getElementById('finEvolTooltip');
+    if(tip) tip.style.opacity = '0';
   }
 
   // ── Lançamentos ─────────────────────────────────────────────
