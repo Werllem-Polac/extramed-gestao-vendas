@@ -1856,6 +1856,13 @@
 
       <!-- ── DASHBOARD ── -->
       <div id="finDashboard">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:600;color:var(--gray);">Período:</span>
+          <select id="dashFiltroMes" onchange="renderFinDashboard()" style="width:140px;">
+            <option value="">Todos os meses</option>
+          </select>
+          <select id="dashFiltroAno" onchange="renderFinDashboard()" style="width:100px;"></select>
+        </div>
         <div class="fin-grid4" id="finCards"></div>
         <div class="card">
           <div class="section-header">
@@ -1899,9 +1906,10 @@
             <select id="finFiltroCentro" onchange="renderFinLancamentos()">
               <option value="Todos">Todos C.C.</option>
             </select>
-            <div class="fin-month-nav">
+            <div style="display:flex;align-items:center;gap:6px;">
               <button class="fin-nav-btn" onclick="finMesAnterior()">←</button>
-              <span id="finMesLabel" style="font-weight:700;font-size:13px;min-width:90px;text-align:center"></span>
+              <select id="finSelectMes" onchange="finMesSelect()" style="font-weight:700;font-size:13px;"></select>
+              <select id="finSelectAno" onchange="finMesSelect()" style="font-weight:700;font-size:13px;width:80px;"></select>
               <button class="fin-nav-btn" onclick="finMesSeguinte()">→</button>
             </div>
           </div>
@@ -1916,16 +1924,17 @@
               <thead>
                 <tr>
                   <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-finLanc" onchange="bulkToggleAll('finLanc',this.checked)"></th>
-                  <th>Descrição / Fornecedor</th>
-                  <th>Categoria</th>
-                  <th>Vencimento</th>
-                  <th class="right">Valor</th>
-                  <th>Centro de Custo</th>
-                  <th>Status</th>
+                  <th onclick="finSortBy('descricao')" style="cursor:pointer;user-select:none;">Descrição / Fornecedor <span id="finSort-descricao"></span></th>
+                  <th onclick="finSortBy('categoria')" style="cursor:pointer;user-select:none;">Categoria <span id="finSort-categoria"></span></th>
+                  <th onclick="finSortBy('vencimento')" style="cursor:pointer;user-select:none;">Vencimento <span id="finSort-vencimento"></span></th>
+                  <th class="right" onclick="finSortBy('valor')" style="cursor:pointer;user-select:none;">Valor <span id="finSort-valor"></span></th>
+                  <th onclick="finSortBy('centroCusto')" style="cursor:pointer;user-select:none;">Centro de Custo <span id="finSort-centroCusto"></span></th>
+                  <th onclick="finSortBy('status')" style="cursor:pointer;user-select:none;">Status <span id="finSort-status"></span></th>
                   <th class="right">Ações</th>
                 </tr>
               </thead>
               <tbody id="finLancTabela"></tbody>
+              <tfoot id="finLancTfoot"></tfoot>
             </table>
           </div>
           <div class="fin-pag" id="finPag"></div>
@@ -4123,9 +4132,13 @@
   const FIN_MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const FIN_POR_PAGINA = 8;
 
-  let _finView = 'finDashboard';
-  let _finMes  = new Date().getMonth();
-  let _finAno  = new Date().getFullYear();
+  let _finView    = 'finDashboard';
+  let _finMes     = new Date().getMonth();
+  let _finAno     = new Date().getFullYear();
+  let _finSortCol = 'vencimento';
+  let _finSortDir = 1; // 1=asc, -1=desc
+  let _dashMes    = new Date().getMonth(); // -1 = todos os meses
+  let _dashAno    = new Date().getFullYear();
   let _finAba  = 'Todos';
   let _finPag  = 1;
 
@@ -4186,8 +4199,50 @@
     renderFinLancamentos();
   }
 
-  function finMesAnterior(){ const d = new Date(_finAno, _finMes-1); _finMes=d.getMonth(); _finAno=d.getFullYear(); _finPag=1; renderFinLancamentos(); }
-  function finMesSeguinte(){ const d = new Date(_finAno, _finMes+1); _finMes=d.getMonth(); _finAno=d.getFullYear(); _finPag=1; renderFinLancamentos(); }
+  function finMesAnterior(){ const d = new Date(_finAno, _finMes-1); _finMes=d.getMonth(); _finAno=d.getFullYear(); _finPag=1; _syncFinSelects(); renderFinLancamentos(); }
+  function finMesSeguinte(){ const d = new Date(_finAno, _finMes+1); _finMes=d.getMonth(); _finAno=d.getFullYear(); _finPag=1; _syncFinSelects(); renderFinLancamentos(); }
+
+  function finMesSelect(){
+    const m = document.getElementById('finSelectMes'); const a = document.getElementById('finSelectAno');
+    if(m && a){ _finMes = parseInt(m.value); _finAno = parseInt(a.value); _finPag = 1; renderFinLancamentos(); }
+  }
+
+  function finSortBy(col){
+    if(_finSortCol === col) _finSortDir *= -1; else { _finSortCol = col; _finSortDir = 1; }
+    renderFinLancamentos();
+  }
+
+  function _syncFinSelects(){
+    const m = document.getElementById('finSelectMes'); const a = document.getElementById('finSelectAno');
+    if(m) m.value = _finMes; if(a) a.value = _finAno;
+  }
+
+  function _populateFinSelects(){
+    // Lançamentos selects
+    const sm = document.getElementById('finSelectMes');
+    const sa = document.getElementById('finSelectAno');
+    if(sm && !sm.options.length){
+      FIN_MESES_FULL.forEach((n,i) => { const o = document.createElement('option'); o.value=i; o.textContent=n; sm.appendChild(o); });
+    }
+    const anos = _finAnos();
+    if(sa){ sa.innerHTML = anos.map(a=>`<option value="${a}">${a}</option>`).join(''); }
+    if(sm) sm.value = _finMes; if(sa) sa.value = _finAno;
+    // Dashboard selects
+    const dm = document.getElementById('dashFiltroMes');
+    const da = document.getElementById('dashFiltroAno');
+    if(dm && dm.options.length <= 1){
+      FIN_MESES_FULL.forEach((n,i) => { const o = document.createElement('option'); o.value=i; o.textContent=n; dm.appendChild(o); });
+    }
+    if(da){ da.innerHTML = anos.map(a=>`<option value="${a}">${a}</option>`).join(''); }
+    if(dm) dm.value = _dashMes === -1 ? '' : _dashMes;
+    if(da) da.value = _dashAno;
+  }
+
+  function _finAnos(){
+    const set = new Set([new Date().getFullYear()]);
+    (db.contasPagar||[]).forEach(l => { const y = l.vencimento ? parseInt(l.vencimento.slice(0,4)) : null; if(y) set.add(y); });
+    return [...set].sort();
+  }
 
   // ── Render principal ────────────────────────────────────────
   function renderFinanceiro(){
@@ -4211,14 +4266,31 @@
   function renderFinDashboard(){
     finEnsure();
     const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const ano  = hoje.getFullYear();
-    const all  = db.contasPagar.map(l => ({...l, se: finStatusEfetivo(l)}));
 
-    // Cards
-    const totPrevisto = all.reduce((s,l) => s + l.valor, 0);
-    const totPago     = all.filter(l => l.se === 'Pago').reduce((s,l) => s + l.valor, 0);
-    const totAPagar   = all.filter(l => ['Pendente','Previsto'].includes(l.se)).reduce((s,l) => s + l.valor, 0);
-    const totVencido  = all.filter(l => l.se === 'Vencido').reduce((s,l) => s + l.valor, 0);
+    // Captura seleção atual antes de _populateFinSelects sobrescrever os selects
+    const selMes = document.getElementById('dashFiltroMes');
+    const selAno = document.getElementById('dashFiltroAno');
+    if(selMes && selMes.options.length > 1) _dashMes = selMes.value === '' ? -1 : parseInt(selMes.value);
+    if(selAno && selAno.value) _dashAno = parseInt(selAno.value);
+
+    _populateFinSelects(); // popula opções e sincroniza valores com _dashMes/_dashAno
+
+    const fMes = _dashMes;
+    const fAno = _dashAno;
+
+    const all = db.contasPagar.map(l => ({...l, se: finStatusEfetivo(l)}));
+    const filtered = all.filter(l => {
+      const d = new Date(l.vencimento+'T00:00:00');
+      if(d.getFullYear() !== fAno) return false;
+      if(fMes !== -1 && d.getMonth() !== fMes) return false;
+      return true;
+    });
+
+    // Cards (filtrados pelo período selecionado)
+    const totPrevisto = filtered.reduce((s,l) => s + l.valor, 0);
+    const totPago     = filtered.filter(l => l.se === 'Pago').reduce((s,l) => s + l.valor, 0);
+    const totAPagar   = filtered.filter(l => ['Pendente','Previsto'].includes(l.se)).reduce((s,l) => s + l.valor, 0);
+    const totVencido  = filtered.filter(l => l.se === 'Vencido').reduce((s,l) => s + l.valor, 0);
 
     const cards = document.getElementById('finCards');
     if(cards) cards.innerHTML = [
@@ -4228,13 +4300,13 @@
       {t:'Vencido',           v:totVencido,  cls:'fin-val-red'},
     ].map(c => `<div class="fin-card"><h4>${c.t}</h4><div class="fin-val ${c.cls}">${formatCurrency(c.v)}</div></div>`).join('');
 
-    // Chart
+    // Gráfico mostra o ano inteiro selecionado
     const yrLabel = document.getElementById('finChartYear');
-    if(yrLabel) yrLabel.textContent = ano;
-    renderFinChart(all, ano, hoje.getMonth());
+    if(yrLabel) yrLabel.textContent = fAno;
+    renderFinChart(all, fAno, fMes !== -1 ? fMes : hoje.getMonth());
 
-    // Quarterly table
-    renderFinTrimestral(all, hoje.getMonth(), ano);
+    // Tabela trimestral a partir do mês selecionado (ou mês atual)
+    renderFinTrimestral(filtered, fMes !== -1 ? fMes : hoje.getMonth(), fAno);
   }
 
   function renderFinChart(all, ano, mesAtual){
@@ -4313,6 +4385,7 @@
   // ── Lançamentos ─────────────────────────────────────────────
   function renderFinLancamentos(){
     finEnsure();
+    _populateFinSelects();
     const busca    = (document.getElementById('finBusca')||{}).value||'';
     const fStatus  = (document.getElementById('finFiltroStatus')||{}).value||'Todos';
     const fCat     = (document.getElementById('finFiltroCategoria')||{}).value||'Todas';
@@ -4331,6 +4404,22 @@
         if(_finAba !== 'Todos' && l.categoria !== _finAba) return false;
         return true;
       });
+
+    // Ordenação
+    const SORT_COLS = ['descricao','categoria','vencimento','valor','centroCusto','status'];
+    todos.sort((a, b) => {
+      let va = _finSortCol === 'status' ? a.se : a[_finSortCol];
+      let vb = _finSortCol === 'status' ? b.se : b[_finSortCol];
+      if(_finSortCol === 'valor') return (va - vb) * _finSortDir;
+      return String(va||'').localeCompare(String(vb||'')) * _finSortDir;
+    });
+
+    // Indicadores de coluna
+    SORT_COLS.forEach(col => {
+      const el = document.getElementById('finSort-'+col);
+      if(!el) return;
+      el.textContent = _finSortCol === col ? (_finSortDir === 1 ? ' ↑' : ' ↓') : '';
+    });
 
     const totalPag = Math.max(1, Math.ceil(todos.length/FIN_POR_PAGINA));
     if(_finPag > totalPag) _finPag = totalPag;
@@ -4353,6 +4442,16 @@
         </td>
       </tr>`;
     }).join('') : `<tr><td colspan="8" class="empty">Nenhum lançamento encontrado para este período.</td></tr>`;
+
+    // Total acumulado (todos os lançamentos filtrados, não só a página)
+    const totalAcumulado = todos.reduce((s,l) => s + l.valor, 0);
+    const tfoot = document.getElementById('finLancTfoot');
+    if(tfoot) tfoot.innerHTML = todos.length ? `<tr style="background:var(--soft);font-weight:700;border-top:2px solid var(--border);">
+      <td colspan="3" style="text-align:right;padding:10px 8px;color:var(--gray);font-size:13px;">Total acumulado (${todos.length} lançamento${todos.length!==1?'s':''})</td>
+      <td style="padding:10px 8px"></td>
+      <td class="right" style="padding:10px 8px;color:var(--wine);font-size:14px;">${formatCurrency(totalAcumulado)}</td>
+      <td colspan="3"></td>
+    </tr>` : '';
 
     const pag = document.getElementById('finPag');
     if(pag) pag.innerHTML = `<span>${todos.length} lançamento(s)</span>
