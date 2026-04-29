@@ -1864,36 +1864,34 @@
           <select id="dashFiltroAno" onchange="renderFinDashboard()" style="width:100px;"></select>
         </div>
         <div class="fin-grid4" id="finCards"></div>
-        <div class="card">
-          <div class="section-header">
-            <h3>Previsão Mensal <span id="finChartYear"></span></h3>
+        <div class="row row-2" style="margin-top:16px;align-items:start">
+          <div class="card">
+            <div class="section-header">
+              <h3>Previsão Mensal <span id="finChartYear"></span></h3>
+            </div>
+            <svg id="finChart" width="100%" style="overflow:visible;display:block"></svg>
+            <div class="fin-chart-legend">
+              <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="var(--wine)"/></svg>Realizado</span>
+              <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="#e8d8de"/></svg>Previsto</span>
+            </div>
           </div>
-          <svg id="finChart" width="100%" style="overflow:visible;display:block"></svg>
-          <div class="fin-chart-legend">
-            <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="var(--wine)"/></svg>Realizado</span>
-            <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="#e8d8de"/></svg>Previsto</span>
+          <div class="card" style="position:relative">
+            <div class="section-header">
+              <h3>Evolução de Despesas</h3>
+            </div>
+            <div style="position:relative;overflow:hidden">
+              <svg id="finEvolChart" width="100%" style="overflow:visible;display:block"></svg>
+              <div id="finEvolTooltip" style="position:absolute;background:#1f2937;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.35)"></div>
+            </div>
+            <div class="fin-chart-legend">
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#9B1C3E" stroke-width="1.5" stroke-linecap="round"/></svg>2025</span>
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>2026</span>
+            </div>
           </div>
         </div>
         <div class="card" style="margin-top:16px">
           <h3>Previsão Trimestral por Categoria</h3>
           <table class="fin-trim-table" id="finTrimestral"></table>
-        </div>
-        <div class="card" style="margin-top:16px;position:relative">
-          <div class="section-header" style="margin-bottom:12px">
-            <h3>Evolução de Despesas</h3>
-            <div style="display:flex;gap:16px;align-items:center;font-size:12px;color:var(--gray)">
-              <span style="display:flex;align-items:center;gap:5px">
-                <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#9B1C3E" stroke-width="2.5" stroke-linecap="round"/></svg>2025
-              </span>
-              <span style="display:flex;align-items:center;gap:5px">
-                <svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#C9A84C" stroke-width="2.5" stroke-linecap="round"/></svg>2026
-              </span>
-            </div>
-          </div>
-          <div style="position:relative;overflow:hidden">
-            <svg id="finEvolChart" width="100%" style="overflow:visible;display:block"></svg>
-            <div id="finEvolTooltip" style="position:absolute;background:#1f2937;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.35)"></div>
-          </div>
         </div>
       </div>
 
@@ -4495,10 +4493,11 @@
     const d26 = monthly(2026);
     const maxV = Math.max(...d25, ...d26, 1);
 
-    const H=96, topPad=14, botPad=24, leftPad=64, rightPad=10;
+    const H=148, topPad=16, botPad=40, leftPad=64, rightPad=10;
     const totalW = 720, chartW = totalW - leftPad - rightPad;
     const stepX = chartW / 11;
     svg.setAttribute('viewBox', `0 0 ${totalW} ${H + topPad + botPad}`);
+    svg.setAttribute('height', H + topPad + botPad);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     const xOf = i => leftPad + i * stepX;
