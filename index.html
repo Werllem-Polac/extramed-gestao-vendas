@@ -1705,6 +1705,10 @@
               <input id="configClinicName" />
             </div>
           </div>
+          <div style="margin-bottom:14px">
+            <label>Link Nota Fiscal</label>
+            <input id="configLinkNotaFiscal" type="url" placeholder="https://" />
+          </div>
           <div class="row row-2">
             <div>
               <label>Modo de cálculo padrão do repasse</label>
@@ -4013,7 +4017,8 @@
       email: document.getElementById('configEmail').value.trim(),
       instagram: document.getElementById('configInstagram').value.trim(),
       site: document.getElementById('configSite').value.trim(),
-      responsavel: document.getElementById('configResponsavel').value.trim()
+      responsavel: document.getElementById('configResponsavel').value.trim(),
+      linkNotaFiscal: document.getElementById('configLinkNotaFiscal').value.trim()
     };
     if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName;
     saveDB();
@@ -4041,6 +4046,7 @@
     document.getElementById('configInstagram').value = db.company.instagram || '';
     document.getElementById('configSite').value = db.company.site || '';
     document.getElementById('configResponsavel').value = db.company.responsavel || '';
+    document.getElementById('configLinkNotaFiscal').value = db.company.linkNotaFiscal || '';
     renderLogoConfigPreview();
   }
 
