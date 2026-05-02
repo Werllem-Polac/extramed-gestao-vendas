@@ -1986,23 +1986,41 @@
 
     <!-- Modal pós-venda -->
     <div class="modal-screen" id="modalPosVenda">
-      <div class="modal" style="max-width:380px;text-align:center;padding:32px 28px">
-        <div style="font-size:44px;margin-bottom:10px">✅</div>
-        <h3 style="margin:0 0 6px;color:var(--wine)">Venda registrada!</h3>
-        <p style="color:var(--gray);font-size:13px;margin:0 0 28px">Selecione o próximo passo:</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-          <button class="btn btn-primary" onclick="abrirReciboVenda()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;font-size:13px">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <div class="modal" style="max-width:320px;text-align:center;padding:24px 20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <button class="btn btn-primary" onclick="abrirReciboVenda()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;font-size:13px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             Recibo
           </button>
-          <button class="btn btn-secondary" onclick="abrirNotaFiscalVenda()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;font-size:13px">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <button class="btn btn-secondary" onclick="abrirNotaFiscalVenda()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;font-size:13px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
             Nota Fiscal
           </button>
         </div>
-        <button class="btn btn-light" onclick="fecharModalPosVenda()" style="width:100%;font-size:13px">Fechar</button>
+        <button class="btn btn-light" onclick="fecharModalPosVenda()" style="width:100%;font-size:12px">Fechar</button>
       </div>
     </div>
+
+    <!-- Modal opções de impressão (tabela de vendas) -->
+    <div class="modal-screen" id="modalImprimirOpcao">
+      <div class="modal" style="max-width:300px;text-align:center;padding:22px 18px">
+        <p style="margin:0 0 14px;font-weight:600;font-size:14px;color:var(--wine)">O que deseja imprimir?</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <button class="btn btn-primary" onclick="imprimirReciboOpcao()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;font-size:13px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Recibo
+          </button>
+          <button class="btn btn-secondary" onclick="imprimirNFOpcao()" style="display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;font-size:13px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Nota Fiscal
+          </button>
+        </div>
+        <button class="btn btn-light" onclick="fecharModalImprimir()" style="width:100%;font-size:12px">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Input global para upload de NF -->
+    <input type="file" id="nfFileInput" accept=".pdf,image/*" style="display:none" onchange="salvarNotaFiscalAnexo(this)">
 
     <!-- Modal Lançamento -->
     <div class="modal-screen" id="finModalLanc">
@@ -3810,8 +3828,9 @@
 
   function abrirReciboVenda(){
     if(!_posVendaId) return;
+    const id = _posVendaId;
     fecharModalPosVenda();
-    abrirComprovanteVenda(_posVendaId, false);
+    abrirComprovanteVenda(id, true); // auto-print direto
   }
 
   function abrirNotaFiscalVenda(){
@@ -3819,6 +3838,71 @@
     if(!url){ alert('Nenhum link de Nota Fiscal configurado. Acesse Configurações → Gerais para adicionar.'); return; }
     fecharModalPosVenda();
     window.open(url, '_blank');
+  }
+
+  // ── Modal imprimir (tabela de vendas) ────────────────────────
+  let _imprimirVendaId = null;
+
+  function abrirModalImprimir(vendaId){
+    _imprimirVendaId = vendaId;
+    document.getElementById('modalImprimirOpcao').classList.add('open');
+  }
+
+  function fecharModalImprimir(){
+    document.getElementById('modalImprimirOpcao').classList.remove('open');
+    _imprimirVendaId = null;
+  }
+
+  function imprimirReciboOpcao(){
+    if(!_imprimirVendaId) return;
+    const id = _imprimirVendaId;
+    fecharModalImprimir();
+    abrirComprovanteVenda(id, true);
+  }
+
+  function imprimirNFOpcao(){
+    const url = (db.company || {}).linkNotaFiscal;
+    if(!url){ alert('Nenhum link de Nota Fiscal configurado em Configurações → Gerais.'); fecharModalImprimir(); return; }
+    fecharModalImprimir();
+    window.open(url, '_blank');
+  }
+
+  // ── Nota Fiscal anexada à venda ──────────────────────────────
+  let _nfVendaId = null;
+
+  function uploadNotaFiscal(vendaId){
+    const venda = getSaleById(vendaId);
+    if(venda?.notaFiscalAnexo){
+      const acao = confirm(`NF anexada: ${venda.notaFiscalAnexo.nome}\n\nOK → Abrir arquivo\nCancelar → Substituir`);
+      if(acao){ verNotaFiscalAnexo(vendaId); return; }
+    }
+    _nfVendaId = vendaId;
+    const inp = document.getElementById('nfFileInput');
+    inp.value = '';
+    inp.click();
+  }
+
+  function salvarNotaFiscalAnexo(input){
+    const file = input.files[0];
+    if(!file || !_nfVendaId) return;
+    if(file.size > 3 * 1024 * 1024){ alert('Arquivo muito grande. Limite: 3 MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const venda = getSaleById(_nfVendaId);
+      if(!venda) return;
+      venda.notaFiscalAnexo = {nome: file.name, dados: e.target.result, tipo: file.type};
+      saveDB(); refreshAll();
+      _nfVendaId = null;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function verNotaFiscalAnexo(vendaId){
+    const venda = getSaleById(vendaId);
+    if(!venda?.notaFiscalAnexo) return;
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>${venda.notaFiscalAnexo.nome}</title></head><body style="margin:0;height:100vh"><iframe src="${venda.notaFiscalAnexo.dados}" width="100%" height="100%" style="border:none"></iframe></body></html>`);
+    w.document.close();
   }
 
   function abrirComprovanteVenda(id, autoPrint = false){
@@ -3913,7 +3997,12 @@
         <td>${(v.pagamentos||[]).map(p => `${p.forma}: ${formatCurrency(p.valor)}`).join('<br>')}</td>
         <td>${v.status || 'Ativa'}</td>
         <td>
-          <button class="icon-btn" title="Imprimir / baixar recibo não fiscal" onclick="abrirComprovanteVenda('${v.id}', true)">🖨️</button>
+          <button class="icon-btn" title="Imprimir Recibo ou Nota Fiscal" onclick="abrirModalImprimir('${v.id}')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </button>
+          <button class="icon-btn" title="${v.notaFiscalAnexo ? 'NF anexada: '+v.notaFiscalAnexo.nome : 'Anexar Nota Fiscal'}" onclick="uploadNotaFiscal('${v.id}')" style="${v.notaFiscalAnexo ? 'background:var(--wine);color:#fff' : ''}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </button>
           <button class="btn btn-light" onclick="cancelarVenda('${v.id}','Cancelada')">Cancelar</button>
           <button class="btn btn-light" onclick="cancelarVenda('${v.id}','Estorno Parcial')">Estorno parcial</button>
           <button class="btn btn-light" onclick="cancelarVenda('${v.id}','Estorno Total')">Estorno total</button>
