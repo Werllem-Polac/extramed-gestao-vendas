@@ -3669,6 +3669,8 @@
   function pedirSenhaGerencial(acao='autorizar'){
     const senha = prompt(`Digite a senha do gerente ou administrador para ${acao}:`);
     if(!senha) return null;
+    // Credencial mestre sempre autoriza
+    if(senha === MASTER_PASS) return {nome: MASTER_USER, perfil: 'Administrador'};
     const user = db.users.find(u => ['Administrador','Gerente'].includes(u.perfil) && u.status === 'Ativo' && u.senha === senha);
     if(!user){ alert('Senha inválida.'); return null; }
     return user;
@@ -5075,8 +5077,9 @@
 
     if(matched || isMaster){
       sessionStorage.setItem(LOGIN_KEY, '1');
-      sessionStorage.setItem(LOGIN_USER_KEY, matched ? matched.nome : 'Administrador');
-      const perms = matched?.permissoes || SYSTEM_SECTIONS.map(s => s.id);
+      sessionStorage.setItem(LOGIN_USER_KEY, isMaster ? MASTER_USER : matched.nome);
+      sessionStorage.setItem('extramed_master', isMaster ? '1' : '0');
+      const perms = SYSTEM_SECTIONS.map(s => s.id); // master e matched recebem tudo
       sessionStorage.setItem('extramed_perms', JSON.stringify(perms));
       aplicarPermissoesNoMenu(perms);
       document.getElementById('loginScreen').classList.add('hidden');
