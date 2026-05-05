@@ -1204,6 +1204,9 @@
                   <th>RQE</th>
                   <th>Status</th>
                   <th>Vigência</th>
+                  <th>% Consulta</th>
+                  <th>% Exame</th>
+                  <th>% Prot./Prod.</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -1282,6 +1285,20 @@
             <div>
               <label>Período final da vigência</label>
               <input id="medicoVigenciaFinal" type="date" />
+            </div>
+          </div>
+          <div class="row row-3">
+            <div>
+              <label class="req">Consulta (%)</label>
+              <input id="medicoPercentualConsulta" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 10" oninput="limparInvalido(this)" />
+            </div>
+            <div>
+              <label class="req">Exame (%)</label>
+              <input id="medicoPercentualExame" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 15" oninput="limparInvalido(this)" />
+            </div>
+            <div>
+              <label class="req">Protocolos/Produtos (%)</label>
+              <input id="medicoPercentualProtocolos" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 30" oninput="limparInvalido(this)" />
             </div>
           </div>
           <div class="actions">
@@ -2502,7 +2519,7 @@
       if(doc){
         if(regra === 'consulta') pct = Number(doc.percentualConsulta || 0);
         else if(regra === 'exame') pct = Number(doc.percentualExame || 0);
-        else pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+        else pct = Number((doc.percentualProtocolos ?? doc.percentualLucro ?? doc.percentual) || 0);
       } else {
         pct = Number(v.percentualRepasse || 0);
       }
@@ -3101,7 +3118,7 @@
     const camposObrigatorios = [
       'medicoNome','medicoEspecialidade','medicoCPF','medicoNascimento',
       'medicoEmail','medicoTelefone','medicoConselho','medicoNumConselho','medicoUF',
-      'medicoVigenciaInicial'
+      'medicoVigenciaInicial','medicoPercentualConsulta','medicoPercentualExame','medicoPercentualProtocolos'
     ];
     if(marcarInvalidos(camposObrigatorios)){
       document.querySelector('#medicosCadastrarView .campo-invalido')?.scrollIntoView({behavior:'smooth',block:'center'});
@@ -3121,12 +3138,16 @@
     const status         = document.getElementById('medicoStatus').value;
     const vigenciaInicial   = document.getElementById('medicoVigenciaInicial').value;
     const vigenciaFinal     = document.getElementById('medicoVigenciaFinal').value;
+    const percentualConsulta   = Number(document.getElementById('medicoPercentualConsulta').value);
+    const percentualExame      = Number(document.getElementById('medicoPercentualExame').value);
+    const percentualProtocolos = Number(document.getElementById('medicoPercentualProtocolos').value);
+
     if(vigenciaFinal && vigenciaFinal < vigenciaInicial){
       alert('O período final da vigência não pode ser menor que o período inicial.');
       return;
     }
 
-    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, conselho, numConselho, uf, rqe, status, vigenciaInicial, vigenciaFinal};
+    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, conselho, numConselho, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualConsulta, percentualExame, percentualProtocolos, percentual: percentualProtocolos, percentualLucro: percentualProtocolos};
 
     if(id){
       db.doctors = db.doctors.map(m => m.id === id ? payload : m);
@@ -3156,8 +3177,11 @@
     ufEl.innerHTML = buildUFOptions(m.uf || '');
     document.getElementById('medicoRQE').value           = m.rqe || '';
     document.getElementById('medicoStatus').value        = m.status;
-    document.getElementById('medicoVigenciaInicial').value  = m.vigenciaInicial || '';
-    document.getElementById('medicoVigenciaFinal').value    = m.vigenciaFinal || '';
+    document.getElementById('medicoVigenciaInicial').value      = m.vigenciaInicial || '';
+    document.getElementById('medicoVigenciaFinal').value        = m.vigenciaFinal || '';
+    document.getElementById('medicoPercentualConsulta').value   = m.percentualConsulta ?? '';
+    document.getElementById('medicoPercentualExame').value      = m.percentualExame ?? '';
+    document.getElementById('medicoPercentualProtocolos').value = m.percentualProtocolos ?? m.percentualLucro ?? m.percentual ?? '';
     document.querySelectorAll('#medicosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#medicosSubnav .subnav-btn[data-medicos-view="cadastrar"]'); if(btn) btn.classList.add('active');
     document.querySelectorAll('#medicos .subview').forEach(v => v.classList.remove('active'));
@@ -3189,12 +3213,15 @@
         <td>${m.rqe || '-'}</td>
         <td>${m.status}</td>
         <td>${m.vigenciaInicial ? new Date(m.vigenciaInicial + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}${m.vigenciaFinal ? ' até ' + new Date(m.vigenciaFinal + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+        <td>${formatPct(m.percentualConsulta)}</td>
+        <td>${formatPct(m.percentualExame)}</td>
+        <td>${formatPct(m.percentualProtocolos ?? m.percentualLucro ?? m.percentual)}</td>
         <td>
           <button class="btn btn-light" onclick="editarMedico('${m.id}')">Editar</button>
           <button class="btn btn-danger" onclick="excluirMedico('${m.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="8" class="empty">Nenhum profissional cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="11" class="empty">Nenhum profissional cadastrado.</td></tr>`;
   }
 
   function limparUsuarioForm(){
@@ -3738,7 +3765,7 @@
   function getApplicablePct(doctorId){
     if(db.settings.calcMode === 'global') return Number(db.settings.globalPct || 0);
     const doc = db.doctors.find(d => d.id === doctorId);
-    return Number((doc?.percentualLucro ?? doc?.percentual) || 0);
+    return Number((doc?.percentualProtocolos ?? doc?.percentualLucro ?? doc?.percentual) || 0);
   }
 
   function calcRepasseAtual(v){
@@ -3750,7 +3777,7 @@
     if(doc){
       if(regra === 'consulta')      pct = Number(doc.percentualConsulta || 0);
       else if(regra === 'exame')    pct = Number(doc.percentualExame    || 0);
-      else                          pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+      else                          pct = Number((doc.percentualProtocolos ?? doc.percentualLucro ?? doc.percentual) || 0);
     } else {
       pct = Number(v.percentualRepasse || 0);
     }
@@ -3778,7 +3805,7 @@
       const pct = Number(doc.percentualExame || 0);
       return { repasse: totalLiquido * (pct / 100), pct };
     }
-    const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+    const pct = Number((doc.percentualProtocolos ?? doc.percentualLucro ?? doc.percentual) || 0);
     return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
   }
 
