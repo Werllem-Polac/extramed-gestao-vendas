@@ -631,7 +631,7 @@
     <nav>
       <button class="nav-btn active" data-target="dashboard" onclick="showMainSection('dashboard', this, 'Dashboard')">Dashboard</button>
       <button class="nav-btn" data-target="vendas" onclick="showMainSection('vendas', this, 'Vendas')">Vendas</button>
-      <button class="nav-btn" data-target="repasse" onclick="showMainSection('repasse', this, 'Repasse Médico')">Repasse Médico</button>
+      <button class="nav-btn" data-target="repasse" onclick="showMainSection('repasse', this, 'Repasse Profissional')">Repasse Profissional</button>
       <button class="nav-btn" data-target="produtividade" onclick="showMainSection('produtividade', this, 'Produtividade')">Produtividade</button>
 
       <!-- Grupo: Cadastros -->
@@ -679,9 +679,9 @@
           <div class="sub">Lucro bruto calculado</div>
         </div>
         <div class="metric m3">
-          <h4>Repasse Médico</h4>
+          <h4>Repasse Profissional</h4>
           <div class="value" id="dashMedicalTransfer">R$ 0,00</div>
-          <div class="sub">Total previsto para médicos</div>
+          <div class="sub">Total previsto para profissionais</div>
         </div>
         <div class="metric m4">
           <h4>Para a Clínica</h4>
@@ -695,7 +695,7 @@
           <h3>Visão Geral</h3>
           <div class="row row-2">
             <div><span class="pill">Produtos</span> <strong id="sumProducts">0</strong></div>
-            <div><span class="pill">Médicos</span> <strong id="sumDoctors">0</strong></div>
+            <div><span class="pill">Profissionais</span> <strong id="sumDoctors">0</strong></div>
             <div><span class="pill">Usuários</span> <strong id="sumUsers">0</strong></div>
             <div><span class="pill">Vendas</span> <strong id="sumSales">0</strong></div>
           </div>
@@ -716,7 +716,7 @@
                 <th>Data</th>
                 <th>Usuário</th>
                 <th>Paciente</th>
-                <th>Médico</th>
+                <th>Profissional</th>
                 <th>Itens</th>
                 <th>Total</th>
                 <th>Lucro</th>
@@ -1178,7 +1178,7 @@
           <h3>Consultar Profissionais</h3>
           <div class="row row-2">
             <div>
-              <label>Pesquisar médico</label>
+              <label>Pesquisar profissional</label>
               <input id="medicoBusca" placeholder="Buscar por nome, especialidade, conselho, UF ou status" />
             </div>
             <div>
@@ -1216,11 +1216,11 @@
         </div>
 
         <div class="subview" id="medicosCadastrarView">
-          <h3>Cadastrar Médico</h3>
+          <h3>Cadastrar Profissional</h3>
           <input type="hidden" id="medicoId" />
           <div class="row row-2">
             <div>
-              <label class="req">Nome do médico</label>
+              <label class="req">Nome do profissional</label>
               <input id="medicoNome" placeholder="Ex.: Dr. João Silva" oninput="limparInvalido(this)" />
             </div>
             <div>
@@ -1336,7 +1336,7 @@
                   <thead>
                     <tr>
                       <th>Especialidade</th>
-                      <th>Médicos vinculados</th>
+                      <th>Profissionais vinculados</th>
                     </tr>
                   </thead>
                   <tbody id="especialidadesTabela"></tbody>
@@ -1393,7 +1393,7 @@
             <select id="vendaUsuario"></select>
           </div>
           <div>
-            <label>Médico</label>
+            <label>Profissional</label>
             <select id="vendaMedico"></select>
           </div>
           <div>
@@ -1601,10 +1601,10 @@
 
     <section class="section" id="repasse">
       <div class="card">
-        <h3>Resumo por Médico</h3>
+        <h3>Resumo por Profissional</h3>
         <div class="row row-4" style="margin-bottom:12px">
           <div>
-            <label>Filtrar por médico</label>
+            <label>Filtrar por profissional</label>
             <select id="repasseFiltroMedico"></select>
           </div>
           <div>
@@ -1623,7 +1623,7 @@
           <table>
             <thead>
               <tr>
-                <th>Médico</th>
+                <th>Profissional</th>
                 <th>Vendas</th>
                 <th>Valor</th>
                 <th>Valor Clínica</th>
@@ -1648,7 +1648,7 @@
                 <th>#</th>
                 <th>Data</th>
                 <th>Paciente</th>
-                <th>Médico</th>
+                <th>Profissional</th>
                 <th class="right">Valor</th>
                 <th class="right">Custo</th>
                 <th class="right">Total</th>
@@ -1752,7 +1752,7 @@
             <div>
               <label>Modo de cálculo padrão do repasse</label>
               <select id="configCalcMode">
-                <option value="medico">Usar percentual do médico</option>
+                <option value="medico">Usar percentual do profissional</option>
                 <option value="global">Usar percentual global</option>
               </select>
             </div>
@@ -1848,7 +1848,7 @@
                   <option value="Administrador">Administrador</option>
                   <option value="Gerente">Gerente</option>
                   <option value="Secretária">Secretária</option>
-                  <option value="Médico">Médico</option>
+                  <option value="Profissional">Profissional</option>
                 </select>
               </div>
               <div>
@@ -2185,14 +2185,14 @@
     <div class="section-header">
       <div>
         <h3>Consultar vendas</h3>
-        <div class="helper-text">Pesquise por número, paciente, médico, usuário e data. Os filtros de status, forma de pagamento e tipo foram mantidos.</div>
+        <div class="helper-text">Pesquise por número, paciente, profissional, usuário e data. Os filtros de status, forma de pagamento e tipo foram mantidos.</div>
       </div>
       <div class="actions" style="margin-top:0">
         <button class="btn btn-light" onclick="fecharConsultarVendasTela()">Fechar</button>
       </div>
     </div>
     <div class="row row-4">
-      <div><label>Pesquisar</label><input id="vendaBusca" placeholder="Número, paciente, médico ou usuário" /></div>
+      <div><label>Pesquisar</label><input id="vendaBusca" placeholder="Número, paciente, profissional ou usuário" /></div>
       <div><label>Data</label><input id="vendaFiltroData" type="date" /></div>
       <div><label>Status</label><select id="vendaFiltroStatus"><option value="">Todos</option><option value="Ativa">Ativa</option><option value="Cancelada">Cancelada</option><option value="Estorno Parcial">Estorno Parcial</option><option value="Estorno Total">Estorno Total</option></select></div>
       <div><label>Forma de pagamento</label><select id="vendaFiltroPagamento"><option value="">Todas</option><option value="Dinheiro">Dinheiro</option><option value="Pix">Pix</option><option value="Cartão Débito">Cartão Débito</option><option value="Cartão Crédito">Cartão Crédito</option><option value="Convênio">Convênio</option><option value="Boleto">Boleto</option><option value="Parcelado">Parcelado</option><option value="Pagamento Misto">Pagamento Misto</option></select></div>
@@ -2208,7 +2208,7 @@
             <th>Número</th>
             <th>Data/Hora</th>
             <th>Paciente</th>
-            <th>Médico</th>
+            <th>Profissional</th>
             <th>Usuário</th>
             <th>Itens</th>
             <th>Total</th>
@@ -2229,7 +2229,7 @@
     <div style="display:grid;gap:12px">
       <div class="row row-2">
         <div><label>Venda #</label><input id="editRepasseNumero" readonly /></div>
-        <div><label>Médico</label><input id="editRepasseMedico" readonly /></div>
+        <div><label>Profissional</label><input id="editRepasseMedico" readonly /></div>
       </div>
       <div class="row row-3">
         <div><label>Valor</label><input id="editRepasseValorVenda" readonly /></div>
@@ -2283,15 +2283,7 @@
       linkNotaFiscal: ''
     },
     productCategories: ['Consulta', 'Exame', 'Pacote', 'Procedimento', 'Protocolo', 'Retorno', 'Produtos'],
-    categoryRepasse: {
-      'Consulta':    'consulta',
-      'Exame':       'exame',
-      'Pacote':      'lucro',
-      'Procedimento':'lucro',
-      'Protocolo':   'lucro',
-      'Retorno':     'consulta',
-      'Produtos':    'lucro'
-    },
+    categoryRepasse: {},
     products: [],
     categories: ['Consulta','Exame','Pacote','Procedimento','Produtos','Protocolo','Retorno'].sort((a,b)=>a.localeCompare(b,'pt-BR')),
     doctors: [],
@@ -2302,7 +2294,7 @@
     saleSequence: 1,
     centrosCusto: [
       {id:'adm', nome:'Administrativo', descricao:'Despesas administrativas gerais'},
-      {id:'med', nome:'Médico', descricao:'Insumos e equipamentos médicos'},
+      {id:'med', nome:'Profissional', descricao:'Insumos e equipamentos do profissional'},
       {id:'est', nome:'Estoque', descricao:'Compras e reposição de estoque'},
       {id:'rh',  nome:'RH',     descricao:'Recursos humanos e folha'},
       {id:'ti',  nome:'TI',     descricao:'Tecnologia e sistemas'},
@@ -2507,8 +2499,8 @@
     db.company = Object.assign({}, structuredClone(defaultDB.company), db.company || {});
     if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Diagnósticos';
     if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Diagnósticos';
-    // merge: defaults preenchem apenas chaves ausentes, configurações manuais prevalecem
-    db.categoryRepasse = Object.assign({}, structuredClone(defaultDB.categoryRepasse), db.categoryRepasse || {});
+    if(!db.categoryRepasse) db.categoryRepasse = {};
+    if(!db._repasseRulesCleared) { db.categoryRepasse = {}; db._repasseRulesCleared = true; }
   }
 
   function migrarRepasseVendas(){
@@ -3097,7 +3089,7 @@
     }
     const vinculados = (db.doctors || []).some(m => m.especialidade === especialidade);
     if(vinculados){
-      alert('Não é possível excluir uma especialidade que possui médicos vinculados.');
+      alert('Não é possível excluir uma especialidade que possui profissionais vinculados.');
       return;
     }
     if(!confirm(`Deseja excluir a especialidade "${especialidade}"?`)) return;
@@ -3195,7 +3187,7 @@
   }
 
   function excluirMedico(id){
-    if(!confirm('Deseja excluir este médico?')) return;
+    if(!confirm('Deseja excluir este profissional?')) return;
     db.doctors = db.doctors.filter(m => m.id !== id);
     saveDB();
     refreshAll();
@@ -3227,7 +3219,7 @@
           <button class="btn btn-danger" onclick="excluirMedico('${m.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="11" class="empty">Nenhum médico cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="11" class="empty">Nenhum profissional cadastrado.</td></tr>`;
   }
 
   function limparUsuarioForm(){
@@ -3646,7 +3638,7 @@
   function preencherSelectsVendas(){
     fillSelect('vendaPaciente', db.patients || [], 'Selecione o paciente');
     fillSelect('vendaUsuario', db.users.filter(u => u.status === 'Ativo'), 'Selecione o usuário');
-    fillSelect('vendaMedico', db.doctors.filter(d => d.status === 'Ativo'), 'Selecione o médico');
+    fillSelect('vendaMedico', db.doctors.filter(d => d.status === 'Ativo'), 'Selecione o profissional');
     fillSelect('vendaProduto', db.products.filter(p => (p.status || 'Ativo') === 'Ativo'), 'Selecione o item');
     fillSelect('repasseFiltroMedico', [{id:'', nome:'Todos'}].concat(db.doctors), 'Todos');
     renderEspecialidades();
@@ -3829,7 +3821,7 @@
     const descontoGeral = Number(document.getElementById('vendaDescontoGeral').value || 0);
     const recebido = Number(document.getElementById('vendaValorRecebido').value || 0);
     if(!usuarioId || !medicoId || !pacienteId || !data || !hora){
-      alert('Preencha paciente, usuário, médico e os dados principais da venda.');
+      alert('Preencha paciente, usuário, profissional e os dados principais da venda.');
       return;
     }
     if(!window.vendaItensTemp.length){
@@ -3956,7 +3948,7 @@
 
         <div class="receipt-meta">
           <strong>Paciente:</strong> ${escapeHtml(venda.paciente || '-')}<br>
-          <strong>Médico:</strong> ${escapeHtml(venda.medicoNome || '-')}<br>
+          <strong>Profissional:</strong> ${escapeHtml(venda.medicoNome || '-')}<br>
           <strong>Usuário:</strong> ${escapeHtml(venda.usuarioNome || '-')}<br>
           <strong>Pagamento:</strong><br>${pagamentos}
           ${venda.observacoes ? `<br><strong>Observações:</strong> ${escapeHtml(venda.observacoes)}` : ''}
@@ -4461,11 +4453,11 @@
         tfoot td{font-weight:700;background:#f5f5f5;border-top:2px solid #9B1C3E}
         @media print{body{padding:8px}}
       </style></head><body>
-      <h1>Relatório de Repasse Médico — ${clinica}</h1>
+      <h1>Relatório de Repasse Profissional — ${clinica}</h1>
       <div class="sub">${periodo} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
       <table>
         <thead><tr>
-          <th>#</th><th>Data</th><th>Paciente</th><th>Médico</th>
+          <th>#</th><th>Data</th><th>Paciente</th><th>Profissional</th>
           <th class="r">Valor</th><th class="r">Custo</th><th class="r">Total</th><th class="r">% Repasse</th>
           <th class="r">Valor Clínica</th><th class="r">Valor Profissional</th>
         </tr></thead>
@@ -5471,7 +5463,7 @@
   const SYSTEM_SECTIONS = [
     { id:'dashboard',     label:'Dashboard'       },
     { id:'vendas',        label:'Vendas'          },
-    { id:'repasse',       label:'Repasse Médico'  },
+    { id:'repasse',       label:'Repasse Profissional'  },
     { id:'produtividade', label:'Produtividade'   },
     { id:'pacientes',     label:'Pacientes'       },
     { id:'medicos',       label:'Profissionais'   },
