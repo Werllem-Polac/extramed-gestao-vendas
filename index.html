@@ -2403,6 +2403,7 @@
   ensureCompanyConfig();
   ensureContasPagar();
   ensureContasPagarFevMai2025();
+  migrarRepasseVendas();
 
   function loadDB(){
     const saved = localStorage.getItem(DB_KEY);
@@ -2469,6 +2470,7 @@
         ensureCompanyConfig();
         ensureContasPagar();
         ensureContasPagarFevMai2025();
+        migrarRepasseVendas();
         try { localStorage.setItem(DB_KEY, JSON.stringify(db)); } catch(e){}
         refreshAll();
       }
@@ -2506,6 +2508,29 @@
     if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Diagnósticos';
     if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Diagnósticos';
     if(!db.categoryRepasse) db.categoryRepasse = structuredClone(defaultDB.categoryRepasse);
+  }
+
+  function migrarRepasseVendas(){
+    if(!db.sales || !db.sales.length) return;
+    let changed = false;
+    db.sales.forEach(v => {
+      const regra = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
+      const pct        = Number(v.percentualRepasse || 0);
+      const valorTotal = Number(v.valorTotal || 0);
+      const lucro      = Number(v.lucro || 0);
+      const base       = (regra === 'consulta' || regra === 'exame') ? valorTotal : Math.max(lucro, 0);
+      const novoRepasse  = base * (pct / 100);
+      const novoLiquido  = valorTotal - novoRepasse;
+      const novoPctClin  = valorTotal > 0 ? (novoLiquido / valorTotal) * 100 : 0;
+      if(Math.abs((v.repasse || 0) - novoRepasse) > 0.005 ||
+         Math.abs((v.liquidoClinica || 0) - novoLiquido) > 0.005){
+        v.repasse         = novoRepasse;
+        v.liquidoClinica  = novoLiquido;
+        v.percentualClinica = novoPctClin;
+        changed = true;
+      }
+    });
+    if(changed) saveDB();
   }
 
   function ensureContasPagar(){
