@@ -745,21 +745,13 @@
           <h3>Consulta de Produtos e Serviços</h3>
           <button class="btn btn-light" onclick="abrirTelaProdutos('cadastro')">Cadastrar novo item</button>
         </div>
-        <div class="row row-4">
+        <div class="row row-3">
           <div>
             <label>Pesquisa</label>
             <div style="position:relative">
               <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6b7280">🔎</span>
-              <input id="produtoBusca" placeholder="Buscar por código, descrição, categoria ou tipo" style="padding-left:40px" />
+              <input id="produtoBusca" placeholder="Buscar por código, descrição ou categoria" style="padding-left:40px" />
             </div>
-          </div>
-          <div>
-            <label>Tipo</label>
-            <select id="produtoBuscaTipo">
-              <option value="">Todos</option>
-              <option value="Produto">Produto</option>
-              <option value="Serviço">Serviço</option>
-            </select>
           </div>
           <div>
             <label>Categoria</label>
@@ -774,6 +766,7 @@
             </select>
           </div>
         </div>
+        <input type="hidden" id="produtoBuscaTipo" value="" />
         <div class="bulk-bar" id="bulkBar-produtos">
           <button class="btn btn-danger" id="bulkBtn-produtos" onclick="excluirBulk('produtos')">Excluir selecionados</button>
         </div>
@@ -783,7 +776,6 @@
               <tr>
                 <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-produtos" onchange="bulkToggleAll('produtos',this.checked)"></th>
                 <th>Código</th>
-                <th>Tipo</th>
                 <th>Categoria</th>
                 <th>Descrição</th>
                 <th>Estoque</th>
@@ -805,14 +797,7 @@
         <input type="hidden" id="produtoId" />
         <div class="card" style="box-shadow:none;border:1px solid var(--border);margin-bottom:14px">
           <h3>Identificação</h3>
-          <div class="row row-4">
-            <div>
-              <label>Tipo</label>
-              <select id="produtoTipo" onchange="toggleProdutoSpecificFields(); atualizarSugestaoCodigo()">
-                <option value="Produto">Produto</option>
-                <option value="Serviço">Serviço</option>
-              </select>
-            </div>
+          <div class="row row-3">
             <div>
               <label>Categoria</label>
               <select id="produtoCategoria"></select>
@@ -2739,15 +2724,20 @@
 
   function atualizarSugestaoCodigo(){
     const manual = document.getElementById('produtoCodigoManual')?.value.trim();
-    const tipo = document.getElementById('produtoTipo')?.value || 'Produto';
     const categoria = document.getElementById('produtoCategoria')?.value || '';
+    const tipo = derivarTipoProduto(categoria);
     const codigo = manual || generateProductCode(tipo, categoria);
     const el = document.getElementById('produtoCodigo');
     if(el) el.value = codigo;
   }
 
+  function derivarTipoProduto(categoria){
+    return (categoria || '').toLowerCase().includes('produto') ? 'Produto' : 'Serviço';
+  }
+
   function toggleProdutoSpecificFields(){
-    const tipo = document.getElementById('produtoTipo')?.value || 'Produto';
+    const categoria = document.getElementById('produtoCategoria')?.value || '';
+    const tipo = derivarTipoProduto(categoria);
     const fisicos = document.getElementById('produtoCamposFisicos');
     const servico = document.getElementById('produtoCamposServico');
     if(!fisicos || !servico) return;
@@ -2757,7 +2747,6 @@
 
   function limparProdutoForm(){
     ['produtoId','produtoCodigo','produtoCodigoManual','produtoNome','produtoLote','produtoCusto','produtoVenda','produtoValidade','produtoLucro','produtoMargem','produtoEstoque','produtoEstoqueMinimo','produtoVigenciaInicial','produtoVigenciaFinal','produtoObs','produtoDuracao','produtoRepasseInfo'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
-    document.getElementById('produtoTipo').value = 'Produto';
     document.getElementById('produtoStatus').value = 'Ativo';
     document.getElementById('produtoAgendamento').value = 'Sim';
     renderCategoryOptions();
@@ -2785,8 +2774,8 @@
 
   function salvarProduto(){
     const id = document.getElementById('produtoId').value;
-    const tipo = document.getElementById('produtoTipo').value;
     const categoria = document.getElementById('produtoCategoria').value;
+    const tipo = derivarTipoProduto(categoria);
     const manual = document.getElementById('produtoCodigoManual').value.trim();
     const codigo = manual || generateProductCode(tipo, categoria);
     const nome = document.getElementById('produtoNome').value.trim();
@@ -2839,7 +2828,6 @@
     const p = db.products.find(x => x.id === id);
     if(!p) return;
     document.getElementById('produtoId').value = p.id;
-    document.getElementById('produtoTipo').value = p.tipo || 'Produto';
     renderCategoryOptions(p.categoria || '');
     document.getElementById('produtoCodigo').value = p.codigo || '';
     document.getElementById('produtoCodigoManual').value = p.codigoManual || '';
@@ -2907,10 +2895,9 @@
       return `<tr>
         <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="produtos" value="${p.id}" onchange="updateBulkBar('produtos')"></td>
         <td>${p.codigo || '-'}</td>
-        <td>${p.tipo || 'Produto'}</td>
         <td>${p.categoria || '-'}</td>
         <td>${p.nome}</td>
-        <td>${(p.tipo||'Produto') === 'Produto' ? (p.estoque ?? 0) : '-'}</td>
+        <td>${derivarTipoProduto(p.categoria) === 'Produto' ? (p.estoque ?? 0) : '-'}</td>
         <td>${p.validade ? new Date(p.validade + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
         <td>${formatCurrency(p.custo)}</td>
         <td>${formatCurrency(p.venda)}</td>
@@ -2921,7 +2908,7 @@
           <button class="btn btn-danger" onclick="excluirProduto('${p.id}')">Excluir</button>
         </td>
       </tr>`;
-    }).join('') : `<tr><td colspan="12" class="empty">Nenhum produto ou serviço cadastrado.</td></tr>`;
+    }).join('') : `<tr><td colspan="11" class="empty">Nenhum produto ou serviço cadastrado.</td></tr>`;
   }
 
   function setupSubnav(containerId, attrName, prefix){
@@ -4640,11 +4627,9 @@
     renderCategoryOptions();
     document.getElementById('produtoCusto').addEventListener('input', calculateProductProfit);
     document.getElementById('produtoVenda').addEventListener('input', calculateProductProfit);
-    document.getElementById('produtoTipo').addEventListener('change', () => { toggleProdutoSpecificFields(); atualizarSugestaoCodigo(); });
-    document.getElementById('produtoCategoria').addEventListener('change', atualizarSugestaoCodigo);
+    document.getElementById('produtoCategoria').addEventListener('change', () => { toggleProdutoSpecificFields(); atualizarSugestaoCodigo(); });
     document.getElementById('produtoBusca').addEventListener('input', renderProdutos);
     document.getElementById('produtoBuscaCategoria').addEventListener('change', renderProdutos);
-    document.getElementById('produtoBuscaTipo').addEventListener('change', renderProdutos);
     document.getElementById('produtoBuscaStatus').addEventListener('change', renderProdutos);
     document.getElementById('controleVencimentoPeriodo').addEventListener('change', renderControleVencimento);
     document.getElementById('controleVencimentoCategoria').addEventListener('change', renderControleVencimento);
