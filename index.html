@@ -1204,9 +1204,6 @@
                   <th>RQE</th>
                   <th>Status</th>
                   <th>Vigência</th>
-                  <th>% Lucro</th>
-                  <th>% Consulta</th>
-                  <th>% Exame</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -1285,20 +1282,6 @@
             <div>
               <label>Período final da vigência</label>
               <input id="medicoVigenciaFinal" type="date" />
-            </div>
-          </div>
-          <div class="row row-3">
-            <div>
-              <label class="req">Percentual sobre o lucro (%)</label>
-              <input id="medicoPercentualLucro" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 30" oninput="limparInvalido(this)" />
-            </div>
-            <div>
-              <label class="req">Percentual sobre consulta (%)</label>
-              <input id="medicoPercentualConsulta" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 10" oninput="limparInvalido(this)" />
-            </div>
-            <div>
-              <label class="req">Percentual sobre exame (%)</label>
-              <input id="medicoPercentualExame" type="number" min="0" max="100" step="0.01" placeholder="Ex.: 15" oninput="limparInvalido(this)" />
             </div>
           </div>
           <div class="actions">
@@ -3117,7 +3100,7 @@
     const camposObrigatorios = [
       'medicoNome','medicoEspecialidade','medicoCPF','medicoNascimento',
       'medicoEmail','medicoTelefone','medicoConselho','medicoNumConselho','medicoUF',
-      'medicoVigenciaInicial','medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'
+      'medicoVigenciaInicial'
     ];
     if(marcarInvalidos(camposObrigatorios)){
       document.querySelector('#medicosCadastrarView .campo-invalido')?.scrollIntoView({behavior:'smooth',block:'center'});
@@ -3137,16 +3120,12 @@
     const status         = document.getElementById('medicoStatus').value;
     const vigenciaInicial   = document.getElementById('medicoVigenciaInicial').value;
     const vigenciaFinal     = document.getElementById('medicoVigenciaFinal').value;
-    const percentualLucro   = Number(document.getElementById('medicoPercentualLucro').value);
-    const percentualConsulta= Number(document.getElementById('medicoPercentualConsulta').value);
-    const percentualExame   = Number(document.getElementById('medicoPercentualExame').value);
-
     if(vigenciaFinal && vigenciaFinal < vigenciaInicial){
       alert('O período final da vigência não pode ser menor que o período inicial.');
       return;
     }
 
-    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, conselho, numConselho, uf, rqe, status, vigenciaInicial, vigenciaFinal, percentualLucro, percentualConsulta, percentualExame, percentual: percentualLucro};
+    const payload = {id:id || uid(), nome, especialidade, cpf, nascimento, email, telefone, conselho, numConselho, uf, rqe, status, vigenciaInicial, vigenciaFinal};
 
     if(id){
       db.doctors = db.doctors.map(m => m.id === id ? payload : m);
@@ -3178,9 +3157,6 @@
     document.getElementById('medicoStatus').value        = m.status;
     document.getElementById('medicoVigenciaInicial').value  = m.vigenciaInicial || '';
     document.getElementById('medicoVigenciaFinal').value    = m.vigenciaFinal || '';
-    document.getElementById('medicoPercentualLucro').value  = m.percentualLucro ?? m.percentual ?? '';
-    document.getElementById('medicoPercentualConsulta').value = m.percentualConsulta ?? '';
-    document.getElementById('medicoPercentualExame').value  = m.percentualExame ?? '';
     document.querySelectorAll('#medicosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#medicosSubnav .subnav-btn[data-medicos-view="cadastrar"]'); if(btn) btn.classList.add('active');
     document.querySelectorAll('#medicos .subview').forEach(v => v.classList.remove('active'));
@@ -3212,15 +3188,12 @@
         <td>${m.rqe || '-'}</td>
         <td>${m.status}</td>
         <td>${m.vigenciaInicial ? new Date(m.vigenciaInicial + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}${m.vigenciaFinal ? ' até ' + new Date(m.vigenciaFinal + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
-        <td>${formatPct(m.percentualLucro ?? m.percentual)}</td>
-        <td>${formatPct(m.percentualConsulta)}</td>
-        <td>${formatPct(m.percentualExame)}</td>
         <td>
           <button class="btn btn-light" onclick="editarMedico('${m.id}')">Editar</button>
           <button class="btn btn-danger" onclick="excluirMedico('${m.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="11" class="empty">Nenhum profissional cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="8" class="empty">Nenhum profissional cadastrado.</td></tr>`;
   }
 
   function limparUsuarioForm(){
