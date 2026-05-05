@@ -3725,6 +3725,7 @@
     const hasExame    = tipoPrincipal === 'Exame'    || itensTipos.includes('Exame');
     const hasConsulta = tipoPrincipal === 'Consulta' || itensTipos.includes('Consulta');
     const hasServico  = itensTipos.includes('Serviço');
+    const hasProduto  = tipoPrincipal === 'Produto'  || itensTipos.includes('Produto');
 
     if(hasExame){
       const pct = Number(doc.percentualExame || 0);
@@ -3737,6 +3738,10 @@
     if(hasServico){
       const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
       return { repasse: totalLiquido * (pct / 100), pct };
+    }
+    if(hasProduto){
+      const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+      return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
     }
     const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
     return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
