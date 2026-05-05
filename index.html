@@ -1571,18 +1571,14 @@
         <div style="text-align:right;margin-bottom:14px">
           <button class="btn btn-light" onclick="limparFiltrosProdutividade()">Limpar filtros</button>
         </div>
-        <div class="grid grid-4" style="margin-bottom:18px">
+        <div class="grid grid-3" style="margin-bottom:18px">
           <div class="metric m1">
-            <h4>Custo Total</h4>
-            <div class="value" id="prodCost">R$ 0,00</div>
-          </div>
-          <div class="metric m2">
             <h4>Valor Total</h4>
             <div class="value" id="prodProfit">R$ 0,00</div>
           </div>
           <div class="metric m3">
-            <h4>% Média Clínica</h4>
-            <div class="value" id="prodClinicPct">0,00%</div>
+            <h4>Valor Profissional</h4>
+            <div class="value" id="prodLiquido">R$ 0,00</div>
           </div>
           <div class="metric m4">
             <h4>Valor Total Clínica</h4>
@@ -4184,15 +4180,13 @@
       return true;
     });
 
-    const totalCost     = vendas.reduce((a,s) => a + Number(s.custo   || 0), 0);
-    const totalProfit   = vendas.reduce((a,s) => a + Number(s.lucro   || 0), 0);
-    const totalTransfer = vendas.reduce((a,s) => a + Number(s.repasse || 0), 0);
-    const avgClinicPct  = totalProfit > 0 ? ((totalProfit - totalTransfer) / totalProfit) * 100 : 0;
+    const totalProfit   = vendas.reduce((a,s) => a + Number(s.lucro          || 0), 0);
+    const totalTransfer = vendas.reduce((a,s) => a + Number(s.repasse        || 0), 0);
+    const totalLiquido  = vendas.reduce((a,s) => a + Number(s.liquidoClinica || 0), 0);
 
-    document.getElementById('prodCost').textContent      = formatCurrency(totalCost);
-    document.getElementById('prodProfit').textContent    = formatCurrency(totalProfit);
-    document.getElementById('prodClinicPct').textContent = formatPct(avgClinicPct);
-    document.getElementById('prodTransfer').textContent  = formatCurrency(totalTransfer);
+    document.getElementById('prodProfit').textContent   = formatCurrency(totalProfit);
+    document.getElementById('prodLiquido').textContent  = formatCurrency(totalLiquido);
+    document.getElementById('prodTransfer').textContent = formatCurrency(totalTransfer);
 
     const tbody = document.getElementById('produtividadeTabela');
     tbody.innerHTML = vendas.length ? vendas.map(v => `
@@ -4202,7 +4196,7 @@
         <td>${(v.itens||[]).length}</td>
         <td>${formatCurrency(v.custo)}</td>
         <td>${formatCurrency(v.lucro)}</td>
-        <td>${formatPct(v.percentualClinica)}</td>
+        <td>${formatPct(v.percentualRepasse)}</td>
         <td>${formatCurrency(v.repasse)}</td>
         <td>${formatCurrency(v.liquidoClinica)}</td>
       </tr>
