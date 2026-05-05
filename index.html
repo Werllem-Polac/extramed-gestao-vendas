@@ -4154,9 +4154,7 @@
     const sel = document.getElementById('prodFiltroAno');
     if(!sel) return;
     const cur = sel.value;
-    const anos = [...new Set(db.sales.map(v => new Date((v.data||'2000-01-01').slice(0,10)+'T12:00').getFullYear()))].sort((a,b)=>b-a);
-    const curYear = new Date().getFullYear();
-    if(!anos.includes(curYear)) anos.unshift(curYear);
+    const anos = Array.from({length: 2050-2022+1}, (_,i) => 2022+i).reverse();
     sel.innerHTML = `<option value="">Todos</option>` + anos.map(a => `<option value="${a}">${a}</option>`).join('');
     sel.value = cur;
   }
@@ -4814,9 +4812,7 @@
   }
 
   function _finAnos(){
-    const set = new Set([new Date().getFullYear()]);
-    (db.contasPagar||[]).forEach(l => { const y = l.vencimento ? parseInt(l.vencimento.slice(0,4)) : null; if(y) set.add(y); });
-    return [...set].sort();
+    return Array.from({length: 2050-2022+1}, (_,i) => 2022+i);
   }
 
   // ── Render principal ────────────────────────────────────────
