@@ -1655,6 +1655,7 @@
                 <th>Data</th>
                 <th>Paciente</th>
                 <th>Médico</th>
+                <th class="right">Valor</th>
                 <th class="right">Custo</th>
                 <th class="right">Total</th>
                 <th class="right">% Repasse</th>
@@ -4286,6 +4287,7 @@
           <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
           <td>${v.paciente || '-'}</td>
           <td>${v.medicoNome || '-'}</td>
+          <td class="right">${formatCurrency(v.valorTotal || 0)}</td>
           <td class="right">${formatCurrency(v.custo || 0)}</td>
           <td class="right">${formatCurrency(v.lucro || 0)}</td>
           <td class="right">${formatPct(v.percentualRepasse || 0)}</td>
@@ -4297,8 +4299,9 @@
             </button>
           </td>
         </tr>`).join('')
-      : `<tr><td colspan="11" class="empty">Nenhuma venda encontrada.</td></tr>`;
+      : `<tr><td colspan="12" class="empty">Nenhuma venda encontrada.</td></tr>`;
 
+    const dTotPreco   = sorted.reduce((a,v) => a + Number(v.valorTotal||0), 0);
     const dTotCusto   = sorted.reduce((a,v) => a + Number(v.custo||0), 0);
     const dTotValor   = sorted.reduce((a,v) => a + Number(v.lucro||0), 0);
     const dTotRepasse = sorted.reduce((a,v) => a + Number(v.repasse||0), 0);
@@ -4306,6 +4309,7 @@
     document.getElementById('repasseDetalheTfoot').innerHTML = sorted.length ? `
       <tr style="font-weight:700;background:var(--soft)">
         <td></td><td colspan="4">Total (${sorted.length} venda(s))</td>
+        <td class="right">${formatCurrency(dTotPreco)}</td>
         <td class="right">${formatCurrency(dTotCusto)}</td>
         <td class="right">${formatCurrency(dTotValor)}</td>
         <td></td>
@@ -4359,6 +4363,7 @@
         <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
         <td>${v.paciente || '-'}</td>
         <td>${v.medicoNome || '-'}</td>
+        <td class="r">${formatCurrency(v.valorTotal||0)}</td>
         <td class="r">${formatCurrency(v.custo||0)}</td>
         <td class="r">${formatCurrency(v.lucro||0)}</td>
         <td class="r">${formatPct(v.percentualRepasse||0)}</td>
@@ -4385,12 +4390,13 @@
       <table>
         <thead><tr>
           <th>#</th><th>Data</th><th>Paciente</th><th>Médico</th>
-          <th class="r">Custo</th><th class="r">Total</th><th class="r">% Repasse</th>
+          <th class="r">Valor</th><th class="r">Custo</th><th class="r">Total</th><th class="r">% Repasse</th>
           <th class="r">Valor Clínica</th><th class="r">Valor Profissional</th>
         </tr></thead>
         <tbody>${linhas}</tbody>
         <tfoot><tr>
           <td colspan="4">Total (${alvo.length} venda(s))</td>
+          <td class="r">${formatCurrency(alvo.reduce((a,v)=>a+Number(v.valorTotal||0),0))}</td>
           <td class="r">${formatCurrency(alvo.reduce((a,v)=>a+Number(v.custo||0),0))}</td>
           <td class="r">${formatCurrency(totV)}</td><td></td>
           <td class="r">${formatCurrency(totR)}</td>
