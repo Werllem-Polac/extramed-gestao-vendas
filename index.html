@@ -2470,7 +2470,7 @@
   }
 
   function ensureProductCategories(){
-    const defaults = ['Consulta', 'Exame', 'Pacote', 'Procedimento', 'Protocolo', 'Retorno', 'Produtos'];
+    const defaults = [];
     const merged = [...new Set([...(db.productCategories || []), ...defaults])]
       .map(item => String(item).trim())
       .filter(Boolean)
@@ -2485,6 +2485,7 @@
     if(!db.categoryRepasse) db.categoryRepasse = {};
     if(!db._repasseRulesCleared) { db.categoryRepasse = {}; db._repasseRulesCleared = true; }
     if(!db._salesReset20260505) { db.sales = []; db.saleSequence = 1; db._salesReset20260505 = true; }
+    if(!db._categoriesReset20260505) { db.productCategories = []; db.categoryRepasse = {}; db._categoriesReset20260505 = true; }
   }
 
   function migrarRepasseVendas(){
