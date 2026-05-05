@@ -1536,6 +1536,41 @@
     <section class="section" id="produtividade">
       <div class="card">
         <h3>Acompanhamento de Produtividade</h3>
+        <div class="row row-4" style="margin-bottom:8px">
+          <div>
+            <label>Data início</label>
+            <input type="date" id="prodDataInicio" />
+          </div>
+          <div>
+            <label>Data fim</label>
+            <input type="date" id="prodDataFim" />
+          </div>
+          <div>
+            <label>Mês</label>
+            <select id="prodFiltroMes">
+              <option value="">Todos</option>
+              <option value="0">Janeiro</option>
+              <option value="1">Fevereiro</option>
+              <option value="2">Março</option>
+              <option value="3">Abril</option>
+              <option value="4">Maio</option>
+              <option value="5">Junho</option>
+              <option value="6">Julho</option>
+              <option value="7">Agosto</option>
+              <option value="8">Setembro</option>
+              <option value="9">Outubro</option>
+              <option value="10">Novembro</option>
+              <option value="11">Dezembro</option>
+            </select>
+          </div>
+          <div>
+            <label>Ano</label>
+            <select id="prodFiltroAno"><option value="">Todos</option></select>
+          </div>
+        </div>
+        <div style="text-align:right;margin-bottom:14px">
+          <button class="btn btn-light" onclick="limparFiltrosProdutividade()">Limpar filtros</button>
+        </div>
         <div class="grid grid-4" style="margin-bottom:18px">
           <div class="metric m1">
             <h4>Custo Total</h4>
@@ -4115,19 +4150,54 @@
     `).join('') || `<tr><td colspan="7" class="empty">Sem vendas recentes.</td></tr>`;
   }
 
+  function _populateProdAno(){
+    const sel = document.getElementById('prodFiltroAno');
+    if(!sel) return;
+    const cur = sel.value;
+    const anos = [...new Set(db.sales.map(v => new Date((v.data||'2000-01-01').slice(0,10)+'T12:00').getFullYear()))].sort((a,b)=>b-a);
+    const curYear = new Date().getFullYear();
+    if(!anos.includes(curYear)) anos.unshift(curYear);
+    sel.innerHTML = `<option value="">Todos</option>` + anos.map(a => `<option value="${a}">${a}</option>`).join('');
+    sel.value = cur;
+  }
+
+  function limparFiltrosProdutividade(){
+    ['prodDataInicio','prodDataFim','prodFiltroMes','prodFiltroAno'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+    renderProdutividade();
+  }
+
   function renderProdutividade(){
-    const tbody = document.getElementById('produtividadeTabela');
-    const totalCost = db.sales.reduce((acc,s) => acc + Number(s.custo || 0), 0);
-    const totalProfit = db.sales.reduce((acc,s) => acc + Number(s.lucro || 0), 0);
-    const totalTransfer = db.sales.reduce((acc,s) => acc + Number(s.repasse || 0), 0);
-    const avgClinicPct = totalProfit > 0 ? ((totalProfit - totalTransfer) / totalProfit) * 100 : 0;
+    _populateProdAno();
+    const di  = document.getElementById('prodDataInicio')?.value || '';
+    const df  = document.getElementById('prodDataFim')?.value || '';
+    const mes = document.getElementById('prodFiltroMes')?.value;
+    const ano = document.getElementById('prodFiltroAno')?.value || '';
 
-    document.getElementById('prodCost').textContent = formatCurrency(totalCost);
-    document.getElementById('prodProfit').textContent = formatCurrency(totalProfit);
+    const vendas = db.sales.filter(v => {
+      const d = (v.data || '').slice(0, 10);
+      if(di && d < di) return false;
+      if(df && d > df) return false;
+      if(mes !== '' && mes !== undefined){
+        if(new Date(d + 'T12:00').getMonth() !== Number(mes)) return false;
+      }
+      if(ano && String(new Date(d + 'T12:00').getFullYear()) !== ano) return false;
+      return true;
+    });
+
+    const totalCost     = vendas.reduce((a,s) => a + Number(s.custo   || 0), 0);
+    const totalProfit   = vendas.reduce((a,s) => a + Number(s.lucro   || 0), 0);
+    const totalTransfer = vendas.reduce((a,s) => a + Number(s.repasse || 0), 0);
+    const avgClinicPct  = totalProfit > 0 ? ((totalProfit - totalTransfer) / totalProfit) * 100 : 0;
+
+    document.getElementById('prodCost').textContent      = formatCurrency(totalCost);
+    document.getElementById('prodProfit').textContent    = formatCurrency(totalProfit);
     document.getElementById('prodClinicPct').textContent = formatPct(avgClinicPct);
-    document.getElementById('prodTransfer').textContent = formatCurrency(totalTransfer);
+    document.getElementById('prodTransfer').textContent  = formatCurrency(totalTransfer);
 
-    tbody.innerHTML = db.sales.length ? db.sales.map(v => `
+    const tbody = document.getElementById('produtividadeTabela');
+    tbody.innerHTML = vendas.length ? vendas.map(v => `
       <tr>
         <td>${new Date(v.data).toLocaleDateString('pt-BR')}</td>
         <td>${v.medicoNome}</td>
@@ -4138,7 +4208,7 @@
         <td>${formatCurrency(v.repasse)}</td>
         <td>${formatCurrency(v.liquidoClinica)}</td>
       </tr>
-    `).join('') : `<tr><td colspan="8" class="empty">Sem dados para produtividade.</td></tr>`;
+    `).join('') : `<tr><td colspan="8" class="empty">Sem dados para o período selecionado.</td></tr>`;
   }
 
   function renderRepasse(){
@@ -4551,6 +4621,9 @@
     document.getElementById('pagamentoMistoValor1').addEventListener('input', updateVendaTotals);
     document.getElementById('pagamentoMistoValor2').addEventListener('input', updateVendaTotals);
     document.getElementById('repasseFiltroMedico').addEventListener('change', renderRepasse);
+    ['prodDataInicio','prodDataFim','prodFiltroMes','prodFiltroAno'].forEach(id =>
+      document.getElementById(id).addEventListener('change', renderProdutividade)
+    );
     document.getElementById('repasseDataInicio').addEventListener('change', renderRepasse);
     document.getElementById('repasseDataFim').addEventListener('change', renderRepasse);
     const medicoBusca = document.getElementById('medicoBusca'); if(medicoBusca) medicoBusca.addEventListener('input', renderMedicos);
