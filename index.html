@@ -3727,7 +3727,7 @@
     const hasServico  = itensTipos.includes('Serviço');
 
     if(hasExame){
-      const pct = Number(doc.percentualConsulta || 0);
+      const pct = Number(doc.percentualExame || 0);
       return { repasse: totalLiquido * (pct / 100), pct };
     }
     if(hasConsulta){
