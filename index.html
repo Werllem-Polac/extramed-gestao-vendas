@@ -3733,10 +3733,10 @@
       return { repasse: totalLiquido * (pct / 100), pct };
     }
     if(hasServico){
-      const pct = Number(doc.percentualLucro ?? doc.percentual || 0);
+      const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
       return { repasse: totalLiquido * (pct / 100), pct };
     }
-    const pct = Number(doc.percentualLucro ?? doc.percentual || 0);
+    const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
     return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
   }
 
