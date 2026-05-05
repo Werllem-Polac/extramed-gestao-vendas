@@ -3711,6 +3711,35 @@
     return Number((doc?.percentualLucro ?? doc?.percentual) || 0);
   }
 
+  function calcRepasseVenda(medicoId, tipoPrincipal, itens, totalLiquido, lucro){
+    if(db.settings.calcMode === 'global'){
+      const pct = Number(db.settings.globalPct || 0);
+      return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
+    }
+    const doc = db.doctors.find(d => d.id === medicoId);
+    if(!doc) return { repasse: 0, pct: 0 };
+
+    const itensTipos = (itens || []).map(i => i.tipo || '');
+    const hasExame    = tipoPrincipal === 'Exame'    || itensTipos.includes('Exame');
+    const hasConsulta = tipoPrincipal === 'Consulta' || itensTipos.includes('Consulta');
+    const hasServico  = itensTipos.includes('Serviço');
+
+    if(hasExame){
+      const pct = Number(doc.percentualExame || 0);
+      return { repasse: totalLiquido * (pct / 100), pct };
+    }
+    if(hasConsulta){
+      const pct = Number(doc.percentualConsulta || 0);
+      return { repasse: totalLiquido * (pct / 100), pct };
+    }
+    if(hasServico){
+      const pct = Number(doc.percentualLucro ?? doc.percentual || 0);
+      return { repasse: totalLiquido * (pct / 100), pct };
+    }
+    const pct = Number(doc.percentualLucro ?? doc.percentual || 0);
+    return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
+  }
+
   function registrarVenda(){
     const usuarioId = document.getElementById('vendaUsuario').value;
     const medicoId = document.getElementById('vendaMedico').value;
@@ -3738,8 +3767,7 @@
     const custo = window.vendaItensTemp.reduce((a,i)=>a+i.custo,0);
     const totalLiquido = Math.max(totalBruto - descontoGeral, 0);
     const lucro = totalLiquido - custo;
-    const pctRepasse = getApplicablePct(medicoId);
-    const repasse = Math.max(lucro,0) * (pctRepasse/100);
+    const { repasse, pct: pctRepasse } = calcRepasseVenda(medicoId, tipoPrincipal, window.vendaItensTemp, totalLiquido, lucro);
     const liquidoClinica = lucro - repasse;
     const percentualClinica = lucro > 0 ? (liquidoClinica / lucro) * 100 : 0;
     const payments = serializePayments(totalLiquido);
