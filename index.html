@@ -1577,14 +1577,21 @@
     <section class="section" id="repasse">
       <div class="card">
         <h3>Resumo por Médico</h3>
-        <div class="row row-2" style="margin-bottom:12px">
+        <div class="row row-4" style="margin-bottom:12px">
           <div>
             <label>Filtrar por médico</label>
             <select id="repasseFiltroMedico"></select>
           </div>
           <div>
-            <label>Total de repasse</label>
-            <input id="repasseResumo" readonly />
+            <label>Data início</label>
+            <input type="date" id="repasseDataInicio" />
+          </div>
+          <div>
+            <label>Data fim</label>
+            <input type="date" id="repasseDataFim" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button class="btn btn-light" style="width:100%" onclick="limparFiltrosRepasse()">Limpar</button>
           </div>
         </div>
         <div class="table-wrap">
@@ -1599,15 +1606,20 @@
               </tr>
             </thead>
             <tbody id="repasseTabela"></tbody>
+            <tfoot id="repasseTfoot"></tfoot>
           </table>
         </div>
       </div>
       <div class="card" style="margin-top:16px">
-        <h3>Detalhe por Venda</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0">Detalhe por Venda</h3>
+          <button class="btn btn-primary" onclick="imprimirRepasseSelecionados()">Imprimir</button>
+        </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
+                <th style="width:32px"><input type="checkbox" id="repasseCheckAll" onchange="toggleAllRepasseCheck(this.checked)" title="Selecionar todos" /></th>
                 <th>#</th>
                 <th>Data</th>
                 <th>Médico</th>
@@ -1619,6 +1631,7 @@
               </tr>
             </thead>
             <tbody id="repasseDetalheTabela"></tbody>
+            <tfoot id="repasseDetalheTfoot"></tfoot>
           </table>
         </div>
       </div>
@@ -4129,50 +4142,169 @@
   }
 
   function renderRepasse(){
-    const filtro = document.getElementById('repasseFiltroMedico')?.value || '';
-    const vendas = db.sales.filter(v => !filtro || v.medicoId === filtro);
+    const filtroMedico = document.getElementById('repasseFiltroMedico')?.value || '';
+    const di = document.getElementById('repasseDataInicio')?.value || '';
+    const df = document.getElementById('repasseDataFim')?.value || '';
+
+    const vendas = db.sales.filter(v => {
+      if(filtroMedico && v.medicoId !== filtroMedico) return false;
+      const d = (v.data || '').slice(0, 10);
+      if(di && d < di) return false;
+      if(df && d > df) return false;
+      return true;
+    });
+
+    // ── Resumo por Médico ──
     const rows = {};
     vendas.forEach(v => {
       if(!rows[v.medicoNome]) rows[v.medicoNome] = {vendas:0,lucro:0,repasse:0,clinica:0};
       rows[v.medicoNome].vendas += 1;
-      rows[v.medicoNome].lucro += Number(v.lucro || 0);
-      rows[v.medicoNome].repasse += Number(v.repasse || 0);
-      rows[v.medicoNome].clinica += Number(v.liquidoClinica || 0);
+      rows[v.medicoNome].lucro  += Number(v.lucro || 0);
+      rows[v.medicoNome].repasse+= Number(v.repasse || 0);
+      rows[v.medicoNome].clinica+= Number(v.liquidoClinica || 0);
     });
-
-    const tbody = document.getElementById('repasseTabela');
     const entries = Object.entries(rows);
-    tbody.innerHTML = entries.length ? entries.map(([nome, data]) => `
-      <tr>
-        <td>${nome}</td>
-        <td>${data.vendas}</td>
-        <td>${formatCurrency(data.lucro)}</td>
-        <td>${formatCurrency(data.repasse)}</td>
-        <td>${formatCurrency(data.clinica)}</td>
-      </tr>
-    `).join('') : `<tr><td colspan="5" class="empty">Nenhum dado de repasse encontrado.</td></tr>`;
+    document.getElementById('repasseTabela').innerHTML = entries.length
+      ? entries.map(([nome, d]) => `<tr>
+          <td>${nome}</td><td>${d.vendas}</td>
+          <td>${formatCurrency(d.lucro)}</td>
+          <td>${formatCurrency(d.repasse)}</td>
+          <td>${formatCurrency(d.clinica)}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="5" class="empty">Nenhum dado de repasse encontrado.</td></tr>`;
 
-    const totalRepasse = entries.reduce((a,[,d]) => a + d.repasse, 0);
-    document.getElementById('repasseResumo').value = formatCurrency(totalRepasse);
+    const totValor   = entries.reduce((a,[,d]) => a + d.lucro,   0);
+    const totRepasse = entries.reduce((a,[,d]) => a + d.repasse, 0);
+    const totLiquido = entries.reduce((a,[,d]) => a + d.clinica, 0);
+    document.getElementById('repasseTfoot').innerHTML = entries.length ? `
+      <tr style="font-weight:700;background:var(--soft)">
+        <td>Total</td><td>${entries.reduce((a,[,d])=>a+d.vendas,0)}</td>
+        <td>${formatCurrency(totValor)}</td>
+        <td style="color:var(--wine)">${formatCurrency(totRepasse)}</td>
+        <td>${formatCurrency(totLiquido)}</td>
+      </tr>` : '';
 
-    const detalhe = document.getElementById('repasseDetalheTabela');
+    // ── Detalhe por Venda ──
     const sorted = [...vendas].sort((a,b) => (b.data||'').localeCompare(a.data||''));
-    detalhe.innerHTML = sorted.length ? sorted.map(v => `
+    document.getElementById('repasseDetalheTabela').innerHTML = sorted.length
+      ? sorted.map(v => `
+        <tr>
+          <td style="text-align:center"><input type="checkbox" class="repasse-check" data-id="${v.id}" /></td>
+          <td>${v.numero || '-'}</td>
+          <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
+          <td>${v.medicoNome || '-'}</td>
+          <td class="right">${formatCurrency(v.lucro || 0)}</td>
+          <td class="right">${formatPct(v.percentualRepasse || 0)}</td>
+          <td class="right" style="color:var(--wine)">${formatCurrency(v.repasse || 0)}</td>
+          <td class="right">${formatCurrency(v.liquidoClinica || 0)}</td>
+          <td>
+            <button class="icon-btn" title="Editar repasse" onclick="abrirEditarRepasse('${v.id}')">
+              <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M14.85 2.85a1.5 1.5 0 0 1 2.12 2.12l-9.19 9.2-2.83.7.71-2.83 9.19-9.19Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+          </td>
+        </tr>`).join('')
+      : `<tr><td colspan="9" class="empty">Nenhuma venda encontrada.</td></tr>`;
+
+    const dTotValor   = sorted.reduce((a,v) => a + Number(v.lucro||0), 0);
+    const dTotRepasse = sorted.reduce((a,v) => a + Number(v.repasse||0), 0);
+    const dTotLiquido = sorted.reduce((a,v) => a + Number(v.liquidoClinica||0), 0);
+    document.getElementById('repasseDetalheTfoot').innerHTML = sorted.length ? `
+      <tr style="font-weight:700;background:var(--soft)">
+        <td></td><td colspan="3">Total (${sorted.length} venda(s))</td>
+        <td class="right">${formatCurrency(dTotValor)}</td>
+        <td></td>
+        <td class="right" style="color:var(--wine)">${formatCurrency(dTotRepasse)}</td>
+        <td class="right">${formatCurrency(dTotLiquido)}</td>
+        <td></td>
+      </tr>` : '';
+
+    const chkAll = document.getElementById('repasseCheckAll');
+    if(chkAll) chkAll.checked = false;
+  }
+
+  function toggleAllRepasseCheck(checked){
+    document.querySelectorAll('.repasse-check').forEach(c => c.checked = checked);
+  }
+
+  function limparFiltrosRepasse(){
+    document.getElementById('repasseFiltroMedico').value = '';
+    document.getElementById('repasseDataInicio').value = '';
+    document.getElementById('repasseDataFim').value = '';
+    renderRepasse();
+  }
+
+  function imprimirRepasseSelecionados(){
+    const checks = [...document.querySelectorAll('.repasse-check')];
+    const selecionados = checks.filter(c => c.checked).map(c => c.dataset.id);
+    const di = document.getElementById('repasseDataInicio')?.value || '';
+    const df = document.getElementById('repasseDataFim')?.value || '';
+    const filtroMedico = document.getElementById('repasseFiltroMedico')?.value || '';
+
+    const vendas = db.sales.filter(v => {
+      if(filtroMedico && v.medicoId !== filtroMedico) return false;
+      const d = (v.data || '').slice(0, 10);
+      if(di && d < di) return false;
+      if(df && d > df) return false;
+      return true;
+    });
+    const sorted = [...vendas].sort((a,b) => (b.data||'').localeCompare(a.data||''));
+    const alvo = selecionados.length ? sorted.filter(v => selecionados.includes(v.id)) : sorted;
+    if(!alvo.length){ alert('Nenhuma venda para imprimir.'); return; }
+
+    const totV = alvo.reduce((a,v) => a + Number(v.lucro||0), 0);
+    const totR = alvo.reduce((a,v) => a + Number(v.repasse||0), 0);
+    const totL = alvo.reduce((a,v) => a + Number(v.liquidoClinica||0), 0);
+    const clinica = db.clinicName || 'Extra Diagnósticos';
+    const periodo = di || df ? `Período: ${di ? new Date(di+'T12:00').toLocaleDateString('pt-BR') : '—'} até ${df ? new Date(df+'T12:00').toLocaleDateString('pt-BR') : '—'}` : 'Todos os períodos';
+
+    const linhas = alvo.map(v => `
       <tr>
         <td>${v.numero || '-'}</td>
         <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
         <td>${v.medicoNome || '-'}</td>
-        <td class="right">${formatCurrency(v.lucro || 0)}</td>
-        <td class="right">${formatPct(v.percentualRepasse || 0)}</td>
-        <td class="right" style="color:var(--wine)">${formatCurrency(v.repasse || 0)}</td>
-        <td class="right">${formatCurrency(v.liquidoClinica || 0)}</td>
-        <td>
-          <button class="icon-btn" title="Editar repasse" onclick="abrirEditarRepasse('${v.id}')">
-            <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M14.85 2.85a1.5 1.5 0 0 1 2.12 2.12l-9.19 9.2-2.83.7.71-2.83 9.19-9.19Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          </button>
-        </td>
-      </tr>
-    `).join('') : `<tr><td colspan="8" class="empty">Nenhuma venda encontrada.</td></tr>`;
+        <td class="r">${formatCurrency(v.lucro||0)}</td>
+        <td class="r">${formatPct(v.percentualRepasse||0)}</td>
+        <td class="r">${formatCurrency(v.repasse||0)}</td>
+        <td class="r">${formatCurrency(v.liquidoClinica||0)}</td>
+      </tr>`).join('');
+
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+      <title>Relatório de Repasse — ${clinica}</title>
+      <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:24px}
+        h1{font-size:16px;margin-bottom:4px}
+        .sub{font-size:11px;color:#666;margin-bottom:16px}
+        table{width:100%;border-collapse:collapse;margin-top:8px}
+        th{background:#9B1C3E;color:#fff;padding:6px 8px;text-align:left;font-size:11px}
+        td{padding:5px 8px;border-bottom:1px solid #eee;font-size:11px}
+        .r{text-align:right}
+        tfoot td{font-weight:700;background:#f5f5f5;border-top:2px solid #9B1C3E}
+        @media print{body{padding:8px}}
+      </style></head><body>
+      <h1>Relatório de Repasse Médico — ${clinica}</h1>
+      <div class="sub">${periodo} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+      <table>
+        <thead><tr>
+          <th>#</th><th>Data</th><th>Médico</th>
+          <th class="r">Valor</th><th class="r">% Repasse</th>
+          <th class="r">Repasse</th><th class="r">Líquido Médico</th>
+        </tr></thead>
+        <tbody>${linhas}</tbody>
+        <tfoot><tr>
+          <td colspan="3">Total (${alvo.length} venda(s))</td>
+          <td class="r">${formatCurrency(totV)}</td><td></td>
+          <td class="r">${formatCurrency(totR)}</td>
+          <td class="r">${formatCurrency(totL)}</td>
+        </tr></tfoot>
+      </table>
+    </body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 400);
   }
 
   function abrirEditarRepasse(vendaId){
@@ -4419,6 +4551,8 @@
     document.getElementById('pagamentoMistoValor1').addEventListener('input', updateVendaTotals);
     document.getElementById('pagamentoMistoValor2').addEventListener('input', updateVendaTotals);
     document.getElementById('repasseFiltroMedico').addEventListener('change', renderRepasse);
+    document.getElementById('repasseDataInicio').addEventListener('change', renderRepasse);
+    document.getElementById('repasseDataFim').addEventListener('change', renderRepasse);
     const medicoBusca = document.getElementById('medicoBusca'); if(medicoBusca) medicoBusca.addEventListener('input', renderMedicos);
     const medicoFiltroStatus = document.getElementById('medicoFiltroStatus'); if(medicoFiltroStatus) medicoFiltroStatus.addEventListener('change', renderMedicos);
     const usuarioBusca = document.getElementById('usuarioBusca'); if(usuarioBusca) usuarioBusca.addEventListener('input', renderUsuarios);
