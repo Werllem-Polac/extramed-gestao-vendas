@@ -3725,7 +3725,8 @@
     const hasExame    = tipoPrincipal === 'Exame'    || itensTipos.includes('Exame');
     const hasConsulta = tipoPrincipal === 'Consulta' || itensTipos.includes('Consulta');
     const hasServico  = itensTipos.includes('Serviço');
-    const hasProduto  = tipoPrincipal === 'Produto'  || itensTipos.includes('Produto');
+    const categoriasLucro = ['Produto','Produtos','Pacote','Procedimento','Protocolo'];
+    const hasProduto  = categoriasLucro.some(c => tipoPrincipal === c || itensTipos.includes(c));
 
     if(hasExame){
       const pct = Number(doc.percentualExame || 0);
