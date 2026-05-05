@@ -2507,25 +2507,40 @@
     db.company = Object.assign({}, structuredClone(defaultDB.company), db.company || {});
     if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Diagnósticos';
     if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Diagnósticos';
-    if(!db.categoryRepasse) db.categoryRepasse = structuredClone(defaultDB.categoryRepasse);
+    // merge: defaults preenchem apenas chaves ausentes, configurações manuais prevalecem
+    db.categoryRepasse = Object.assign({}, structuredClone(defaultDB.categoryRepasse), db.categoryRepasse || {});
   }
 
   function migrarRepasseVendas(){
     if(!db.sales || !db.sales.length) return;
     let changed = false;
     db.sales.forEach(v => {
-      const regra = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
-      const pct        = Number(v.percentualRepasse || 0);
+      const regra      = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
+      const doc        = (db.doctors || []).find(d => d.id === v.medicoId);
       const valorTotal = Number(v.valorTotal || 0);
       const lucro      = Number(v.lucro || 0);
-      const base       = (regra === 'consulta' || regra === 'exame') ? valorTotal : Math.max(lucro, 0);
-      const novoRepasse  = base * (pct / 100);
-      const novoLiquido  = valorTotal - novoRepasse;
-      const novoPctClin  = valorTotal > 0 ? (novoLiquido / valorTotal) * 100 : 0;
-      if(Math.abs((v.repasse || 0) - novoRepasse) > 0.005 ||
+
+      // re-deriva percentual correto do perfil atual do médico
+      let pct;
+      if(doc){
+        if(regra === 'consulta') pct = Number(doc.percentualConsulta || 0);
+        else if(regra === 'exame') pct = Number(doc.percentualExame || 0);
+        else pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+      } else {
+        pct = Number(v.percentualRepasse || 0);
+      }
+
+      const base        = (regra === 'consulta' || regra === 'exame') ? valorTotal : Math.max(lucro, 0);
+      const novoRepasse = base * (pct / 100);
+      const novoLiquido = valorTotal - novoRepasse;
+      const novoPctClin = valorTotal > 0 ? (novoLiquido / valorTotal) * 100 : 0;
+
+      if(Math.abs((v.percentualRepasse || 0) - pct) > 0.005 ||
+         Math.abs((v.repasse || 0) - novoRepasse) > 0.005 ||
          Math.abs((v.liquidoClinica || 0) - novoLiquido) > 0.005){
-        v.repasse         = novoRepasse;
-        v.liquidoClinica  = novoLiquido;
+        v.percentualRepasse = pct;
+        v.repasse           = novoRepasse;
+        v.liquidoClinica    = novoLiquido;
         v.percentualClinica = novoPctClin;
         changed = true;
       }
