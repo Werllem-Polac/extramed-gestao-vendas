@@ -915,10 +915,18 @@
       <div id="produtosCategorias" class="grid grid-2" style="margin-top:18px; display:none">
         <div class="card">
           <h3>Cadastro de Categorias</h3>
-          <div class="row row-2" style="align-items:end">
+          <div class="row row-3" style="align-items:end">
             <div>
               <label>Nome da categoria</label>
               <input id="novaCategoria" placeholder="Adicionar ou editar categoria" />
+            </div>
+            <div>
+              <label>Regra de Repasse</label>
+              <select id="categoriaRepasse">
+                <option value="lucro">Percentual sobre o lucro (%)</option>
+                <option value="consulta">Percentual sobre consulta (%)</option>
+                <option value="exame">Percentual sobre exame (%)</option>
+              </select>
             </div>
             <div>
               <label>Categoria selecionada</label>
@@ -939,6 +947,7 @@
               <thead>
                 <tr>
                   <th>Categoria</th>
+                  <th>Repasse</th>
                   <th>Qtd. itens</th>
                 </tr>
               </thead>
@@ -2273,6 +2282,15 @@
       linkNotaFiscal: ''
     },
     productCategories: ['Consulta', 'Exame', 'Pacote', 'Procedimento', 'Protocolo', 'Retorno', 'Produtos'],
+    categoryRepasse: {
+      'Consulta':    'consulta',
+      'Exame':       'exame',
+      'Pacote':      'lucro',
+      'Procedimento':'lucro',
+      'Protocolo':   'lucro',
+      'Retorno':     'consulta',
+      'Produtos':    'lucro'
+    },
     products: [],
     categories: ['Consulta','Exame','Pacote','Procedimento','Produtos','Protocolo','Retorno'].sort((a,b)=>a.localeCompare(b,'pt-BR')),
     doctors: [],
@@ -2486,6 +2504,7 @@
     db.company = Object.assign({}, structuredClone(defaultDB.company), db.company || {});
     if(!db.clinicName) db.clinicName = db.company.nomeFantasia || 'Extra Diagnósticos';
     if(!db.company.nomeFantasia) db.company.nomeFantasia = db.clinicName || 'Extra Diagnósticos';
+    if(!db.categoryRepasse) db.categoryRepasse = structuredClone(defaultDB.categoryRepasse);
   }
 
   function ensureContasPagar(){
@@ -2556,10 +2575,12 @@
       }
     }
     if(buscaCategoria) buscaCategoria.innerHTML = options.join('');
+    const repasseLabels = { lucro: 'Sobre o lucro (%)', consulta: 'Sobre consulta (%)', exame: 'Sobre exame (%)' };
     tbody.innerHTML = db.productCategories.length ? db.productCategories.map(c => {
       const qtd = db.products.filter(p => p.categoria === c).length;
-      return `<tr><td>${c}</td><td>${qtd}</td></tr>`;
-    }).join('') : `<tr><td colspan="2" class="empty">Nenhuma categoria cadastrada.</td></tr>`;
+      const regra = (db.categoryRepasse || {})[c] || 'lucro';
+      return `<tr><td>${c}</td><td>${repasseLabels[regra] || regra}</td><td>${qtd}</td></tr>`;
+    }).join('') : `<tr><td colspan="3" class="empty">Nenhuma categoria cadastrada.</td></tr>`;
   }
 
   function renderControleVencimento(){
@@ -2609,11 +2630,15 @@
   function carregarCategoriaSelecionadaParaEdicao(){
     const categoria = document.getElementById('categoriaSelecionada').value;
     document.getElementById('novaCategoria').value = categoria || '';
+    const sel = document.getElementById('categoriaRepasse');
+    if(sel) sel.value = (db.categoryRepasse || {})[categoria] || 'lucro';
   }
 
   function limparCategoriaForm(){
     document.getElementById('novaCategoria').value = '';
     document.getElementById('categoriaSelecionada').value = '';
+    const sel = document.getElementById('categoriaRepasse');
+    if(sel) sel.value = 'lucro';
   }
 
   function adicionarCategoria(){
@@ -2628,8 +2653,11 @@
       alert('Essa categoria já existe.');
       return;
     }
+    const regra = document.getElementById('categoriaRepasse')?.value || 'lucro';
     db.productCategories.push(novaCategoria);
     db.productCategories = [...new Set(db.productCategories)].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+    if(!db.categoryRepasse) db.categoryRepasse = {};
+    db.categoryRepasse[novaCategoria] = regra;
     input.value = '';
     saveDB();
     refreshAll();
@@ -2659,8 +2687,12 @@
       return;
     }
 
+    const regra = document.getElementById('categoriaRepasse')?.value || 'lucro';
     db.productCategories = (db.productCategories || []).map(c => c === categoriaAtual ? novoNome : c);
     db.products = (db.products || []).map(p => p.categoria === categoriaAtual ? {...p, categoria: novoNome} : p);
+    if(!db.categoryRepasse) db.categoryRepasse = {};
+    db.categoryRepasse[novoNome] = regra;
+    if(novoNome !== categoriaAtual) delete db.categoryRepasse[categoriaAtual];
     ensureProductCategories();
     saveDB();
     refreshAll();
@@ -3708,28 +3740,15 @@
     const doc = db.doctors.find(d => d.id === medicoId);
     if(!doc) return { repasse: 0, pct: 0 };
 
-    const itensTipos = (itens || []).map(i => i.tipo || '');
-    const hasExame    = tipoPrincipal === 'Exame'    || itensTipos.includes('Exame');
-    const hasConsulta = tipoPrincipal === 'Consulta' || itensTipos.includes('Consulta');
-    const hasServico  = itensTipos.includes('Serviço');
-    const categoriasLucro = ['Produto','Produtos','Pacote','Procedimento','Protocolo'];
-    const hasProduto  = categoriasLucro.some(c => tipoPrincipal === c || itensTipos.includes(c));
+    const regra = (db.categoryRepasse || {})[tipoPrincipal] || 'lucro';
 
-    if(hasExame){
-      const pct = Number(doc.percentualExame || 0);
-      return { repasse: totalLiquido * (pct / 100), pct };
-    }
-    if(hasConsulta){
+    if(regra === 'consulta'){
       const pct = Number(doc.percentualConsulta || 0);
       return { repasse: totalLiquido * (pct / 100), pct };
     }
-    if(hasServico){
-      const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+    if(regra === 'exame'){
+      const pct = Number(doc.percentualExame || 0);
       return { repasse: totalLiquido * (pct / 100), pct };
-    }
-    if(hasProduto){
-      const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
-      return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
     }
     const pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
     return { repasse: Math.max(lucro, 0) * (pct / 100), pct };
