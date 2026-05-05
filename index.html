@@ -3161,6 +3161,7 @@
       db.doctors.push(payload);
     }
 
+    migrarRepasseVendas();
     saveDB();
     limparMedicoForm();
     refreshAll();
@@ -3773,6 +3774,25 @@
     return Number((doc?.percentualLucro ?? doc?.percentual) || 0);
   }
 
+  function calcRepasseAtual(v){
+    const regra      = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
+    const doc        = (db.doctors || []).find(d => d.id === v.medicoId);
+    const valorTotal = Number(v.valorTotal || 0);
+    const lucro      = Number(v.lucro || 0);
+    let pct;
+    if(doc){
+      if(regra === 'consulta')      pct = Number(doc.percentualConsulta || 0);
+      else if(regra === 'exame')    pct = Number(doc.percentualExame    || 0);
+      else                          pct = Number((doc.percentualLucro ?? doc.percentual) || 0);
+    } else {
+      pct = Number(v.percentualRepasse || 0);
+    }
+    const base          = (regra === 'consulta' || regra === 'exame') ? valorTotal : Math.max(lucro, 0);
+    const repasse       = base * (pct / 100);
+    const liquidoClinica = valorTotal - repasse;
+    return { pct, repasse, liquidoClinica };
+  }
+
   function calcRepasseVenda(medicoId, tipoPrincipal, itens, totalLiquido, lucro){
     if(db.settings.calcMode === 'global'){
       const pct = Number(db.settings.globalPct || 0);
@@ -4303,11 +4323,12 @@
     // ── Resumo por Médico ──
     const rows = {};
     vendas.forEach(v => {
+      const cr = calcRepasseAtual(v);
       if(!rows[v.medicoNome]) rows[v.medicoNome] = {vendas:0,lucro:0,repasse:0,clinica:0};
       rows[v.medicoNome].vendas += 1;
       rows[v.medicoNome].lucro  += Number(v.lucro || 0);
-      rows[v.medicoNome].repasse+= Number(v.repasse || 0);
-      rows[v.medicoNome].clinica+= Number(v.liquidoClinica || 0);
+      rows[v.medicoNome].repasse+= cr.repasse;
+      rows[v.medicoNome].clinica+= cr.liquidoClinica;
     });
     const entries = Object.entries(rows);
     document.getElementById('repasseTabela').innerHTML = entries.length
@@ -4333,7 +4354,9 @@
     // ── Detalhe por Venda ──
     const sorted = [...vendas].sort((a,b) => (b.data||'').localeCompare(a.data||''));
     document.getElementById('repasseDetalheTabela').innerHTML = sorted.length
-      ? sorted.map(v => `
+      ? sorted.map(v => {
+          const cr = calcRepasseAtual(v);
+          return `
         <tr>
           <td style="text-align:center"><input type="checkbox" class="repasse-check" data-id="${v.id}" /></td>
           <td>${v.numero || '-'}</td>
@@ -4343,22 +4366,22 @@
           <td class="right">${formatCurrency(v.valorTotal || 0)}</td>
           <td class="right">${formatCurrency(v.custo || 0)}</td>
           <td class="right">${formatCurrency(v.lucro || 0)}</td>
-          <td class="right">${formatPct(v.percentualRepasse || 0)}</td>
-          <td class="right" style="color:var(--wine)">${formatCurrency(v.repasse || 0)}</td>
-          <td class="right">${formatCurrency(v.liquidoClinica || 0)}</td>
+          <td class="right">${formatPct(cr.pct)}</td>
+          <td class="right" style="color:var(--wine)">${formatCurrency(cr.repasse)}</td>
+          <td class="right">${formatCurrency(cr.liquidoClinica)}</td>
           <td>
             <button class="icon-btn" title="Editar repasse" onclick="abrirEditarRepasse('${v.id}')">
               <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M14.85 2.85a1.5 1.5 0 0 1 2.12 2.12l-9.19 9.2-2.83.7.71-2.83 9.19-9.19Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </button>
           </td>
-        </tr>`).join('')
+        </tr>`;}).join('')
       : `<tr><td colspan="12" class="empty">Nenhuma venda encontrada.</td></tr>`;
 
     const dTotPreco   = sorted.reduce((a,v) => a + Number(v.valorTotal||0), 0);
     const dTotCusto   = sorted.reduce((a,v) => a + Number(v.custo||0), 0);
     const dTotValor   = sorted.reduce((a,v) => a + Number(v.lucro||0), 0);
-    const dTotRepasse = sorted.reduce((a,v) => a + Number(v.repasse||0), 0);
-    const dTotLiquido = sorted.reduce((a,v) => a + Number(v.liquidoClinica||0), 0);
+    const dTotRepasse = sorted.reduce((a,v) => a + calcRepasseAtual(v).repasse, 0);
+    const dTotLiquido = sorted.reduce((a,v) => a + calcRepasseAtual(v).liquidoClinica, 0);
     document.getElementById('repasseDetalheTfoot').innerHTML = sorted.length ? `
       <tr style="font-weight:700;background:var(--soft)">
         <td></td><td colspan="4">Total (${sorted.length} venda(s))</td>
