@@ -2231,17 +2231,18 @@
         <div><label>Venda #</label><input id="editRepasseNumero" readonly /></div>
         <div><label>Médico</label><input id="editRepasseMedico" readonly /></div>
       </div>
-      <div>
-        <label>Lucro da Venda</label>
-        <input id="editRepasseLucro" readonly />
+      <div class="row row-3">
+        <div><label>Valor</label><input id="editRepasseValorVenda" readonly /></div>
+        <div><label>Custo</label><input id="editRepasseCusto" readonly /></div>
+        <div><label>Total</label><input id="editRepasseLucro" readonly /></div>
       </div>
       <div>
         <label>% Repasse</label>
         <input id="editRepassePct" type="number" min="0" max="100" step="0.01" oninput="calcPreviewRepasse()" />
       </div>
       <div class="row row-2">
-        <div><label>Valor Clínica (novo)</label><input id="editRepasseValor" readonly style="color:var(--wine);font-weight:700" /></div>
-        <div><label>Líquido Clínica (novo)</label><input id="editRepasseLiquido" readonly style="font-weight:700" /></div>
+        <div><label>Valor Clínica</label><input id="editRepasseValor" readonly style="color:var(--wine);font-weight:700" /></div>
+        <div><label>Valor Profissional</label><input id="editRepasseLiquido" readonly style="font-weight:700" /></div>
       </div>
     </div>
     <div class="actions" style="margin-top:16px">
@@ -3782,8 +3783,8 @@
     const totalLiquido = Math.max(totalBruto - descontoGeral, 0);
     const lucro = totalLiquido - custo;
     const { repasse, pct: pctRepasse } = calcRepasseVenda(medicoId, tipoPrincipal, window.vendaItensTemp, totalLiquido, lucro);
-    const liquidoClinica = lucro - repasse;
-    const percentualClinica = lucro > 0 ? (liquidoClinica / lucro) * 100 : 0;
+    const liquidoClinica = totalLiquido - repasse;
+    const percentualClinica = totalLiquido > 0 ? (liquidoClinica / totalLiquido) * 100 : 0;
     const payments = serializePayments(totalLiquido);
     const troco = Math.max(recebido - totalLiquido, 0);
     const numero = document.getElementById('vendaNumero').value || `VEN-${String(db.saleSequence || 1).padStart(6,'0')}`;
@@ -4430,9 +4431,12 @@
     const v = db.sales.find(s => s.id === vendaId);
     if(!v) return;
     _editRepasseVendaId = vendaId;
+    const regra = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
     document.getElementById('editRepasseNumero').value = v.numero || '';
     document.getElementById('editRepasseMedico').value = v.medicoNome || '';
-    document.getElementById('editRepasseLucro').value = formatCurrency(v.lucro || 0);
+    document.getElementById('editRepasseValorVenda').value = formatCurrency(v.valorTotal || 0);
+    document.getElementById('editRepasseCusto').value = regra === 'lucro' ? formatCurrency(v.custo || 0) : '-';
+    document.getElementById('editRepasseLucro').value = regra === 'lucro' ? formatCurrency(v.lucro || 0) : formatCurrency(v.valorTotal || 0);
     document.getElementById('editRepassePct').value = Number(v.percentualRepasse || 0).toFixed(2);
     calcPreviewRepasse();
     document.getElementById('modalEditarRepasse').classList.add('open');
@@ -4441,11 +4445,14 @@
   function calcPreviewRepasse(){
     const v = db.sales.find(s => s.id === _editRepasseVendaId);
     if(!v) return;
+    const regra = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
     const pct = Number(document.getElementById('editRepassePct').value || 0);
+    const valorVenda = Number(v.valorTotal || 0);
     const lucro = Number(v.lucro || 0);
-    const repasse = Math.max(lucro, 0) * (pct / 100);
-    document.getElementById('editRepasseValor').value = formatCurrency(repasse);
-    document.getElementById('editRepasseLiquido').value = formatCurrency(lucro - repasse);
+    const base = regra === 'lucro' ? Math.max(lucro, 0) : valorVenda;
+    const valorClinica = base * (pct / 100);
+    document.getElementById('editRepasseValor').value = formatCurrency(valorClinica);
+    document.getElementById('editRepasseLiquido').value = formatCurrency(valorVenda - valorClinica);
   }
 
   function fecharModalEditarRepasse(){
@@ -4457,12 +4464,15 @@
     if(!_editRepasseVendaId) return;
     const v = db.sales.find(s => s.id === _editRepasseVendaId);
     if(!v) return;
+    const regra = (db.categoryRepasse || {})[v.tipoPrincipal] || 'lucro';
     const pct = Number(document.getElementById('editRepassePct').value || 0);
+    const valorVenda = Number(v.valorTotal || 0);
     const lucro = Number(v.lucro || 0);
+    const base = regra === 'lucro' ? Math.max(lucro, 0) : valorVenda;
     v.percentualRepasse = pct;
-    v.repasse = Math.max(lucro, 0) * (pct / 100);
-    v.liquidoClinica = lucro - v.repasse;
-    v.percentualClinica = lucro > 0 ? (v.liquidoClinica / lucro) * 100 : 0;
+    v.repasse = base * (pct / 100);
+    v.liquidoClinica = valorVenda - v.repasse;
+    v.percentualClinica = valorVenda > 0 ? (v.liquidoClinica / valorVenda) * 100 : 0;
     saveDB();
     refreshAll();
     fecharModalEditarRepasse();
