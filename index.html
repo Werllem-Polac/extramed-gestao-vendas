@@ -1550,7 +1550,7 @@
             <div class="value" id="prodClinicPct">0,00%</div>
           </div>
           <div class="metric m4">
-            <h4>Repasse Clínica Total</h4>
+            <h4>Valor Total Clínica</h4>
             <div class="value" id="prodTransfer">R$ 0,00</div>
           </div>
         </div>
@@ -1564,8 +1564,8 @@
                 <th>Custo</th>
                 <th>Valor</th>
                 <th>% Clínica</th>
-                <th>Repasse Clínica</th>
-                <th>Líquido Médico</th>
+                <th>Valor Clínica</th>
+                <th>Valor Profissional</th>
               </tr>
             </thead>
             <tbody id="produtividadeTabela"></tbody>
@@ -1601,8 +1601,8 @@
                 <th>Médico</th>
                 <th>Vendas</th>
                 <th>Valor</th>
-                <th>Repasse Clínica</th>
-                <th>Líquido Médico</th>
+                <th>Valor Clínica</th>
+                <th>Valor Profissional</th>
               </tr>
             </thead>
             <tbody id="repasseTabela"></tbody>
@@ -1625,8 +1625,8 @@
                 <th>Médico</th>
                 <th class="right">Valor</th>
                 <th class="right">% Repasse</th>
-                <th class="right">Repasse Clínica</th>
-                <th class="right">Líquido Médico</th>
+                <th class="right">Valor Clínica</th>
+                <th class="right">Valor Profissional</th>
                 <th></th>
               </tr>
             </thead>
@@ -2212,7 +2212,7 @@
         <input id="editRepassePct" type="number" min="0" max="100" step="0.01" oninput="calcPreviewRepasse()" />
       </div>
       <div class="row row-2">
-        <div><label>Repasse Clínica (novo)</label><input id="editRepasseValor" readonly style="color:var(--wine);font-weight:700" /></div>
+        <div><label>Valor Clínica (novo)</label><input id="editRepasseValor" readonly style="color:var(--wine);font-weight:700" /></div>
         <div><label>Líquido Clínica (novo)</label><input id="editRepasseLiquido" readonly style="font-weight:700" /></div>
       </div>
     </div>
@@ -4288,7 +4288,7 @@
         <thead><tr>
           <th>#</th><th>Data</th><th>Médico</th>
           <th class="r">Valor</th><th class="r">% Repasse</th>
-          <th class="r">Repasse Clínica</th><th class="r">Líquido Médico</th>
+          <th class="r">Valor Clínica</th><th class="r">Valor Profissional</th>
         </tr></thead>
         <tbody>${linhas}</tbody>
         <tfoot><tr>
