@@ -1653,6 +1653,7 @@
                 <th style="width:32px"><input type="checkbox" id="repasseCheckAll" onchange="toggleAllRepasseCheck(this.checked)" title="Selecionar todos" /></th>
                 <th>#</th>
                 <th>Data</th>
+                <th>Paciente</th>
                 <th>Médico</th>
                 <th class="right">Valor</th>
                 <th class="right">% Repasse</th>
@@ -4254,6 +4255,7 @@
           <td style="text-align:center"><input type="checkbox" class="repasse-check" data-id="${v.id}" /></td>
           <td>${v.numero || '-'}</td>
           <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
+          <td>${v.paciente || '-'}</td>
           <td>${v.medicoNome || '-'}</td>
           <td class="right">${formatCurrency(v.lucro || 0)}</td>
           <td class="right">${formatPct(v.percentualRepasse || 0)}</td>
@@ -4265,14 +4267,14 @@
             </button>
           </td>
         </tr>`).join('')
-      : `<tr><td colspan="9" class="empty">Nenhuma venda encontrada.</td></tr>`;
+      : `<tr><td colspan="10" class="empty">Nenhuma venda encontrada.</td></tr>`;
 
     const dTotValor   = sorted.reduce((a,v) => a + Number(v.lucro||0), 0);
     const dTotRepasse = sorted.reduce((a,v) => a + Number(v.repasse||0), 0);
     const dTotLiquido = sorted.reduce((a,v) => a + Number(v.liquidoClinica||0), 0);
     document.getElementById('repasseDetalheTfoot').innerHTML = sorted.length ? `
       <tr style="font-weight:700;background:var(--soft)">
-        <td></td><td colspan="3">Total (${sorted.length} venda(s))</td>
+        <td></td><td colspan="4">Total (${sorted.length} venda(s))</td>
         <td class="right">${formatCurrency(dTotValor)}</td>
         <td></td>
         <td class="right" style="color:var(--wine)">${formatCurrency(dTotRepasse)}</td>
@@ -4323,6 +4325,7 @@
       <tr>
         <td>${v.numero || '-'}</td>
         <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
+        <td>${v.paciente || '-'}</td>
         <td>${v.medicoNome || '-'}</td>
         <td class="r">${formatCurrency(v.lucro||0)}</td>
         <td class="r">${formatPct(v.percentualRepasse||0)}</td>
@@ -4348,13 +4351,13 @@
       <div class="sub">${periodo} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
       <table>
         <thead><tr>
-          <th>#</th><th>Data</th><th>Médico</th>
+          <th>#</th><th>Data</th><th>Paciente</th><th>Médico</th>
           <th class="r">Valor</th><th class="r">% Repasse</th>
           <th class="r">Valor Clínica</th><th class="r">Valor Profissional</th>
         </tr></thead>
         <tbody>${linhas}</tbody>
         <tfoot><tr>
-          <td colspan="3">Total (${alvo.length} venda(s))</td>
+          <td colspan="4">Total (${alvo.length} venda(s))</td>
           <td class="r">${formatCurrency(totV)}</td><td></td>
           <td class="r">${formatCurrency(totR)}</td>
           <td class="r">${formatCurrency(totL)}</td>
