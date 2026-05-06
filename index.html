@@ -1417,7 +1417,7 @@
               <input id="vendaSubtotalItem" readonly />
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:12px">
             <div>
               <label>Categoria</label>
               <input id="vendaItemCategoria" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
@@ -1433,6 +1433,10 @@
             <div>
               <label>R$ Repasse</label>
               <input id="vendaItemRepasseValor" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
+            </div>
+            <div>
+              <label>Valor Profissional</label>
+              <input id="vendaItemValorProfissional" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
             </div>
             <div>
               <label>Observação do item</label>
@@ -3674,7 +3678,7 @@
     document.getElementById('vendaParcelas').value = 1;
     document.getElementById('vendaFormaPagamento').value = 'Dinheiro';
     document.getElementById('vendaValorRecebido').value = 0;
-    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemCusto','vendaItemRepasse','vendaItemRepasseValor'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
+    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemCusto','vendaItemRepasse','vendaItemRepasseValor','vendaItemValorProfissional'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
     refreshVendaDateTime();
 
     document.getElementById('pagamentoMistoValor1').value = 0;
@@ -3712,11 +3716,17 @@
 
   function atualizarRepasseItemValor(subtotal, custoTotal){
     const pct = parseFloat((document.getElementById('vendaItemRepasse')?.value || '').replace('%','')) || 0;
-    if(!pct){ document.getElementById('vendaItemRepasseValor').value = ''; return; }
+    if(!pct){
+      document.getElementById('vendaItemRepasseValor').value = '';
+      document.getElementById('vendaItemValorProfissional').value = '';
+      return;
+    }
     const categoria = document.getElementById('vendaItemCategoria')?.value || '';
     const regra = (db.categoryRepasse || {})[categoria] || 'lucro';
     const base = regra === 'lucro' ? Math.max(subtotal - (custoTotal || 0), 0) : subtotal;
-    document.getElementById('vendaItemRepasseValor').value = formatCurrency(base * pct / 100);
+    const repasseVal = base * pct / 100;
+    document.getElementById('vendaItemRepasseValor').value = formatCurrency(repasseVal);
+    document.getElementById('vendaItemValorProfissional').value = formatCurrency(subtotal - repasseVal);
   }
 
   function preencherCamprosItemVenda(){
@@ -3762,6 +3772,7 @@
     document.getElementById('vendaItemCusto').value = '';
     document.getElementById('vendaItemRepasse').value = '';
     document.getElementById('vendaItemRepasseValor').value = '';
+    document.getElementById('vendaItemValorProfissional').value = '';
     renderVendaItensTemp();
     updateVendaTotals();
   }
