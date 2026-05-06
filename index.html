@@ -3698,10 +3698,11 @@
     if(produto && !valUnitInput.value){ valUnitInput.value = produto.venda; }
     const valUnit = Number(valUnitInput.value || 0);
     const total = Math.max((qtd * valUnit) - desconto, 0);
-    document.getElementById('vendaSubtotalItem').value = formatCurrency(total);
-    atualizarRepasseItemValor(total);
     const custoUnit = produto ? Number(produto.custo || 0) : 0;
-    if(produto) document.getElementById('vendaItemCusto').value = formatCurrency(custoUnit * qtd);
+    const custoTotal = custoUnit * qtd;
+    document.getElementById('vendaSubtotalItem').value = formatCurrency(total);
+    if(produto) document.getElementById('vendaItemCusto').value = formatCurrency(custoTotal);
+    atualizarRepasseItemValor(total, custoTotal);
   }
 
   function getRepassePctItem(categoria, medicoId){
@@ -3713,25 +3714,30 @@
     return Number((doc.percentualProtocolos ?? doc.percentualLucro ?? doc.percentual) || 0);
   }
 
-  function atualizarRepasseItemValor(subtotal){
-    const repasseEl = document.getElementById('vendaItemRepasse');
-    const pct = parseFloat((repasseEl?.value || '').replace('%','')) || 0;
-    const val = subtotal != null ? subtotal : (parseFloat((document.getElementById('vendaSubtotalItem')?.value || '').replace(/[^\d,.-]/g,'').replace(',','.')) || 0);
-    document.getElementById('vendaItemRepasseValor').value = pct > 0 ? formatCurrency(val * pct / 100) : '';
+  function atualizarRepasseItemValor(subtotal, custoTotal){
+    const pct = parseFloat((document.getElementById('vendaItemRepasse')?.value || '').replace('%','')) || 0;
+    if(!pct){ document.getElementById('vendaItemRepasseValor').value = ''; return; }
+    const categoria = document.getElementById('vendaItemCategoria')?.value || '';
+    const regra = (db.categoryRepasse || {})[categoria] || 'lucro';
+    const base = regra === 'lucro' ? Math.max(subtotal - (custoTotal || 0), 0) : subtotal;
+    document.getElementById('vendaItemRepasseValor').value = formatCurrency(base * pct / 100);
   }
 
   function preencherCamprosItemVenda(){
-    const produtoId = document.getElementById('vendaProduto').value;
-    const medicoId  = document.getElementById('vendaMedico').value;
-    const produto   = db.products.find(p => p.id === produtoId);
-    const categoria = produto ? (produto.categoria || produto.tipo || '') : '';
-    const pct       = produto ? getRepassePctItem(categoria, medicoId) : '';
-    const qtd   = Number(document.getElementById('vendaQuantidade').value || 1);
-    const custo = produto ? Number(produto.custo || 0) * qtd : '';
+    const produtoId  = document.getElementById('vendaProduto').value;
+    const medicoId   = document.getElementById('vendaMedico').value;
+    const produto    = db.products.find(p => p.id === produtoId);
+    const categoria  = produto ? (produto.categoria || produto.tipo || '') : '';
+    const pct        = produto ? getRepassePctItem(categoria, medicoId) : '';
+    const qtd        = Number(document.getElementById('vendaQuantidade').value || 1);
+    const valUnit    = Number(document.getElementById('vendaValorUnitario').value || produto?.venda || 0);
+    const desconto   = Number(document.getElementById('vendaDescontoItem').value || 0);
+    const subtotal   = Math.max(qtd * valUnit - desconto, 0);
+    const custoTotal = produto ? Number(produto.custo || 0) * qtd : 0;
     document.getElementById('vendaItemCategoria').value = categoria;
-    document.getElementById('vendaItemCusto').value     = custo !== '' ? formatCurrency(custo) : '';
+    document.getElementById('vendaItemCusto').value     = produto ? formatCurrency(custoTotal) : '';
     document.getElementById('vendaItemRepasse').value   = pct !== '' ? pct + '%' : '';
-    atualizarRepasseItemValor(null);
+    atualizarRepasseItemValor(subtotal, custoTotal);
   }
 
   function adicionarItemVenda(){
