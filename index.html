@@ -691,7 +691,8 @@
         <div class="metric m1">
           <h4>Pacientes no Mês</h4>
           <div class="value" id="dashPacientesMes">0</div>
-          <div class="sub">Atendimentos no mês atual</div>
+          <div class="sub">pacientes únicos (por CPF)</div>
+          <div class="sub" style="margin-top:4px"><span id="dashVendasMes">0</span> vendas no mês</div>
         </div>
       </div>
 
@@ -4286,15 +4287,17 @@
 
     const now = new Date();
     const mesAtual = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const pacientesMes = new Set(
-      db.sales.filter(s => (s.data||'').startsWith(mesAtual)).map(s => s.pacienteId)
-    ).size;
+    const vendasMes = db.sales.filter(s => (s.data||'').startsWith(mesAtual) && s.status !== 'Cancelada');
+    const vendasMesCount = vendasMes.length;
+    const patientMap = Object.fromEntries((db.patients || []).map(p => [p.id, p.cpf || p.id]));
+    const pacientesMes = new Set(vendasMes.map(s => patientMap[s.pacienteId] || s.pacienteId)).size;
 
     document.getElementById('dashRevenue').textContent = formatCurrency(revenue);
     document.getElementById('dashProfit').textContent = formatCurrency(profit);
     document.getElementById('dashMedicalTransfer').textContent = formatCurrency(transfer);
     document.getElementById('dashClinicValue').textContent = formatCurrency(clinic);
     document.getElementById('dashPacientesMes').textContent = pacientesMes;
+    document.getElementById('dashVendasMes').textContent = vendasMesCount;
 
     document.getElementById('sumProducts').textContent = db.products.length;
     document.getElementById('sumDoctors').textContent = db.doctors.length;
