@@ -2003,6 +2003,10 @@
               <select id="finSelectAno" onchange="finMesSelect()" style="font-weight:700;font-size:13px;width:80px;"></select>
               <button class="fin-nav-btn" onclick="finMesSeguinte()">→</button>
             </div>
+            <input type="date" id="finLancDataInicial" onchange="renderFinLancamentos()" title="Data inicial" style="width:148px;" />
+            <span style="font-size:13px;color:var(--gray);">até</span>
+            <input type="date" id="finLancDataFinal" onchange="renderFinLancamentos()" title="Data final" style="width:148px;" />
+            <button class="btn btn-light" onclick="limparFiltroDataLanc()" style="padding:4px 10px;font-size:12px;">Limpar datas</button>
           </div>
         </div>
         <!-- Tabela -->
@@ -5090,6 +5094,14 @@
     renderFinDashboard();
   }
 
+  function limparFiltroDataLanc(){
+    const di = document.getElementById('finLancDataInicial');
+    const df = document.getElementById('finLancDataFinal');
+    if(di) di.value = '';
+    if(df) df.value = '';
+    renderFinLancamentos();
+  }
+
   // ── Dashboard ───────────────────────────────────────────────
   function renderFinDashboard(){
     finEnsure();
@@ -5390,17 +5402,25 @@
   function renderFinLancamentos(){
     finEnsure();
     _populateFinSelects();
-    const busca    = (document.getElementById('finBusca')||{}).value||'';
-    const fStatus  = (document.getElementById('finFiltroStatus')||{}).value||'Todos';
-    const fCat     = (document.getElementById('finFiltroCategoria')||{}).value||'Todas';
-    const fCentro  = (document.getElementById('finFiltroCentro')||{}).value||'Todos';
+    const busca          = (document.getElementById('finBusca')||{}).value||'';
+    const fStatus        = (document.getElementById('finFiltroStatus')||{}).value||'Todos';
+    const fCat           = (document.getElementById('finFiltroCategoria')||{}).value||'Todas';
+    const fCentro        = (document.getElementById('finFiltroCentro')||{}).value||'Todos';
+    const lancDataInicial = document.getElementById('finLancDataInicial')?.value || '';
+    const lancDataFinal   = document.getElementById('finLancDataFinal')?.value   || '';
+    const usaIntervalo    = lancDataInicial || lancDataFinal;
     const label    = document.getElementById('finMesLabel');
-    if(label) label.textContent = `${FIN_MESES_FULL[_finMes]} ${_finAno}`;
+    if(label) label.textContent = usaIntervalo ? `${lancDataInicial||'…'} → ${lancDataFinal||'…'}` : `${FIN_MESES_FULL[_finMes]} ${_finAno}`;
 
     const todos = db.contasPagar.map(l => ({...l, se: finStatusEfetivo(l)}))
       .filter(l => {
         const d = new Date(l.vencimento+'T00:00:00');
-        if(d.getMonth() !== _finMes || d.getFullYear() !== _finAno) return false;
+        if(usaIntervalo){
+          if(lancDataInicial && l.vencimento < lancDataInicial) return false;
+          if(lancDataFinal   && l.vencimento > lancDataFinal)   return false;
+        } else {
+          if(d.getMonth() !== _finMes || d.getFullYear() !== _finAno) return false;
+        }
         if(busca && !l.descricao.toLowerCase().includes(busca.toLowerCase()) && !l.fornecedor.toLowerCase().includes(busca.toLowerCase())) return false;
         if(fStatus !== 'Todos' && l.se !== fStatus) return false;
         if(fCat !== 'Todas' && l.categoria !== fCat) return false;
