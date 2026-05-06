@@ -1652,18 +1652,17 @@
           <table>
             <thead>
               <tr>
-                <th style="width:32px"><input type="checkbox" id="repasseCheckAll" onchange="toggleAllRepasseCheck(this.checked)" title="Selecionar todos" /></th>
                 <th>#</th>
                 <th>Data</th>
                 <th>Paciente</th>
                 <th>Profissional</th>
+                <th>Item</th>
                 <th class="right">Valor</th>
                 <th class="right">Custo</th>
                 <th class="right">Total</th>
                 <th class="right">% Repasse</th>
                 <th class="right">Valor Clínica</th>
                 <th class="right">Valor Profissional</th>
-                <th></th>
               </tr>
             </thead>
             <tbody id="repasseDetalheTabela"></tbody>
@@ -3761,8 +3760,13 @@
     const categoria = produto.categoria || produto.tipo || 'Item';
     const percentualRepasse = getRepassePctItem(categoria, medicoId);
     const subtotal = Math.max((quantidade * valorUnitario) - desconto, 0);
-    const lucro = subtotal - (quantidade * Number(produto.custo || 0));
-    window.vendaItensTemp.push({produtoId: produto.id, produtoNome: produto.nome, tipo: categoria, categoria, percentualRepasse, quantidade, valorUnitario, desconto, subtotal, custo: quantidade * Number(produto.custo || 0), lucro, observacao});
+    const custoItem = quantidade * Number(produto.custo || 0);
+    const lucro = subtotal - custoItem;
+    const regra = (db.categoryRepasse || {})[categoria] || 'lucro';
+    const baseRepasse = regra === 'lucro' ? Math.max(subtotal - custoItem, 0) : subtotal;
+    const repasseValor = baseRepasse * percentualRepasse / 100;
+    const valorProfissional = subtotal - repasseValor;
+    window.vendaItensTemp.push({produtoId: produto.id, produtoNome: produto.nome, tipo: categoria, categoria, percentualRepasse, repasseValor, valorProfissional, quantidade, valorUnitario, desconto, subtotal, custo: custoItem, lucro, observacao});
     document.getElementById('vendaProduto').value = '';
     document.getElementById('vendaQuantidade').value = 1;
     document.getElementById('vendaValorUnitario').value = '';
@@ -4408,51 +4412,55 @@
         <td>${formatCurrency(totLiquido)}</td>
       </tr>` : '';
 
-    // ── Detalhe por Venda ──
+    // ── Detalhe por Venda (uma linha por item) ──
     const sorted = [...vendas].sort((a,b) => (b.data||'').localeCompare(a.data||''));
-    document.getElementById('repasseDetalheTabela').innerHTML = sorted.length
-      ? sorted.map(v => {
-          const cr = calcRepasseAtual(v);
-          return `
-        <tr>
-          <td style="text-align:center"><input type="checkbox" class="repasse-check" data-id="${v.id}" /></td>
+    const linhasItens = [];
+    let totValorI = 0, totCustoI = 0, totTotalI = 0, totRepasseI = 0, totProfI = 0;
+    sorted.forEach(v => {
+      const itens = v.itens && v.itens.length ? v.itens : [];
+      itens.forEach(item => {
+        const subtotal      = Number(item.subtotal || 0);
+        const custoItem     = Number(item.custo || 0);
+        const totalItem     = subtotal - custoItem;
+        const pct           = Number(item.percentualRepasse || 0);
+        const regra         = (db.categoryRepasse || {})[item.categoria || item.tipo || ''] || 'lucro';
+        const baseRepasse   = regra === 'lucro' ? Math.max(subtotal - custoItem, 0) : subtotal;
+        const repasseVal    = item.repasseValor != null ? Number(item.repasseValor) : baseRepasse * pct / 100;
+        const valProf       = item.valorProfissional != null ? Number(item.valorProfissional) : subtotal - repasseVal;
+        totValorI   += subtotal;
+        totCustoI   += custoItem;
+        totTotalI   += totalItem;
+        totRepasseI += repasseVal;
+        totProfI    += valProf;
+        linhasItens.push(`<tr>
           <td>${v.numero || '-'}</td>
-          <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
+          <td>${v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
           <td>${v.paciente || '-'}</td>
           <td>${v.medicoNome || '-'}</td>
-          <td class="right">${formatCurrency(v.valorTotal || 0)}</td>
-          <td class="right">${formatCurrency(v.custo || 0)}</td>
-          <td class="right">${formatCurrency(v.lucro || 0)}</td>
-          <td class="right">${formatPct(cr.pct)}</td>
-          <td class="right" style="color:var(--wine)">${formatCurrency(cr.repasse)}</td>
-          <td class="right">${formatCurrency(cr.liquidoClinica)}</td>
-          <td>
-            <button class="icon-btn" title="Editar repasse" onclick="abrirEditarRepasse('${v.id}')">
-              <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M14.85 2.85a1.5 1.5 0 0 1 2.12 2.12l-9.19 9.2-2.83.7.71-2.83 9.19-9.19Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            </button>
-          </td>
-        </tr>`;}).join('')
-      : `<tr><td colspan="12" class="empty">Nenhuma venda encontrada.</td></tr>`;
+          <td>${item.produtoNome || '-'}</td>
+          <td class="right">${formatCurrency(subtotal)}</td>
+          <td class="right">${formatCurrency(custoItem)}</td>
+          <td class="right">${formatCurrency(totalItem)}</td>
+          <td class="right">${formatPct(pct)}</td>
+          <td class="right" style="color:var(--wine)">${formatCurrency(repasseVal)}</td>
+          <td class="right">${formatCurrency(valProf)}</td>
+        </tr>`);
+      });
+    });
+    document.getElementById('repasseDetalheTabela').innerHTML = linhasItens.length
+      ? linhasItens.join('')
+      : `<tr><td colspan="11" class="empty">Nenhuma venda encontrada.</td></tr>`;
 
-    const dTotPreco   = sorted.reduce((a,v) => a + Number(v.valorTotal||0), 0);
-    const dTotCusto   = sorted.reduce((a,v) => a + Number(v.custo||0), 0);
-    const dTotValor   = sorted.reduce((a,v) => a + Number(v.lucro||0), 0);
-    const dTotRepasse = sorted.reduce((a,v) => a + calcRepasseAtual(v).repasse, 0);
-    const dTotLiquido = sorted.reduce((a,v) => a + calcRepasseAtual(v).liquidoClinica, 0);
-    document.getElementById('repasseDetalheTfoot').innerHTML = sorted.length ? `
+    document.getElementById('repasseDetalheTfoot').innerHTML = linhasItens.length ? `
       <tr style="font-weight:700;background:var(--soft)">
-        <td></td><td colspan="4">Total (${sorted.length} venda(s))</td>
-        <td class="right">${formatCurrency(dTotPreco)}</td>
-        <td class="right">${formatCurrency(dTotCusto)}</td>
-        <td class="right">${formatCurrency(dTotValor)}</td>
+        <td colspan="5">Total (${linhasItens.length} item(ns))</td>
+        <td class="right">${formatCurrency(totValorI)}</td>
+        <td class="right">${formatCurrency(totCustoI)}</td>
+        <td class="right">${formatCurrency(totTotalI)}</td>
         <td></td>
-        <td class="right" style="color:var(--wine)">${formatCurrency(dTotRepasse)}</td>
-        <td class="right">${formatCurrency(dTotLiquido)}</td>
-        <td></td>
+        <td class="right" style="color:var(--wine)">${formatCurrency(totRepasseI)}</td>
+        <td class="right">${formatCurrency(totProfI)}</td>
       </tr>` : '';
-
-    const chkAll = document.getElementById('repasseCheckAll');
-    if(chkAll) chkAll.checked = false;
   }
 
   function toggleAllRepasseCheck(checked){
