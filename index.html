@@ -407,7 +407,7 @@
     .fin-dot-pendente::before{content:"● ";font-size:10px;color:#ca8a04}
     .fin-dot-vencido::before{content:"● ";font-size:10px;color:#dc2626}
     .fin-dot-previsto::before{content:"● ";font-size:10px;color:#94a3b8}
-    .fin-filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:center}
+    .fin-filters{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow-x:auto}
     .fin-month-nav{display:flex;align-items:center;gap:8px;white-space:nowrap}
     .fin-nav-btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--wine);font-weight:700;transition:.1s}
     .fin-nav-btn:hover{background:var(--soft)}
@@ -1987,26 +1987,23 @@
         <!-- Filtros -->
         <div class="card" style="margin-bottom:14px;padding:14px 18px">
           <div class="fin-filters">
-            <input id="finBusca" placeholder="Buscar por descrição ou fornecedor…" oninput="renderFinLancamentos()" />
-            <select id="finFiltroStatus" onchange="renderFinLancamentos()">
+            <input id="finBusca" placeholder="Buscar…" oninput="renderFinLancamentos()" style="min-width:140px;flex:1" />
+            <select id="finFiltroStatus" onchange="renderFinLancamentos()" style="width:90px;flex-shrink:0">
               <option>Todos</option><option>Pago</option><option>Pendente</option><option>Vencido</option><option>Previsto</option>
             </select>
-            <select id="finFiltroCategoria" onchange="renderFinLancamentos()">
+            <select id="finFiltroCategoria" onchange="renderFinLancamentos()" style="width:90px;flex-shrink:0">
               <option>Todas</option><option>Fixo</option><option>Variável</option><option>Mercadoria</option>
             </select>
-            <select id="finFiltroCentro" onchange="renderFinLancamentos()">
+            <select id="finFiltroCentro" onchange="renderFinLancamentos()" style="width:110px;flex-shrink:0">
               <option value="Todos">Todos C.C.</option>
             </select>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <button class="fin-nav-btn" onclick="finMesAnterior()">←</button>
-              <select id="finSelectMes" onchange="finMesSelect()" style="font-weight:700;font-size:13px;"></select>
-              <select id="finSelectAno" onchange="finMesSelect()" style="font-weight:700;font-size:13px;width:80px;"></select>
-              <button class="fin-nav-btn" onclick="finMesSeguinte()">→</button>
-            </div>
-            <input type="date" id="finLancDataInicial" onchange="renderFinLancamentos()" title="Data inicial" style="width:148px;" />
-            <span style="font-size:13px;color:var(--gray);">até</span>
-            <input type="date" id="finLancDataFinal" onchange="renderFinLancamentos()" title="Data final" style="width:148px;" />
-            <button class="btn btn-light" onclick="limparFiltroDataLanc()" style="padding:4px 10px;font-size:12px;">Limpar datas</button>
+            <button class="fin-nav-btn" onclick="finMesAnterior()" style="flex-shrink:0">←</button>
+            <select id="finSelectMes" onchange="finMesSelect()" style="font-weight:700;font-size:13px;width:100px;flex-shrink:0"></select>
+            <select id="finSelectAno" onchange="finMesSelect()" style="font-weight:700;font-size:13px;width:74px;flex-shrink:0"></select>
+            <button class="fin-nav-btn" onclick="finMesSeguinte()" style="flex-shrink:0">→</button>
+            <input type="date" id="finLancDataInicial" onchange="renderFinLancamentos()" title="Data inicial" style="width:140px;flex-shrink:0" />
+            <input type="date" id="finLancDataFinal" onchange="renderFinLancamentos()" title="Data final" style="width:140px;flex-shrink:0" />
+            <button class="btn btn-light" onclick="limparFiltroDataLanc()" style="padding:4px 10px;font-size:12px;flex-shrink:0;white-space:nowrap">Limpar</button>
           </div>
         </div>
         <!-- Tabela -->
