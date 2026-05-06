@@ -3973,7 +3973,6 @@
     const pagamentos = (venda.pagamentos || []).map(p => `${p.forma}: ${formatCurrency(p.valor)}${p.parcelas && p.parcelas > 1 ? ` (${p.parcelas}x)` : ''}`).join('<br>') || '-';
     const itensHtml = (venda.itens || []).map(item => `
       <tr>
-        <td>${escapeHtml(item.tipo || '-')}</td>
         <td>${escapeHtml(item.produtoNome || '-')}</td>
         <td>${item.quantidade || 0}</td>
         <td>${formatCurrency(item.valorUnitario || 0)}</td>
@@ -4013,7 +4012,6 @@
         <table class="receipt-table">
           <thead>
             <tr>
-              <th>Tipo</th>
               <th>Item</th>
               <th>Qtd.</th>
               <th>Unitário</th>
