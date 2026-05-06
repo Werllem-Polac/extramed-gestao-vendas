@@ -3056,9 +3056,10 @@
             userViews.forEach((v, index) => v.classList.toggle('active', index === 0));
           }
         }
-        // Inicializa grid de permissões ao abrir aba cadastrar usuário
+        // Limpa e inicializa formulário ao abrir aba cadastrar usuário
         if(target === 'cadastrar' && prefix === 'usuarios'){
-          if(!document.getElementById('permissoesGrid')?.children.length) renderPermissoesGrid();
+          limparUsuarioForm();
+          renderPermissoesGrid();
         }
       });
     });
