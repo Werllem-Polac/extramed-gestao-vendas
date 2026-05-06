@@ -1925,7 +1925,7 @@
           <select id="dashFiltroAno" onchange="renderFinDashboard()" style="width:100px;"></select>
         </div>
         <div class="fin-grid4" id="finCards"></div>
-        <div class="row row-2" style="margin-top:16px;align-items:start">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;align-items:start">
           <div class="card">
             <div class="section-header">
               <h3>Previsão Mensal <span id="finChartYear"></span></h3>
@@ -1934,6 +1934,16 @@
             <div class="fin-chart-legend">
               <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="var(--wine)"/></svg>Realizado</span>
               <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="#e8d8de"/></svg>Previsto</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-header">
+              <h3>Despesas Diárias <span id="finDiariasLabel"></span></h3>
+            </div>
+            <svg id="finDiariasChart" width="100%" style="overflow:visible;display:block"></svg>
+            <div class="fin-chart-legend">
+              <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="var(--wine)"/></svg>Pago</span>
+              <span><svg width="14" height="14"><rect x="0" y="2" width="14" height="10" rx="3" fill="#e8d8de"/></svg>Pendente/Previsto</span>
             </div>
           </div>
           <div class="card" style="position:relative">
@@ -5115,6 +5125,9 @@
 
     // Gráfico de evolução 2025 vs 2026 (sempre usa todos os dados, independente do filtro)
     renderFinEvolucao();
+
+    // Gráfico de despesas diárias do mês atual
+    renderDespesasDiarias();
   }
 
   function renderFinChart(all, ano, mesAtual){
@@ -5149,6 +5162,67 @@
       }
       s += `<text x="${x+barW/2}" y="${topPad+H+20}" text-anchor="middle" font-size="11" fill="#6b7280">${m}</text>`;
     });
+    svg.innerHTML = s;
+  }
+
+  function renderDespesasDiarias(){
+    const svg = document.getElementById('finDiariasChart');
+    const label = document.getElementById('finDiariasLabel');
+    if(!svg) return;
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = hoje.getMonth();
+    const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+    if(label) label.textContent = `— ${FIN_MESES_FULL[mes]}/${ano}`;
+
+    const diario = new Array(diasNoMes).fill(0);
+    const diarioPago = new Array(diasNoMes).fill(0);
+    (db.contasPagar || []).forEach(l => {
+      const d = new Date(l.vencimento + 'T00:00:00');
+      if(d.getFullYear() !== ano || d.getMonth() !== mes) return;
+      const dia = d.getDate() - 1;
+      diario[dia] += l.valor;
+      if(finStatusEfetivo(l) === 'Pago') diarioPago[dia] += l.valor;
+    });
+
+    const maxV = Math.max(...diario, 1);
+    const H = 160, topPad = 12, leftPad = 56;
+    const barW = Math.max(6, Math.floor((520 - leftPad) / diasNoMes) - 2);
+    const gap = Math.max(2, Math.floor((520 - leftPad - diasNoMes * barW) / diasNoMes));
+    const totalW = leftPad + diasNoMes * (barW + gap);
+
+    svg.setAttribute('viewBox', `0 0 ${totalW} ${H + 44}`);
+    svg.setAttribute('height', H + 44);
+    let s = '';
+
+    [0, .25, .5, .75, 1].forEach(f => {
+      const y = topPad + H - H * f;
+      s += `<line x1="${leftPad}" y1="${y}" x2="${totalW}" y2="${y}" stroke="#f0eef5" stroke-width="1"/>`;
+      s += `<text x="${leftPad - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="#9ca3af">${finFmtK(maxV * f)}</text>`;
+    });
+
+    for(let i = 0; i < diasNoMes; i++){
+      const total = diario[i] || 0;
+      const pago  = diarioPago[i] || 0;
+      const x = leftPad + i * (barW + gap);
+      const hTotal = (total / maxV) * H;
+      const hPago  = (pago  / maxV) * H;
+      const yTotal = topPad + H - hTotal;
+      const yPago  = topPad + H - hPago;
+
+      if(hTotal > 0){
+        s += `<rect x="${x}" y="${yTotal}" width="${barW}" height="${hTotal}" fill="#e8d8de" rx="2"/>`;
+      }
+      if(hPago > 0){
+        s += `<rect x="${x}" y="${yPago}" width="${barW}" height="${hPago}" fill="var(--wine)" rx="2"/>`;
+      }
+      if(total > 0){
+        s += `<text x="${x + barW/2}" y="${yTotal - 3}" text-anchor="middle" font-size="9" fill="#9B1C3E">${finFmtK(total)}</text>`;
+      }
+      if((i + 1) % 5 === 0 || i === 0 || i === diasNoMes - 1){
+        s += `<text x="${x + barW/2}" y="${topPad + H + 18}" text-anchor="middle" font-size="10" fill="#6b7280">${i + 1}</text>`;
+      }
+    }
     svg.innerHTML = s;
   }
 
