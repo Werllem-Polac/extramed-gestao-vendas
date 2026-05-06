@@ -1420,7 +1420,7 @@
               <input id="vendaValorUnitario" type="number" min="0" step="0.01" placeholder="0,00" />
             </div>
           </div>
-          <div class="row row-3">
+          <div class="row row-4">
             <div>
               <label>Desconto</label>
               <input id="vendaDescontoItem" type="number" min="0" step="0.01" placeholder="0,00" />
@@ -1432,6 +1432,10 @@
             <div>
               <label>% Repasse</label>
               <input id="vendaItemRepasse" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
+            </div>
+            <div>
+              <label>R$ Repasse</label>
+              <input id="vendaItemRepasseValor" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
             </div>
           </div>
           <div class="row row-2">
@@ -3681,7 +3685,7 @@
     document.getElementById('vendaParcelas').value = 1;
     document.getElementById('vendaFormaPagamento').value = 'Dinheiro';
     document.getElementById('vendaValorRecebido').value = 0;
-    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemRepasse'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
+    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemRepasse','vendaItemRepasseValor'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
     refreshVendaDateTime();
     document.getElementById('vendaTipoPrincipal').value = 'Consulta';
     document.getElementById('pagamentoMistoValor1').value = 0;
@@ -3702,6 +3706,7 @@
     const valUnit = Number(valUnitInput.value || 0);
     const total = Math.max((qtd * valUnit) - desconto, 0);
     document.getElementById('vendaSubtotalItem').value = formatCurrency(total);
+    atualizarRepasseItemValor(total);
   }
 
   function getRepassePctItem(categoria, medicoId){
@@ -3713,6 +3718,13 @@
     return Number((doc.percentualProtocolos ?? doc.percentualLucro ?? doc.percentual) || 0);
   }
 
+  function atualizarRepasseItemValor(subtotal){
+    const repasseEl = document.getElementById('vendaItemRepasse');
+    const pct = parseFloat((repasseEl?.value || '').replace('%','')) || 0;
+    const val = subtotal != null ? subtotal : (parseFloat((document.getElementById('vendaSubtotalItem')?.value || '').replace(/[^\d,.-]/g,'').replace(',','.')) || 0);
+    document.getElementById('vendaItemRepasseValor').value = pct > 0 ? formatCurrency(val * pct / 100) : '';
+  }
+
   function preencherCamprosItemVenda(){
     const produtoId = document.getElementById('vendaProduto').value;
     const medicoId  = document.getElementById('vendaMedico').value;
@@ -3721,6 +3733,7 @@
     const pct       = produto ? getRepassePctItem(categoria, medicoId) : '';
     document.getElementById('vendaItemCategoria').value = categoria;
     document.getElementById('vendaItemRepasse').value   = pct !== '' ? pct + '%' : '';
+    atualizarRepasseItemValor(null);
   }
 
   function adicionarItemVenda(){
@@ -3747,6 +3760,7 @@
     document.getElementById('vendaObsItem').value = '';
     document.getElementById('vendaItemCategoria').value = '';
     document.getElementById('vendaItemRepasse').value = '';
+    document.getElementById('vendaItemRepasseValor').value = '';
     renderVendaItensTemp();
     updateVendaTotals();
   }
