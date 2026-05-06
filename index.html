@@ -2336,6 +2336,7 @@
     _repasseRulesCleared: false,
     _salesReset20260505: false,
     _categoriesReset20260505: false,
+    _usuarioCodCintia20260506: false,
     products: [],
     categories: ['Consulta','Exame','Pacote','Procedimento','Produtos','Protocolo','Retorno'].sort((a,b)=>a.localeCompare(b,'pt-BR')),
     doctors: [],
@@ -2555,6 +2556,11 @@
     if(!db._repasseRulesCleared) { db.categoryRepasse = {}; db._repasseRulesCleared = true; }
     if(!db._salesReset20260505) { db.sales = []; db.saleSequence = 1; db._salesReset20260505 = true; }
     if(!db._categoriesReset20260505) { db.productCategories = []; db.categoryRepasse = {}; db._categoriesReset20260505 = true; }
+    if(!db._usuarioCodCintia20260506){
+      const cintia = (db.users || []).find(u => u.nome && u.nome.toLowerCase().includes('cintia'));
+      if(cintia) cintia.codigo = '01';
+      db._usuarioCodCintia20260506 = true;
+    }
   }
 
   function migrarRepasseVendas(){
