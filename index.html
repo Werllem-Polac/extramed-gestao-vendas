@@ -4475,8 +4475,6 @@
   }
 
   function imprimirRepasseSelecionados(){
-    const checks = [...document.querySelectorAll('.repasse-check')];
-    const selecionados = checks.filter(c => c.checked).map(c => c.dataset.id);
     const di = document.getElementById('repasseDataInicio')?.value || '';
     const df = document.getElementById('repasseDataFim')?.value || '';
     const filtroMedico = document.getElementById('repasseFiltroMedico')?.value || '';
@@ -4488,69 +4486,93 @@
       if(df && d > df) return false;
       return true;
     });
-    const sorted = [...vendas].sort((a,b) => (b.data||'').localeCompare(a.data||''));
-    const alvo = selecionados.length ? sorted.filter(v => selecionados.includes(v.id)) : sorted;
-    if(!alvo.length){ alert('Nenhuma venda para imprimir.'); return; }
+    const sorted = [...vendas].sort((a,b) => (a.data||'').localeCompare(b.data||''));
+    if(!sorted.length){ alert('Nenhuma venda para imprimir.'); return; }
 
-    const totV = alvo.reduce((a,v) => a + Number(v.lucro||0), 0);
-    const totR = alvo.reduce((a,v) => a + Number(v.repasse||0), 0);
-    const totL = alvo.reduce((a,v) => a + Number(v.liquidoClinica||0), 0);
-    const clinica = db.clinicName || 'Extra Diagnósticos';
-    const periodo = di || df ? `Período: ${di ? new Date(di+'T12:00').toLocaleDateString('pt-BR') : '—'} até ${df ? new Date(df+'T12:00').toLocaleDateString('pt-BR') : '—'}` : 'Todos os períodos';
+    const clinica = db.clinicName || db.company?.nomeFantasia || 'Extra Med Clínica de Especialidades';
+    const periodo = di || df
+      ? `Período: ${di ? new Date(di+'T12:00').toLocaleDateString('pt-BR') : '—'} até ${df ? new Date(df+'T12:00').toLocaleDateString('pt-BR') : '—'}`
+      : 'Todos os períodos';
 
-    const linhas = alvo.map(v => `
-      <tr>
-        <td>${v.numero || '-'}</td>
-        <td>${v.data ? new Date(v.data).toLocaleDateString('pt-BR') : '-'}</td>
-        <td>${v.paciente || '-'}</td>
-        <td>${v.medicoNome || '-'}</td>
-        <td class="r">${formatCurrency(v.valorTotal||0)}</td>
-        <td class="r">${formatCurrency(v.custo||0)}</td>
-        <td class="r">${formatCurrency(v.lucro||0)}</td>
-        <td class="r">${formatPct(v.percentualRepasse||0)}</td>
-        <td class="r">${formatCurrency(v.repasse||0)}</td>
-        <td class="r">${formatCurrency(v.liquidoClinica||0)}</td>
-      </tr>`).join('');
+    let totValor = 0, totCusto = 0, totTotal = 0, totRepasse = 0, totClinica = 0, totProf = 0;
+    const linhas = [];
+    sorted.forEach(v => {
+      (v.itens || []).forEach(item => {
+        const subtotal    = Number(item.subtotal || 0);
+        const custoItem   = Number(item.custo || 0);
+        const totalItem   = subtotal - custoItem;
+        const pct         = Number(item.percentualRepasse || 0);
+        const regra       = (db.categoryRepasse || {})[item.categoria || item.tipo || ''] || 'lucro';
+        const baseRepasse = regra === 'lucro' ? Math.max(subtotal - custoItem, 0) : subtotal;
+        const repasseVal  = item.repasseValor != null ? Number(item.repasseValor) : baseRepasse * pct / 100;
+        const valProf     = item.valorProfissional != null ? Number(item.valorProfissional) : subtotal - repasseVal;
+        totValor   += subtotal;
+        totCusto   += custoItem;
+        totTotal   += totalItem;
+        totRepasse += pct;
+        totClinica += repasseVal;
+        totProf    += valProf;
+        linhas.push(`<tr>
+          <td>${v.numero || '-'}</td>
+          <td>${v.data ? new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR') : '-'}</td>
+          <td>${escapeHtml(v.paciente || '-')}</td>
+          <td>${escapeHtml(item.produtoNome || '-')}</td>
+          <td class="r">${formatCurrency(subtotal)}</td>
+          <td class="r">${formatCurrency(custoItem)}</td>
+          <td class="r">${formatCurrency(totalItem)}</td>
+          <td class="r">${formatPct(pct)}</td>
+          <td class="r">${formatCurrency(repasseVal)}</td>
+          <td class="r">${formatCurrency(valProf)}</td>
+        </tr>`);
+      });
+    });
 
     const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-      <title>Relatório de Repasse — ${clinica}</title>
+      <title>Relatório de Repasse Profissional — ${clinica}</title>
       <style>
+        @page{size:A4 landscape;margin:15mm}
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:24px}
-        h1{font-size:16px;margin-bottom:4px}
-        .sub{font-size:11px;color:#666;margin-bottom:16px}
+        body{font-family:Arial,sans-serif;font-size:10px;color:#222}
+        .header{margin-bottom:10px}
+        .header h1{font-size:14px;color:#9B1C3E;margin-bottom:2px}
+        .header .sub{font-size:9px;color:#666}
         table{width:100%;border-collapse:collapse;margin-top:8px}
-        th{background:#9B1C3E;color:#fff;padding:6px 8px;text-align:left;font-size:11px}
-        td{padding:5px 8px;border-bottom:1px solid #eee;font-size:11px}
+        thead th{background:#9B1C3E;color:#fff;padding:5px 6px;font-size:9px;white-space:nowrap}
+        tbody td{padding:4px 6px;border-bottom:1px solid #eee;font-size:9px}
+        tbody tr:nth-child(even){background:#fafafa}
+        tfoot td{font-weight:700;background:#f0e8ec;border-top:2px solid #9B1C3E;padding:5px 6px;font-size:9px}
         .r{text-align:right}
-        tfoot td{font-weight:700;background:#f5f5f5;border-top:2px solid #9B1C3E}
-        @media print{body{padding:8px}}
+        @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
       </style></head><body>
-      <h1>Relatório de Repasse Profissional — ${clinica}</h1>
-      <div class="sub">${periodo} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+      <div class="header">
+        <h1>Relatório de Repasse Profissional — ${escapeHtml(clinica)}</h1>
+        <div class="sub">${periodo} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+      </div>
       <table>
         <thead><tr>
-          <th>#</th><th>Data</th><th>Paciente</th><th>Profissional</th>
-          <th class="r">Valor</th><th class="r">Custo</th><th class="r">Total</th><th class="r">% Repasse</th>
-          <th class="r">Valor Clínica</th><th class="r">Valor Profissional</th>
+          <th>Venda</th><th>Data</th><th>Paciente</th><th>Produto</th>
+          <th class="r">Valor</th><th class="r">Custo</th><th class="r">Total</th>
+          <th class="r">% Repasse</th><th class="r">Valor Clínica</th><th class="r">Valor Profissional</th>
         </tr></thead>
-        <tbody>${linhas}</tbody>
+        <tbody>${linhas.join('')}</tbody>
         <tfoot><tr>
-          <td colspan="4">Total (${alvo.length} venda(s))</td>
-          <td class="r">${formatCurrency(alvo.reduce((a,v)=>a+Number(v.valorTotal||0),0))}</td>
-          <td class="r">${formatCurrency(alvo.reduce((a,v)=>a+Number(v.custo||0),0))}</td>
-          <td class="r">${formatCurrency(totV)}</td><td></td>
-          <td class="r">${formatCurrency(totR)}</td>
-          <td class="r">${formatCurrency(totL)}</td>
+          <td colspan="4">Total (${linhas.length} item(ns))</td>
+          <td class="r">${formatCurrency(totValor)}</td>
+          <td class="r">${formatCurrency(totCusto)}</td>
+          <td class="r">${formatCurrency(totTotal)}</td>
+          <td></td>
+          <td class="r">${formatCurrency(totClinica)}</td>
+          <td class="r">${formatCurrency(totProf)}</td>
         </tr></tfoot>
       </table>
     </body></html>`;
 
     const w = window.open('', '_blank');
+    if(!w){ alert('Permita pop-ups para gerar o relatório.'); return; }
     w.document.write(html);
     w.document.close();
     w.focus();
-    setTimeout(() => w.print(), 400);
+    setTimeout(() => w.print(), 500);
   }
 
   function abrirEditarRepasse(vendaId){
