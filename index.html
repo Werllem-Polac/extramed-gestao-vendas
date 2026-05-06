@@ -3700,6 +3700,8 @@
     const total = Math.max((qtd * valUnit) - desconto, 0);
     document.getElementById('vendaSubtotalItem').value = formatCurrency(total);
     atualizarRepasseItemValor(total);
+    const custoUnit = produto ? Number(produto.custo || 0) : 0;
+    if(produto) document.getElementById('vendaItemCusto').value = formatCurrency(custoUnit * qtd);
   }
 
   function getRepassePctItem(categoria, medicoId){
@@ -3724,7 +3726,8 @@
     const produto   = db.products.find(p => p.id === produtoId);
     const categoria = produto ? (produto.categoria || produto.tipo || '') : '';
     const pct       = produto ? getRepassePctItem(categoria, medicoId) : '';
-    const custo     = produto ? Number(produto.custo || 0) : '';
+    const qtd   = Number(document.getElementById('vendaQuantidade').value || 1);
+    const custo = produto ? Number(produto.custo || 0) * qtd : '';
     document.getElementById('vendaItemCategoria').value = categoria;
     document.getElementById('vendaItemCusto').value     = custo !== '' ? formatCurrency(custo) : '';
     document.getElementById('vendaItemRepasse').value   = pct !== '' ? pct + '%' : '';
