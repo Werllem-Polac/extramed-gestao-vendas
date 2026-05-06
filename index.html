@@ -1358,7 +1358,7 @@
           <button class="btn btn-secondary" onclick="abrirConsultarVendasTela()">Consultar vendas</button>
         </div>
         <input type="hidden" id="vendaId" />
-        <div class="row row-4">
+        <div class="row row-3">
           <div>
             <label>Número da venda / atendimento</label>
             <input id="vendaNumero" readonly />
@@ -1370,17 +1370,6 @@
           <div>
             <label>Hora da venda</label>
             <input id="vendaHora" type="time" readonly />
-          </div>
-          <div>
-            <label>Tipo principal</label>
-            <select id="vendaTipoPrincipal">
-              <option value="Consulta">Consulta</option>
-              <option value="Exame">Exame</option>
-              <option value="Procedimento">Procedimento</option>
-              <option value="Pacote">Pacote</option>
-              <option value="Produto">Produto</option>
-              <option value="Retorno">Retorno</option>
-            </select>
           </div>
         </div>
         <div class="row row-4">
@@ -3687,7 +3676,7 @@
     document.getElementById('vendaValorRecebido').value = 0;
     ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemRepasse','vendaItemRepasseValor'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
     refreshVendaDateTime();
-    document.getElementById('vendaTipoPrincipal').value = 'Consulta';
+
     document.getElementById('pagamentoMistoValor1').value = 0;
     document.getElementById('pagamentoMistoValor2').value = 0;
     togglePagamentoMisto();
@@ -3871,7 +3860,7 @@
     refreshVendaDateTime();
     const data = document.getElementById('vendaData').value;
     const hora = document.getElementById('vendaHora').value;
-    const tipoPrincipal = document.getElementById('vendaTipoPrincipal').value;
+    const tipoPrincipal = (window.vendaItensTemp[0]?.categoria) || (window.vendaItensTemp[0]?.tipo) || 'Consulta';
     const observacoes = document.getElementById('vendaObservacoes').value.trim();
     const descontoGeral = Number(document.getElementById('vendaDescontoGeral').value || 0);
     const recebido = Number(document.getElementById('vendaValorRecebido').value || 0);
