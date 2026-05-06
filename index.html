@@ -3163,7 +3163,7 @@
   function limparMedicoForm(){
     ['medicoId','medicoNome','medicoCPF','medicoNascimento','medicoEmail','medicoTelefone',
      'medicoNumConselho','medicoRQE','medicoVigenciaInicial','medicoVigenciaFinal',
-     'medicoPercentualLucro','medicoPercentualConsulta','medicoPercentualExame'
+     'medicoPercentualProtocolos','medicoPercentualConsulta','medicoPercentualExame'
     ].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; el?.classList.remove('campo-invalido'); });
     const uf = document.getElementById('medicoUF'); if(uf){ uf.innerHTML = buildUFOptions(); uf.classList.remove('campo-invalido'); }
     document.getElementById('medicoConselho').value = '';
@@ -3339,7 +3339,7 @@
     renderPermissoesGrid(u.permissoes || SYSTEM_SECTIONS.map(s => s.id));
     document.querySelectorAll('#usuariosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#usuariosSubnav .subnav-btn[data-usuarios-view="cadastrar"]'); if(btn) btn.classList.add('active');
-    document.querySelectorAll('#configuracoesUsuarios .subview').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('#configuracoesUsuariosView > .subview').forEach(v => v.classList.remove('active'));
     document.getElementById('usuariosCadastrarView').classList.add('active');
   }
 
@@ -4626,7 +4626,7 @@
         totValor   += subtotal;
         totCusto   += custoItem;
         totTotal   += totalItem;
-        totRepasse += pct;
+        totRepasse += repasseVal;
         totClinica += repasseVal;
         totProf    += valProf;
         linhas.push(`<tr>
@@ -4867,7 +4867,6 @@
   }
 
   function refreshAll(){
-    saveDB();
     renderProdutos();
     renderCategoriasTabela();
     renderControleVencimento();
@@ -5730,7 +5729,15 @@
     return `${d}/${m}/${y}`;
   }
 
-  window.addEventListener('DOMContentLoaded', init);
+  window.addEventListener('DOMContentLoaded', () => {
+    init();
+    checkLogin();
+    ['loginUser','loginPass'].forEach(id => {
+      document.getElementById(id)?.addEventListener('keydown', e => {
+        if(e.key === 'Enter') doLogin();
+      });
+    });
+  });
 
   // ── UF E VALIDAÇÃO VISUAL ──
   const UF_LIST = [
@@ -5884,7 +5891,9 @@
       sessionStorage.setItem(LOGIN_KEY, '1');
       sessionStorage.setItem(LOGIN_USER_KEY, isMaster ? MASTER_USER : matched.nome);
       sessionStorage.setItem('extramed_master', isMaster ? '1' : '0');
-      const perms = SYSTEM_SECTIONS.map(s => s.id); // master e matched recebem tudo
+      const perms = (isMaster || !matched?.permissoes?.length)
+        ? SYSTEM_SECTIONS.map(s => s.id)
+        : matched.permissoes;
       sessionStorage.setItem('extramed_perms', JSON.stringify(perms));
       aplicarPermissoesNoMenu(perms);
       document.getElementById('loginScreen').classList.add('hidden');
@@ -5904,15 +5913,6 @@
     document.getElementById('loginScreen').classList.remove('hidden');
   }
 
-  // Enter nos campos de login
-  document.addEventListener('DOMContentLoaded', () => {
-    checkLogin();
-    ['loginUser','loginPass'].forEach(id => {
-      document.getElementById(id)?.addEventListener('keydown', e => {
-        if(e.key === 'Enter') doLogin();
-      });
-    });
-  });
 </script>
 </body>
 </html>
