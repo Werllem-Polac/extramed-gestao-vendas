@@ -667,11 +667,16 @@
     </div>
 
     <section class="section active" id="dashboard">
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:0">
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:0">
         <div class="metric m1">
           <h4>Faturamento Bruto</h4>
           <div class="value" id="dashRevenue">R$ 0,00</div>
           <div class="sub">Total das vendas registradas</div>
+        </div>
+        <div class="metric m3">
+          <h4>Custo</h4>
+          <div class="value" id="dashCusto">R$ 0,00</div>
+          <div class="sub">Somatória de custos das vendas</div>
         </div>
         <div class="metric m2">
           <h4>Faturamento Líquido</h4>
@@ -4281,6 +4286,7 @@
 
   function renderDashboard(){
     const revenue = db.sales.reduce((acc,s) => acc + Number(s.valorTotal || 0), 0);
+    const custo = db.sales.reduce((acc,s) => acc + Number(s.custo || 0), 0);
     const profit = db.sales.reduce((acc,s) => acc + Number(s.lucro || 0), 0);
     const transfer = db.sales.reduce((acc,s) => acc + Number(s.repasse || 0), 0);
     const clinic = db.sales.reduce((acc,s) => acc + Number(s.liquidoClinica || 0), 0);
@@ -4293,6 +4299,7 @@
     const pacientesMes = new Set(vendasMes.map(s => patientMap[s.pacienteId] || s.pacienteId)).size;
 
     document.getElementById('dashRevenue').textContent = formatCurrency(revenue);
+    document.getElementById('dashCusto').textContent = formatCurrency(custo);
     document.getElementById('dashProfit').textContent = formatCurrency(profit);
     document.getElementById('dashMedicalTransfer').textContent = formatCurrency(transfer);
     document.getElementById('dashClinicValue').textContent = formatCurrency(clinic);
