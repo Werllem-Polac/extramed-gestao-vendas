@@ -409,6 +409,12 @@
     .fin-dot-previsto::before{content:"● ";font-size:10px;color:#94a3b8}
     .fin-filters{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;overflow-x:auto}
     .fin-month-nav{display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .ac-wrap{position:relative}
+    .ac-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9999;max-height:220px;overflow-y:auto;display:none}
+    .ac-list .ac-item{padding:9px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid #f3eef8;transition:background .1s}
+    .ac-list .ac-item:last-child{border-bottom:none}
+    .ac-list .ac-item:hover,.ac-list .ac-item.ac-active{background:var(--soft);color:var(--wine);font-weight:600}
+    .ac-list .ac-empty{padding:9px 14px;font-size:12px;color:var(--gray);font-style:italic}
     .fin-nav-btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--wine);font-weight:700;transition:.1s}
     .fin-nav-btn:hover{background:var(--soft)}
     .fin-pag{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid #eee5f7;font-size:13px;color:var(--gray)}
@@ -1386,7 +1392,11 @@
         <div class="row row-4">
           <div>
             <label>Paciente</label>
-            <select id="vendaPaciente"></select>
+            <div class="ac-wrap">
+              <input type="text" id="vendaPacienteInput" placeholder="Digite o nome do paciente…" oninput="acVenda('paciente',this.value)" onkeydown="acVendaKey(event,'paciente')" autocomplete="off" />
+              <input type="hidden" id="vendaPaciente" />
+              <div id="vendaPacienteList" class="ac-list"></div>
+            </div>
           </div>
           <div>
             <label>Usuário</label>
@@ -1394,7 +1404,11 @@
           </div>
           <div>
             <label>Profissional</label>
-            <select id="vendaMedico"></select>
+            <div class="ac-wrap">
+              <input type="text" id="vendaMedicoInput" placeholder="Digite o nome do profissional…" oninput="acVenda('medico',this.value)" onkeydown="acVendaKey(event,'medico')" autocomplete="off" />
+              <input type="hidden" id="vendaMedico" />
+              <div id="vendaMedicoList" class="ac-list"></div>
+            </div>
           </div>
           <div>
             <label>Observações da venda</label>
@@ -3674,10 +3688,60 @@
     `).join('');
   }
 
+  // ── Autocomplete Vendas ──────────────────────────────────────
+  const _acIdx = {paciente: -1, medico: -1};
+
+  function acVenda(tipo, q){
+    const listEl = document.getElementById(tipo === 'paciente' ? 'vendaPacienteList' : 'vendaMedicoList');
+    const hidEl  = document.getElementById(tipo === 'paciente' ? 'vendaPaciente'     : 'vendaMedico');
+    hidEl.value = '';
+    _acIdx[tipo] = -1;
+    if(!q || q.length < 1){ listEl.style.display = 'none'; listEl.innerHTML = ''; return; }
+    const items = tipo === 'paciente'
+      ? (db.patients || [])
+      : (db.doctors  || []).filter(d => d.status === 'Ativo');
+    const ql = q.toLowerCase();
+    const matches = items.filter(i => i.nome && i.nome.toLowerCase().includes(ql)).slice(0, 20);
+    if(!matches.length){
+      listEl.innerHTML = '<div class="ac-empty">Nenhum resultado</div>';
+      listEl.style.display = 'block';
+      return;
+    }
+    listEl.innerHTML = matches.map(i =>
+      `<div class="ac-item" onmousedown="acVendaSelect('${tipo}','${i.id}',${JSON.stringify(i.nome)})">${i.nome}</div>`
+    ).join('');
+    listEl.style.display = 'block';
+  }
+
+  function acVendaSelect(tipo, id, nome){
+    document.getElementById(tipo === 'paciente' ? 'vendaPacienteInput' : 'vendaMedicoInput').value = nome;
+    document.getElementById(tipo === 'paciente' ? 'vendaPaciente'      : 'vendaMedico').value = id;
+    const listEl = document.getElementById(tipo === 'paciente' ? 'vendaPacienteList' : 'vendaMedicoList');
+    listEl.style.display = 'none';
+    _acIdx[tipo] = -1;
+    if(tipo === 'medico') preencherCamprosItemVenda();
+  }
+
+  function acVendaKey(e, tipo){
+    const listEl = document.getElementById(tipo === 'paciente' ? 'vendaPacienteList' : 'vendaMedicoList');
+    const items  = listEl.querySelectorAll('.ac-item');
+    if(!items.length) return;
+    if(e.key === 'ArrowDown'){ e.preventDefault(); _acIdx[tipo] = Math.min(_acIdx[tipo]+1, items.length-1); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); _acIdx[tipo] = Math.max(_acIdx[tipo]-1, 0); }
+    else if(e.key === 'Enter' && _acIdx[tipo] >= 0){ e.preventDefault(); items[_acIdx[tipo]].dispatchEvent(new MouseEvent('mousedown')); return; }
+    else if(e.key === 'Escape'){ listEl.style.display = 'none'; return; }
+    items.forEach((el,i) => el.classList.toggle('ac-active', i === _acIdx[tipo]));
+  }
+
+  document.addEventListener('click', e => {
+    ['vendaPacienteList','vendaMedicoList'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el && !el.closest('.ac-wrap')?.contains(e.target)) el.style.display = 'none';
+    });
+  });
+
   function preencherSelectsVendas(){
-    fillSelect('vendaPaciente', db.patients || [], 'Selecione o paciente');
     fillSelect('vendaUsuario', db.users.filter(u => u.status === 'Ativo'), 'Selecione o usuário');
-    fillSelect('vendaMedico', db.doctors.filter(d => d.status === 'Ativo'), 'Selecione o profissional');
     fillSelect('vendaProduto', db.products.filter(p => (p.status || 'Ativo') === 'Ativo'), 'Selecione o item');
     fillSelect('repasseFiltroMedico', [{id:'', nome:'Todos'}].concat(db.doctors), 'Todos');
     renderEspecialidades();
@@ -3705,6 +3769,8 @@
     document.getElementById('vendaFormaPagamento').value = 'Dinheiro';
     document.getElementById('vendaValorRecebido').value = 0;
     ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemCusto','vendaItemRepasse','vendaItemRepasseValor','vendaItemValorProfissional'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
+    ['vendaPacienteInput','vendaMedicoInput'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    ['vendaPacienteList','vendaMedicoList'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
     refreshVendaDateTime();
 
     document.getElementById('pagamentoMistoValor1').value = 0;
