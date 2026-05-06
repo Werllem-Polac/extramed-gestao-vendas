@@ -1846,6 +1846,7 @@
                 <thead>
                   <tr>
                     <th class="th-cb"><input type="checkbox" class="bulk-cb" id="bulkAll-usuarios" onchange="bulkToggleAll('usuarios',this.checked)"></th>
+                    <th>Cód.</th>
                     <th>Nome de usuário</th>
                     <th>Cargo</th>
                     <th>Perfil</th>
@@ -3308,7 +3309,10 @@
     if(loginDup){ alert('Esse login já está em uso por outro usuário.'); return; }
 
     const permissoes = lerPermissoesMarcadas();
-    const payload = { id: id || uid(), nome, cargo, perfil, login, status, senha: senha || existing?.senha || '', permissoes };
+    const nextCodigo = id
+      ? (existing?.codigo || '')
+      : String(Math.max(0, ...db.users.map(u => parseInt(u.codigo || '0'))) + 1).padStart(2, '0');
+    const payload = { id: id || uid(), codigo: nextCodigo, nome, cargo, perfil, login, status, senha: senha || existing?.senha || '', permissoes };
 
     if(id){ db.users = db.users.map(u => u.id === id ? payload : u); }
     else   { db.users.push(payload); }
@@ -3351,6 +3355,7 @@
     tbody.innerHTML = items.length ? items.map(u => `
       <tr>
         <td class="td-cb"><input type="checkbox" class="bulk-cb" data-bulk="usuarios" value="${u.id}" onchange="updateBulkBar('usuarios')"></td>
+        <td style="font-weight:600;color:var(--wine)">${u.codigo || '-'}</td>
         <td>${escapeHtml(u.nome)}</td>
         <td>${escapeHtml(u.cargo || '-')}</td>
         <td>${escapeHtml(u.perfil)}</td>
@@ -3362,7 +3367,7 @@
           <button class="btn btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="8" class="empty">Nenhum usuário cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="9" class="empty">Nenhum usuário cadastrado.</td></tr>`;
     updateProtectedMenuVisibility();
   }
 
