@@ -2282,8 +2282,11 @@
       responsavel: '',
       linkNotaFiscal: ''
     },
-    productCategories: ['Consulta', 'Exame', 'Pacote', 'Procedimento', 'Protocolo', 'Retorno', 'Produtos'],
+    productCategories: [],
     categoryRepasse: {},
+    _repasseRulesCleared: false,
+    _salesReset20260505: false,
+    _categoriesReset20260505: false,
     products: [],
     categories: ['Consulta','Exame','Pacote','Procedimento','Produtos','Protocolo','Retorno'].sort((a,b)=>a.localeCompare(b,'pt-BR')),
     doctors: [],
