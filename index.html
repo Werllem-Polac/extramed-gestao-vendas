@@ -4490,6 +4490,7 @@
     if(!sorted.length){ alert('Nenhuma venda para imprimir.'); return; }
 
     const clinica = db.clinicName || db.company?.nomeFantasia || 'Extra Med Clínica de Especialidades';
+    const profissional = filtroMedico ? (db.doctors || []).find(d => d.id === filtroMedico)?.nome || '' : '';
     const periodo = di || df
       ? `Período: ${di ? new Date(di+'T12:00').toLocaleDateString('pt-BR') : '—'} até ${df ? new Date(df+'T12:00').toLocaleDateString('pt-BR') : '—'}`
       : 'Todos os períodos';
@@ -4535,6 +4536,7 @@
         body{font-family:Arial,sans-serif;font-size:10px;color:#222}
         .header{margin-bottom:10px}
         .header h1{font-size:14px;color:#9B1C3E;margin-bottom:2px}
+        .header .prof{font-size:11px;color:#333;margin-bottom:2px}
         .header .sub{font-size:9px;color:#666}
         table{width:100%;border-collapse:collapse;margin-top:8px}
         thead th{background:#9B1C3E;color:#fff;padding:5px 6px;font-size:9px;white-space:nowrap}
@@ -4546,6 +4548,7 @@
       </style></head><body>
       <div class="header">
         <h1>Relatório de Repasse Profissional — ${escapeHtml(clinica)}</h1>
+        ${profissional ? `<div class="prof">Profissional: <strong>${escapeHtml(profissional)}</strong></div>` : ''}
         <div class="sub">${periodo} &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')}</div>
       </div>
       <table>
