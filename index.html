@@ -1395,7 +1395,7 @@
           <div class="section-header">
             <h3>Itens da venda</h3>
           </div>
-          <div class="row row-3">
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
             <div>
               <label>Item</label>
               <select id="vendaProduto"></select>
@@ -1408,12 +1408,16 @@
               <label>Valor unitário</label>
               <input id="vendaValorUnitario" type="number" min="0" step="0.01" placeholder="0,00" />
             </div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
             <div>
               <label>Desconto</label>
               <input id="vendaDescontoItem" type="number" min="0" step="0.01" placeholder="0,00" />
             </div>
+            <div>
+              <label>Subtotal item</label>
+              <input id="vendaSubtotalItem" readonly />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
             <div>
               <label>Categoria</label>
               <input id="vendaItemCategoria" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
@@ -1430,16 +1434,10 @@
               <label>R$ Repasse</label>
               <input id="vendaItemRepasseValor" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
             </div>
-          </div>
-          <div class="row row-2">
-            <div>
-              <label>Subtotal item</label>
-              <input id="vendaSubtotalItem" readonly />
-            </div>
             <div>
               <label>Observação do item</label>
-              <div style="display:flex;gap:10px;align-items:center">
-                <input id="vendaObsItem" placeholder="Opcional" />
+              <div style="display:flex;gap:8px;align-items:center">
+                <input id="vendaObsItem" placeholder="Opcional" style="flex:1" />
                 <button type="button" class="btn btn-light" onclick="adicionarItemVenda()">Lançar</button>
               </div>
             </div>
