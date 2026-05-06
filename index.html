@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <!-- CSP aplicado via vercel.json em produção; este meta cobre carregamento local -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" />
   <title>Extra Diagnósticos | Gestão de Vendas</title>
   <style>
     :root{
@@ -530,6 +535,8 @@
     }
     .logout-btn:hover{background:rgba(255,255,255,.2)}
   </style>
+  <!-- Supabase JS — necessário para autenticação segura -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 
@@ -603,16 +610,19 @@
     </div>
     <h1>Extra Diagnósticos</h1>
     <p>Gestão estratégica</p>
-    <div class="login-err" id="loginErr">Usuário ou senha incorretos.</div>
+    <div class="login-err" id="loginErr">E-mail ou senha incorretos.</div>
     <div class="login-field">
-      <label for="loginUser">Usuário</label>
-      <input id="loginUser" type="text" placeholder="Digite seu usuário" autocomplete="username" />
+      <label for="loginUser">E-mail</label>
+      <input id="loginUser" type="email" placeholder="seu@email.com" autocomplete="username" />
     </div>
     <div class="login-field">
       <label for="loginPass">Senha</label>
       <input id="loginPass" type="password" placeholder="Digite sua senha" autocomplete="current-password" />
     </div>
-    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Entrar</button>
+    <div style="text-align:center;margin-top:10px">
+      <a href="#" onclick="doEsqueciSenha();return false;" style="font-size:13px;color:var(--wine);text-decoration:underline">Esqueci minha senha</a>
+    </div>
     <div class="login-footer">Extra Diagnósticos &copy; 2026<br>desenvolvido por Werllem Polac</div>
   </div>
 </div>
@@ -1850,9 +1860,8 @@
                     <th>Nome de usuário</th>
                     <th>Cargo</th>
                     <th>Perfil</th>
-                    <th>Login</th>
+                    <th>E-mail</th>
                     <th>Status</th>
-                    <th>Senha</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -1895,15 +1904,15 @@
             </div>
             <div class="row row-2">
               <div>
-                <label>Login</label>
-                <input id="usuarioLogin" placeholder="Ex.: maria.souza" autocomplete="off" />
+                <label>E-mail de acesso</label>
+                <input id="usuarioLogin" type="email" placeholder="usuario@email.com" autocomplete="off" />
               </div>
               <div>
-                <label>Senha</label>
-                <input id="usuarioSenha" type="password" placeholder="Senha de acesso ao sistema" autocomplete="new-password" />
+                <label>Senha <span style="font-size:11px;color:var(--gray)">(somente ao criar)</span></label>
+                <input id="usuarioSenha" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
               </div>
             </div>
-            <div class="helper-text" style="margin-bottom:12px">Login e senha são usados para entrar no sistema e para autorizações gerenciais.</div>
+            <div class="helper-text" style="margin-bottom:12px">O e-mail e a senha são usados para entrar no sistema. Para redefinir a senha de um usuário existente, use "Esqueci minha senha" na tela de login.</div>
 
             <div class="perm-panel">
               <div class="perm-panel-title">
@@ -2305,6 +2314,10 @@
   const DB_KEY = 'extramed_clinica_vendas_v1';
 
   // ── SUPABASE ──
+  // A anon key abaixo é PUBLIC por design do Supabase (equivalente a uma chave de leitura).
+  // O acesso real aos dados é controlado por políticas RLS no banco de dados.
+  // A service_role key (que ignora RLS) fica SOMENTE nas Vercel Functions (api/).
+  // Documentação: https://supabase.com/docs/guides/api/api-keys
   const SUPABASE_URL = 'https://ftcokjikthnnegnsxliu.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0Y29ramlrdGhubmVnbnN4bGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTk1MDMsImV4cCI6MjA5MjczNTUwM30.qd9aiV16f2QPQbk7CufQpZYgIa6NvHwQgvq_Uyj1jhs';
 
@@ -3292,38 +3305,61 @@
     renderPermissoesGrid(); // todas marcadas por padrão
   }
 
-  function salvarUsuario(){
+  async function salvarUsuario(){
     const id    = document.getElementById('usuarioId').value;
     const nome  = document.getElementById('usuarioNome').value.trim();
     const cargo = document.getElementById('usuarioCargo').value.trim();
     const perfil= document.getElementById('usuarioPerfil').value;
-    const login = document.getElementById('usuarioLogin').value.trim();
+    const login = document.getElementById('usuarioLogin').value.trim().toLowerCase();
     const status= document.getElementById('usuarioStatus').value;
     const senha = document.getElementById('usuarioSenha').value;
 
     if(!nome || !perfil || !login){
-      alert('Preencha Nome de usuário, Perfil e Login.');
+      alert('Preencha Nome de usuário, Perfil e E-mail de acesso.');
+      return;
+    }
+    if(!login.includes('@')){
+      alert('Informe um e-mail válido no campo "E-mail de acesso".');
       return;
     }
     if(!senha && !id){
-      alert('Informe a senha de acesso ao sistema.');
+      alert('Informe a senha de acesso (mínimo 8 caracteres).');
+      return;
+    }
+    if(senha && senha.length < 8){
+      alert('A senha deve ter pelo menos 8 caracteres.');
       return;
     }
 
     const existing = db.users.find(u => u.id === id);
     const loginDup = db.users.find(u => u.login === login && u.id !== id);
-    if(loginDup){ alert('Esse login já está em uso por outro usuário.'); return; }
+    if(loginDup){ alert('Esse e-mail já está em uso por outro usuário.'); return; }
 
     const permissoes = lerPermissoesMarcadas();
     const nextCodigo = id
       ? (existing?.codigo || '')
       : String(Math.max(0, ...db.users.map(u => parseInt(u.codigo || '0'))) + 1).padStart(2, '0');
-    const payload = { id: id || uid(), codigo: nextCodigo, nome, cargo, perfil, login, status, senha: senha || existing?.senha || '', permissoes };
+
+    // Perfil salvo sem senha — autenticação gerenciada pelo Supabase Auth
+    const payload = { id: id || uid(), codigo: nextCodigo, nome, cargo, perfil, login, status, permissoes };
+
+    if(!id && senha){
+      // Criar conta no Supabase Auth para o novo usuário
+      const { error: authErr } = await supabaseClient.auth.signUp({
+        email: login,
+        password: senha,
+      });
+      if(authErr && !authErr.message.includes('already registered')){
+        alert(`Erro ao criar acesso: ${authErr.message}`);
+        return;
+      }
+    }
 
     if(id){ db.users = db.users.map(u => u.id === id ? payload : u); }
     else   { db.users.push(payload); }
 
     saveDB(); limparUsuarioForm(); refreshAll();
+    if(!id) alert('Usuário criado. O acesso estará disponível assim que o e-mail for confirmado (se habilitado no painel Supabase).');
   }
 
   function editarUsuario(id){
@@ -3335,7 +3371,7 @@
     document.getElementById('usuarioPerfil').value= u.perfil;
     document.getElementById('usuarioLogin').value = u.login;
     document.getElementById('usuarioStatus').value= u.status;
-    document.getElementById('usuarioSenha').value = u.senha || '';
+    document.getElementById('usuarioSenha').value = ''; // senha nunca exposta ao frontend
     renderPermissoesGrid(u.permissoes || SYSTEM_SECTIONS.map(s => s.id));
     document.querySelectorAll('#usuariosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#usuariosSubnav .subnav-btn[data-usuarios-view="cadastrar"]'); if(btn) btn.classList.add('active');
@@ -3367,13 +3403,12 @@
         <td>${escapeHtml(u.perfil)}</td>
         <td>${escapeHtml(u.login)}</td>
         <td>${u.status}</td>
-        <td>${u.senha ? '••••••' : '-'}</td>
         <td>
           <button class="btn btn-light" onclick="editarUsuario('${u.id}')">Editar</button>
           <button class="btn btn-danger" onclick="excluirUsuario('${u.id}')">Excluir</button>
         </td>
       </tr>
-    `).join('') : `<tr><td colspan="9" class="empty">Nenhum usuário cadastrado.</td></tr>`;
+    `).join('') : `<tr><td colspan="8" class="empty">Nenhum usuário cadastrado.</td></tr>`;
     updateProtectedMenuVisibility();
   }
 
@@ -3515,51 +3550,69 @@
 
   async function enviarFormularioPaciente(){
     const consent = document.getElementById('pubConsentimento');
-    if(!consent || !consent.checked){ alert('É necessário aceitar o Aviso de Privacidade (LGPD) para enviar o formulário.'); return; }
-    const nome     = document.getElementById('pubNome').value.trim();
-    const telefone = formatTelefone(document.getElementById('pubTelefone').value.trim());
-    const cpf      = formatCPF(document.getElementById('pubCPF').value.trim());
-    if(!nome || !cpf || onlyDigits(cpf).length !== 11){ alert('Preencha nome, CPF válido (11 dígitos) e telefone.'); return; }
-    if(onlyDigits(telefone).length < 10){ alert('Informe um telefone válido com DDD.'); return; }
+    if(!consent || !consent.checked){
+      alert('É necessário aceitar o Aviso de Privacidade (LGPD) para enviar o formulário.');
+      return;
+    }
+
+    // Sanitizar e validar antes de enviar ao servidor
+    const nome     = sanitizeInput(document.getElementById('pubNome').value, 150);
+    const cpfRaw   = onlyDigits(document.getElementById('pubCPF').value);
+    const telefone = sanitizeInput(formatTelefone(document.getElementById('pubTelefone').value.trim()), 20);
+
+    if(!nome || nome.length < 2){
+      alert('Preencha o nome completo.'); return;
+    }
+    if(cpfRaw.length !== 11){
+      alert('Informe um CPF válido com 11 dígitos.'); return;
+    }
+    if(onlyDigits(telefone).length < 10){
+      alert('Informe um telefone válido com DDD.'); return;
+    }
+
     const btn = document.getElementById('pubSubmitBtn');
-    btn.disabled = true; btn.textContent = 'Enviando...';
-    const pending = {
-      id: uid(), nome, telefone, cpf,
-      rua: document.getElementById('pubRua').value.trim(),
-      numero: document.getElementById('pubNumero').value.trim(),
-      bairro: document.getElementById('pubBairro').value.trim(),
-      cidade: document.getElementById('pubCidade').value.trim(),
-      estado: document.getElementById('pubEstado').value,
-      cep: formatCEP(document.getElementById('pubCEP').value.trim()),
-      nascimento: document.getElementById('pubNascimento').value,
-      email: document.getElementById('pubEmail').value.trim(),
-      dataEnvio: new Date().toISOString(),
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    const payload = {
+      nome,
+      cpf:               cpfRaw,
+      telefone,
+      rua:               sanitizeInput(document.getElementById('pubRua').value),
+      numero:            sanitizeInput(document.getElementById('pubNumero').value, 20),
+      bairro:            sanitizeInput(document.getElementById('pubBairro').value),
+      cidade:            sanitizeInput(document.getElementById('pubCidade').value),
+      estado:            sanitizeInput(document.getElementById('pubEstado').value, 2),
+      cep:               onlyDigits(document.getElementById('pubCEP').value).slice(0, 8),
+      nascimento:        sanitizeInput(document.getElementById('pubNascimento').value, 10),
+      email:             sanitizeInput(document.getElementById('pubEmail').value, 150),
       consentimentoLGPD: true,
-      dataConsentimento: new Date().toISOString(),
-      status: 'pendente'
     };
+
     try {
-      const readRes = await fetch(`${SUPABASE_URL}/rest/v1/app_data?key=eq.${DB_KEY}&select=value`,
-        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-      let remoteDB = {};
-      if(readRes.ok){ const rows = await readRes.json(); if(rows.length && rows[0].value) remoteDB = rows[0].value; }
-      if(!Array.isArray(remoteDB.pendingPatients)) remoteDB.pendingPatients = [];
-      remoteDB.pendingPatients.push(pending);
-      const saveRes = await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
-                   'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: DB_KEY, value: remoteDB })
+      // Chama o proxy serverless — sem expor credenciais do banco ao cliente público
+      const res = await fetch('/api/paciente-pendente', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body:    JSON.stringify(payload),
       });
-      if(!saveRes.ok && saveRes.status !== 201) throw new Error(saveRes.status);
+
+      const json = await res.json().catch(() => ({}));
+
+      if(!res.ok){
+        throw new Error(json.error || `HTTP ${res.status}`);
+      }
+
       document.getElementById('pubFormFields').style.display = 'none';
       const msg = document.getElementById('pubFormMsg');
       msg.style.display = 'block';
       msg.style.cssText += ';background:#e8f5e9;color:#2e7d32;';
       msg.textContent = 'Formulário enviado com sucesso! Aguarde o contato da clínica para confirmar seu cadastro.';
+
     } catch(e) {
-      btn.disabled = false; btn.textContent = 'Enviar formulário';
-      alert('Erro ao enviar. Verifique sua conexão e tente novamente.');
+      btn.disabled = false;
+      btn.textContent = 'Enviar formulário';
+      alert('Erro ao enviar: ' + (e.message || 'Verifique sua conexão e tente novamente.'));
     }
   }
 
@@ -4029,13 +4082,15 @@
   }
 
   function pedirSenhaGerencial(acao='autorizar'){
-    const senha = prompt(`Digite a senha do gerente ou administrador para ${acao}:`);
-    if(!senha) return null;
-    // Credencial mestre sempre autoriza
-    if(senha === MASTER_PASS) return {nome: MASTER_USER, perfil: 'Administrador'};
-    const user = db.users.find(u => ['Administrador','Gerente'].includes(u.perfil) && u.status === 'Ativo' && u.senha === senha);
-    if(!user){ alert('Senha inválida.'); return null; }
-    return user;
+    // Verifica o perfil do usuário logado na sessão atual (sem expor senha)
+    if(!currentUser || !['Administrador','Gerente'].includes(currentUser.perfil)){
+      alert('Apenas Administradores e Gerentes podem ' + acao + '.');
+      return null;
+    }
+    if(!confirm('Confirmar: ' + acao + '?\nOperador: ' + currentUser.nome + ' (' + currentUser.perfil + ')')){
+      return null;
+    }
+    return currentUser;
   }
 
   function excluirVenda(id){
@@ -4084,6 +4139,11 @@
 
   function escapeHtml(value){
     return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[char] || char));
+  }
+
+  // Remove caracteres de controle e limita comprimento — usar antes de enviar ao servidor
+  function sanitizeInput(value, maxLen = 300){
+    return String(value ?? '').replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLen);
   }
 
   function getReceiptHtml(venda){
@@ -5731,7 +5791,7 @@
 
   window.addEventListener('DOMContentLoaded', () => {
     init();
-    checkLogin();
+    checkLogin(); // async — não precisa await aqui; a tela de login permanece visível até resolver
     ['loginUser','loginPass'].forEach(id => {
       document.getElementById(id)?.addEventListener('keydown', e => {
         if(e.key === 'Enter') doLogin();
@@ -5858,59 +5918,139 @@
     _origShowMainSection(target, btn, title);
   };
 
-  // ── LOGIN ──
-  const LOGIN_KEY   = 'extramed_logged';
+  // ── LOGIN (Supabase Auth) ──
   const LOGIN_USER_KEY = 'extramed_login_user';
-  // Credencial mestre (fallback quando não há usuários cadastrados)
-  const MASTER_USER = 'Extramed@';
-  const MASTER_PASS = 'Extramed@';
 
-  function checkLogin(){
-    if(sessionStorage.getItem(LOGIN_KEY) !== '1'){
-      document.getElementById('loginScreen').classList.remove('hidden');
-    } else {
+  // Inicializar cliente Supabase Auth (sessão expira ao fechar o navegador)
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      persistSession: true,
+      storage: sessionStorage,   // sessão encerra ao fechar o browser/aba
+      storageKey: 'extramed_auth',
+      autoRefreshToken: true,
+    }
+  });
+
+  // Usuário da sessão atual (populado no login e no checkLogin)
+  let currentUser = null;
+
+  function _setCurrentUser(profile) {
+    currentUser = profile;
+    if(profile){
+      sessionStorage.setItem(LOGIN_USER_KEY, profile.nome);
+      sessionStorage.setItem('extramed_perms', JSON.stringify(profile.permissoes));
+      aplicarPermissoesNoMenu(profile.permissoes);
       document.getElementById('loginScreen').classList.add('hidden');
-      const perms = JSON.parse(sessionStorage.getItem('extramed_perms') || 'null') || SYSTEM_SECTIONS.map(s => s.id);
-      aplicarPermissoesNoMenu(perms);
     }
   }
 
-  function doLogin(){
-    const user = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    const err  = document.getElementById('loginErr');
-
-    // Busca usuário ativo com login e senha correspondentes
+  function _resolveProfile(email){
     const matched = db.users.find(u =>
-      u.login === user && u.senha === pass && u.status === 'Ativo'
+      u.login && u.login.toLowerCase() === (email || '').toLowerCase() && u.status === 'Ativo'
     );
-    // Fallback: credencial mestre
-    const isMaster = (user === MASTER_USER && pass === MASTER_PASS);
+    const permissoes = matched?.permissoes?.length
+      ? matched.permissoes
+      : SYSTEM_SECTIONS.map(s => s.id);
+    return {
+      nome: matched?.nome || email,
+      perfil: matched?.perfil || 'Secretária',
+      permissoes,
+      login: email,
+    };
+  }
 
-    if(matched || isMaster){
-      sessionStorage.setItem(LOGIN_KEY, '1');
-      sessionStorage.setItem(LOGIN_USER_KEY, isMaster ? MASTER_USER : matched.nome);
-      sessionStorage.setItem('extramed_master', isMaster ? '1' : '0');
-      const perms = (isMaster || !matched?.permissoes?.length)
-        ? SYSTEM_SECTIONS.map(s => s.id)
-        : matched.permissoes;
-      sessionStorage.setItem('extramed_perms', JSON.stringify(perms));
-      aplicarPermissoesNoMenu(perms);
-      document.getElementById('loginScreen').classList.add('hidden');
-      err.style.display = 'none';
-    } else {
+  async function checkLogin(){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session){
+      document.getElementById('loginScreen').classList.remove('hidden');
+      return;
+    }
+    _setCurrentUser(_resolveProfile(session.user.email));
+  }
+
+  // Expirar sessão automaticamente quando o Supabase detectar SIGNED_OUT
+  supabaseClient.auth.onAuthStateChange((event) => {
+    if(event === 'SIGNED_OUT'){
+      currentUser = null;
+      sessionStorage.removeItem(LOGIN_USER_KEY);
+      sessionStorage.removeItem('extramed_perms');
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+      document.getElementById('loginErr').style.display = 'none';
+      document.getElementById('loginScreen').classList.remove('hidden');
+    }
+  });
+
+  async function doLogin(){
+    const email = document.getElementById('loginUser').value.trim().toLowerCase();
+    const pass  = document.getElementById('loginPass').value;
+    const err   = document.getElementById('loginErr');
+    const btn   = document.getElementById('loginBtn');
+
+    // Bloqueio por tentativas inválidas
+    const lockUntil = parseInt(sessionStorage.getItem('loginLockUntil') || '0');
+    if(Date.now() < lockUntil){
+      const mins = Math.ceil((lockUntil - Date.now()) / 60000);
+      err.textContent = 'Conta bloqueada. Aguarde ' + mins + ' minuto(s).';
+      err.style.display = 'block';
+      return;
+    }
+
+    if(!email || !pass){
+      err.textContent = 'Preencha e-mail e senha.';
+      err.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando…';
+    err.style.display = 'none';
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+    if(error){
+      const attempts = parseInt(sessionStorage.getItem('loginAttempts') || '0') + 1;
+      sessionStorage.setItem('loginAttempts', attempts);
+      if(attempts >= 5){
+        sessionStorage.setItem('loginLockUntil', Date.now() + 5 * 60 * 1000);
+        sessionStorage.removeItem('loginAttempts');
+        err.textContent = 'Bloqueado após 5 tentativas inválidas. Aguarde 5 minutos.';
+      } else {
+        err.textContent = 'E-mail ou senha incorretos. (' + (5 - attempts) + ' tentativa(s) restante(s))';
+      }
       err.style.display = 'block';
       document.getElementById('loginPass').value = '';
       document.getElementById('loginPass').focus();
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+      return;
     }
+
+    sessionStorage.removeItem('loginAttempts');
+    sessionStorage.removeItem('loginLockUntil');
+    err.textContent = 'E-mail ou senha incorretos.';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+    _setCurrentUser(_resolveProfile(data.session.user.email));
   }
 
-  function doLogout(){
-    sessionStorage.removeItem(LOGIN_KEY);
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
-    document.getElementById('loginErr').style.display = 'none';
-    document.getElementById('loginScreen').classList.remove('hidden');
+  async function doLogout(){
+    await supabaseClient.auth.signOut();
+    // onAuthStateChange cuida de limpar a tela
+  }
+
+  async function doEsqueciSenha(){
+    const email = document.getElementById('loginUser').value.trim().toLowerCase()
+      || prompt('Digite seu e-mail de acesso:');
+    if(!email){ return; }
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.href,
+    });
+    if(error){
+      alert('Erro ao enviar e-mail: ' + error.message);
+    } else {
+      alert('E-mail de recuperação enviado para ' + email + '. Verifique sua caixa de entrada.');
+    }
   }
 
 </script>
