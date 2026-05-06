@@ -1406,22 +1406,32 @@
           <div class="section-header">
             <h3>Itens da venda</h3>
           </div>
-          <div class="row row-4">
+          <div class="row row-3">
             <div>
               <label>Item</label>
               <select id="vendaProduto"></select>
             </div>
             <div>
-              <label>Quantidade</label>
+              <label>Qtd.</label>
               <input id="vendaQuantidade" type="number" min="1" step="1" value="1" />
             </div>
             <div>
               <label>Valor unitário</label>
               <input id="vendaValorUnitario" type="number" min="0" step="0.01" placeholder="0,00" />
             </div>
+          </div>
+          <div class="row row-3">
             <div>
-              <label>Desconto por item</label>
+              <label>Desconto</label>
               <input id="vendaDescontoItem" type="number" min="0" step="0.01" placeholder="0,00" />
+            </div>
+            <div>
+              <label>Categoria</label>
+              <input id="vendaItemCategoria" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
+            </div>
+            <div>
+              <label>% Repasse</label>
+              <input id="vendaItemRepasse" readonly placeholder="Auto" style="background:var(--input-bg,#f5f5f5)" />
             </div>
           </div>
           <div class="row row-2">
@@ -1441,8 +1451,9 @@
             <table>
               <thead>
                 <tr>
-                  <th>Tipo</th>
+                  <th>Categoria</th>
                   <th>Item</th>
+                  <th>% Rep.</th>
                   <th>Qtd.</th>
                   <th>Unitário</th>
                   <th>Desconto</th>
@@ -3670,7 +3681,7 @@
     document.getElementById('vendaParcelas').value = 1;
     document.getElementById('vendaFormaPagamento').value = 'Dinheiro';
     document.getElementById('vendaValorRecebido').value = 0;
-    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
+    ['vendaPaciente','vendaUsuario','vendaMedico','vendaProduto','vendaItemCategoria','vendaItemRepasse'].forEach(id => { const el=document.getElementById(id); if(el) el.value = ''; });
     refreshVendaDateTime();
     document.getElementById('vendaTipoPrincipal').value = 'Consulta';
     document.getElementById('pagamentoMistoValor1').value = 0;
@@ -3693,25 +3704,49 @@
     document.getElementById('vendaSubtotalItem').value = formatCurrency(total);
   }
 
+  function getRepassePctItem(categoria, medicoId){
+    const regra = (db.categoryRepasse || {})[categoria] || 'lucro';
+    const doc = (db.doctors || []).find(d => d.id === medicoId);
+    if(!doc) return 0;
+    if(regra === 'consulta') return Number(doc.percentualConsulta || 0);
+    if(regra === 'exame')    return Number(doc.percentualExame    || 0);
+    return Number((doc.percentualProtocolos ?? doc.percentualLucro ?? doc.percentual) || 0);
+  }
+
+  function preencherCamprosItemVenda(){
+    const produtoId = document.getElementById('vendaProduto').value;
+    const medicoId  = document.getElementById('vendaMedico').value;
+    const produto   = db.products.find(p => p.id === produtoId);
+    const categoria = produto ? (produto.categoria || produto.tipo || '') : '';
+    const pct       = produto ? getRepassePctItem(categoria, medicoId) : '';
+    document.getElementById('vendaItemCategoria').value = categoria;
+    document.getElementById('vendaItemRepasse').value   = pct !== '' ? pct + '%' : '';
+  }
+
   function adicionarItemVenda(){
     const produtoId = document.getElementById('vendaProduto').value;
     const quantidade = Number(document.getElementById('vendaQuantidade').value || 0);
     const valorUnitario = Number(document.getElementById('vendaValorUnitario').value || 0);
     const desconto = Number(document.getElementById('vendaDescontoItem').value || 0);
     const observacao = document.getElementById('vendaObsItem').value.trim();
+    const medicoId = document.getElementById('vendaMedico').value;
     const produto = db.products.find(p => p.id === produtoId);
     if(!produto || quantidade <= 0 || valorUnitario < 0){
       alert('Selecione um item válido e informe quantidade/valor.');
       return;
     }
+    const categoria = produto.categoria || produto.tipo || 'Item';
+    const percentualRepasse = getRepassePctItem(categoria, medicoId);
     const subtotal = Math.max((quantidade * valorUnitario) - desconto, 0);
     const lucro = subtotal - (quantidade * Number(produto.custo || 0));
-    window.vendaItensTemp.push({produtoId: produto.id, produtoNome: produto.nome, tipo: produto.categoria || produto.tipo || 'Item', quantidade, valorUnitario, desconto, subtotal, custo: quantidade * Number(produto.custo || 0), lucro, observacao});
+    window.vendaItensTemp.push({produtoId: produto.id, produtoNome: produto.nome, tipo: categoria, categoria, percentualRepasse, quantidade, valorUnitario, desconto, subtotal, custo: quantidade * Number(produto.custo || 0), lucro, observacao});
     document.getElementById('vendaProduto').value = '';
     document.getElementById('vendaQuantidade').value = 1;
     document.getElementById('vendaValorUnitario').value = '';
     document.getElementById('vendaDescontoItem').value = '';
     document.getElementById('vendaObsItem').value = '';
+    document.getElementById('vendaItemCategoria').value = '';
+    document.getElementById('vendaItemRepasse').value = '';
     renderVendaItensTemp();
     updateVendaTotals();
   }
@@ -3726,15 +3761,16 @@
     const tbody = document.getElementById('vendaItensTabela');
     tbody.innerHTML = window.vendaItensTemp.length ? window.vendaItensTemp.map((item, idx) => `
       <tr>
-        <td>${item.tipo}</td>
+        <td>${item.categoria || item.tipo}</td>
         <td>${item.produtoNome}</td>
+        <td>${item.percentualRepasse != null ? item.percentualRepasse + '%' : '-'}</td>
         <td>${item.quantidade}</td>
         <td>${formatCurrency(item.valorUnitario)}</td>
         <td>${formatCurrency(item.desconto)}</td>
         <td>${formatCurrency(item.subtotal)}</td>
         <td><button class="btn btn-danger" onclick="removerItemVendaTemp(${idx})">Remover</button></td>
       </tr>
-    `).join('') : `<tr><td colspan="7" class="empty">Nenhum item adicionado à venda.</td></tr>`;
+    `).join('') : `<tr><td colspan="8" class="empty">Nenhum item adicionado à venda.</td></tr>`;
   }
 
   function togglePagamentoMisto(){
@@ -4726,8 +4762,10 @@
     document.getElementById('vendaProduto').addEventListener('change', () => {
       const prod = db.products.find(p => p.id === document.getElementById('vendaProduto').value);
       document.getElementById('vendaValorUnitario').value = prod ? prod.venda : '';
+      preencherCamprosItemVenda();
       updateVendaPreview();
     });
+    document.getElementById('vendaMedico').addEventListener('change', preencherCamprosItemVenda);
     document.getElementById('vendaQuantidade').addEventListener('input', updateVendaPreview);
     document.getElementById('vendaValorUnitario').addEventListener('input', updateVendaPreview);
     document.getElementById('vendaDescontoItem').addEventListener('input', updateVendaPreview);
