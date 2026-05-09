@@ -399,6 +399,8 @@
     .fin-aba-btn:hover:not(.active){color:var(--wine-dark);background:#faf6f8;border-radius:8px 8px 0 0}
     .fin-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
     .fin-grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+    .fin-badge{display:inline-flex;align-items:center;justify-content:center;background:#b91c1c;color:#fff;font-size:10px;font-weight:800;border-radius:99px;min-width:18px;height:18px;padding:0 5px;margin-left:5px;vertical-align:middle;line-height:1}
+    .fin-badge-amber{background:#b45309}
     .fin-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px 20px}
     .fin-card h4{margin:0 0 8px;font-size:12px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
     .fin-card .fin-val{font-size:22px;font-weight:800;margin:0}
@@ -1936,8 +1938,8 @@
       <!-- Sub-nav -->
       <div class="fin-abas">
         <button class="fin-aba-btn active" onclick="showFinView('finDashboard',this)">Dashboard</button>
-        <button class="fin-aba-btn" onclick="showFinView('finRecebimentos',this)">Recebimentos</button>
-        <button class="fin-aba-btn" onclick="showFinView('finLancamentos',this)">Lançamentos</button>
+        <button class="fin-aba-btn" onclick="showFinView('finRecebimentos',this)">Recebimentos <span class="fin-badge" id="badgeParcelasVenc" style="display:none"></span></button>
+        <button class="fin-aba-btn" onclick="showFinView('finLancamentos',this)">Lançamentos <span class="fin-badge fin-badge-amber" id="badgeLancPend" style="display:none"></span></button>
         <button class="fin-aba-btn" onclick="showFinView('finCentros',this)">Centros de Custo</button>
       </div>
 
@@ -1955,9 +1957,14 @@
           <input type="date" id="finDataFinal" onchange="renderFinDashboard()" style="width:150px;" title="Data final" />
           <button class="btn btn-light" onclick="limparFiltroDataFin()" style="padding:4px 12px;font-size:12px;">Limpar datas</button>
         </div>
-        <div class="fin-grid4" id="finCards"></div>
-        <!-- Resultado Operacional (alimentado pelo módulo Recebimentos) -->
-        <div class="card" id="dashRecSummary" style="margin-bottom:4px;padding:16px 20px;background:linear-gradient(135deg,#f9f5fb 0%,#fff 100%)"></div>
+        <!-- DRE Unificado -->
+        <div class="card" id="finDRE" style="padding:0;margin-bottom:20px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:1fr 1fr">
+            <div id="finDREReceitas" style="padding:18px 20px;background:linear-gradient(135deg,#eef9f2 0%,#f7fdf9 100%)"></div>
+            <div id="finDREDespesas" style="padding:18px 20px;background:linear-gradient(135deg,#fef2f2 0%,#fff9f9 100%);border-left:1px solid #fecaca"></div>
+          </div>
+          <div id="finDREResultado" style="padding:14px 20px;border-top:1px solid var(--border);background:linear-gradient(135deg,#f9f5fb 0%,#fff 100%)"></div>
+        </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px;align-items:start">
           <div class="card">
             <div class="section-header">
@@ -2051,7 +2058,8 @@
         <!-- ── LISTAGEM NORMAL ── -->
         <div id="recListagem">
         <!-- Cards de resumo -->
-        <div class="fin-grid5" id="recCards" style="margin-bottom:14px"></div>
+        <div id="recCardsMain" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:10px"></div>
+        <div id="recCardsSec" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px"></div>
 
         <!-- Confronto Receitas × Despesas -->
         <div class="card" id="recConfrontoBox" style="margin-bottom:14px;padding:16px 20px">
@@ -5408,13 +5416,16 @@
     const totAPagar   = filtered.filter(l => ['Pendente','Previsto'].includes(l.se)).reduce((s,l) => s + l.valor, 0);
     const totVencido  = filtered.filter(l => l.se === 'Vencido').reduce((s,l) => s + l.valor, 0);
 
-    const cards = document.getElementById('finCards');
-    if(cards) cards.innerHTML = [
-      {t:'Total Previsto',    v:totPrevisto, cls:'fin-val-blue'},
-      {t:'Já Pago',           v:totPago,     cls:'fin-val-green'},
-      {t:'A Pagar',           v:totAPagar,   cls:'fin-val-amber'},
-      {t:'Vencido',           v:totVencido,  cls:'fin-val-red'},
-    ].map(c => `<div class="fin-card"><h4>${c.t}</h4><div class="fin-val ${c.cls}">${formatCurrency(c.v)}</div></div>`).join('');
+    const dreDesp = document.getElementById('finDREDespesas');
+    if(dreDesp) dreDesp.innerHTML = `
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#b91c1c;margin-bottom:10px">Despesas do Período</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div style="font-size:11px;color:var(--gray)">Total Previsto</div><div style="font-size:15px;font-weight:800;color:#1d4ed8">${formatCurrency(totPrevisto)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Já Pago</div><div style="font-size:15px;font-weight:800;color:#b91c1c">${formatCurrency(totPago)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">A Pagar</div><div style="font-size:15px;font-weight:800;color:#b45309">${formatCurrency(totAPagar)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Vencido</div><div style="font-size:15px;font-weight:800;color:#b91c1c">${formatCurrency(totVencido)}</div></div>
+      </div>`;
+    _updateFinBadges();
 
     // Gráfico mostra o ano inteiro selecionado
     const yrLabel = document.getElementById('finChartYear');
@@ -5972,16 +5983,7 @@
     const totClinica  = ativas.reduce((s,v) => s + (v.liquidoClinica || 0), 0);
     const nVendas     = ativas.length;
 
-    const cards = document.getElementById('recCards');
-    if(cards) cards.innerHTML = [
-      {t:`Receita Bruta (${nVendas} venda${nVendas!==1?'s':''})`, v:totBruto,    cls:'fin-val-blue'},
-      {t:'Descontos Concedidos',                                    v:totDesconto, cls:'fin-val-amber'},
-      {t:'Receita Líquida',                                         v:totLiquido,  cls:'fin-val-green'},
-      {t:'Valor Clínica',                                            v:totRepasse,  cls:'fin-val-amber'},
-      {t:'Valor Profissionais',                                      v:totClinica,  cls:'fin-val-green'},
-    ].map(c => `<div class="fin-card"><h4>${c.t}</h4><div class="fin-val ${c.cls}">${formatCurrency(c.v)}</div></div>`).join('');
-
-    // Confronto Receitas × Despesas
+    // Despesas do período (necessário para o card de Resultado)
     const despesasPeriodo = (db.contasPagar || []).filter(l => {
       const dataLanc = l.vencimento || '';
       if(usaInterval){
@@ -5993,8 +5995,33 @@
       }
       return finStatusEfetivo(l) === 'Pago';
     });
-    const totDespesas  = despesasPeriodo.reduce((s,l) => s + l.valor, 0);
-    const resultado    = totRepasse - totDespesas;
+    const totDespesas = despesasPeriodo.reduce((s,l) => s + l.valor, 0);
+    const resultado   = totRepasse - totDespesas;
+
+    // Cards principais (3 destaques)
+    const cardsMain = document.getElementById('recCardsMain');
+    if(cardsMain) cardsMain.innerHTML = [
+      {t:'Receita Bruta', sub:`${nVendas} venda${nVendas!==1?'s':''}`, v:totBruto, c:'#1d4ed8', bg:'linear-gradient(135deg,#eff6ff 0%,#fff 100%)'},
+      {t:'Valor Clínica',  sub:'após repasse aos profissionais',         v:totRepasse, c:'#b45309', bg:'linear-gradient(135deg,#fffbeb 0%,#fff 100%)'},
+      {t:'Resultado do Período', sub:'Valor Clínica − Despesas Pagas',  v:resultado, c:resultado>=0?'#16a34a':'#b91c1c', bg:resultado>=0?'linear-gradient(135deg,#f0fdf4 0%,#fff 100%)':'linear-gradient(135deg,#fef2f2 0%,#fff 100%)'},
+    ].map(x => `<div style="background:${x.bg};border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.07)">
+      <h4 style="font-size:12px;font-weight:700;color:var(--gray);margin:0 0 2px">${x.t}</h4>
+      <div style="font-size:10px;color:var(--gray);margin-bottom:8px">${x.sub}</div>
+      <div style="font-size:22px;font-weight:900;color:${x.c}">${formatCurrency(x.v)}</div>
+    </div>`).join('');
+
+    // Cards secundários (3 detalhes)
+    const cardsSec = document.getElementById('recCardsSec');
+    if(cardsSec) cardsSec.innerHTML = [
+      {t:'Receita Líquida',      v:totLiquido,  c:'#16a34a'},
+      {t:'Descontos Concedidos', v:totDesconto, c:'#b45309'},
+      {t:'Valor Profissionais',  v:totClinica,  c:'#6b7280'},
+    ].map(x => `<div style="background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:12px 16px">
+      <div style="font-size:11px;color:var(--gray);margin-bottom:4px">${x.t}</div>
+      <div style="font-size:16px;font-weight:800;color:${x.c}">${formatCurrency(x.v)}</div>
+    </div>`).join('');
+
+    // Confronto Receitas × Despesas
     const confEl = document.getElementById('recConfrontoNums');
     if(confEl) confEl.innerHTML = `
       <span style="font-size:13px;color:#16a34a"><strong>Valor Clínica:</strong> ${formatCurrency(totRepasse)}</span>
@@ -6053,29 +6080,50 @@
 
     // Envia resumo para o Dashboard (atualiza se já estiver visível)
     _recAtualizaDashboard(totBruto, totLiquido, totRepasse, totClinica, totDespesas, resultado);
+    _updateFinBadges();
   }
 
   function recPagAnterior(){ if(_recPag > 1){ _recPag--; renderFinRecebimentos(); } }
   function recPagSeguinte(tot){ if(_recPag < tot){ _recPag++; renderFinRecebimentos(); } }
 
   function _recAtualizaDashboard(bruto, liquido, repasse, clinica, despesas, resultado){
-    const el = document.getElementById('dashRecSummary');
-    if(!el) return;
-    const mes = FIN_MESES_FULL[_recMes] + ' ' + _recAno;
-    el.innerHTML = `
-      <div style="font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">
-        Resultado de ${mes}
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-        <div><div style="font-size:11px;color:var(--gray)">Receita Bruta</div><div style="font-size:16px;font-weight:800;color:#1d4ed8">${formatCurrency(bruto)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray)">Valor Clínica</div><div style="font-size:16px;font-weight:800;color:#b45309">${formatCurrency(repasse)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray)">Valor Profissionais</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(clinica)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray)">Despesas Pagas</div><div style="font-size:16px;font-weight:800;color:#b91c1c">${formatCurrency(despesas)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray)">Receita Líquida</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(liquido)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray);margin-bottom:2px">Resultado Operacional</div>
-          <div style="font-size:18px;font-weight:900;color:${resultado>=0?'#16a34a':'#b91c1c'}">${formatCurrency(resultado)}</div>
-        </div>
+    const recEl = document.getElementById('finDREReceitas');
+    if(recEl) recEl.innerHTML = `
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#16a34a;margin-bottom:10px">Receitas do Período</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div style="font-size:11px;color:var(--gray)">Receita Bruta</div><div style="font-size:15px;font-weight:800;color:#1d4ed8">${formatCurrency(bruto)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Receita Líquida</div><div style="font-size:15px;font-weight:800;color:#16a34a">${formatCurrency(liquido)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Valor Clínica</div><div style="font-size:15px;font-weight:800;color:#b45309">${formatCurrency(repasse)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Valor Profissionais</div><div style="font-size:15px;font-weight:800;color:#16a34a">${formatCurrency(clinica)}</div></div>
       </div>`;
+    const resEl = document.getElementById('finDREResultado');
+    if(resEl) resEl.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <span style="font-size:12px;font-weight:600;color:var(--gray)">Resultado Operacional <span style="font-weight:400">(Valor Clínica − Despesas Pagas)</span></span>
+        <span style="font-size:22px;font-weight:900;color:${resultado>=0?'#16a34a':'#b91c1c'}">${formatCurrency(resultado)}</span>
+      </div>`;
+  }
+
+  function _updateFinBadges(){
+    // Badge Recebimentos: parcelas vencidas em aberto
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    let vencidas = 0;
+    (db.sales || []).filter(v => v.status === 'Ativa' && _ehParcelado(v)).forEach(v => {
+      _gerarParcelas(v).forEach(p => { if(p.status === 'Vencido') vencidas++; });
+    });
+    const bVenc = document.getElementById('badgeParcelasVenc');
+    if(bVenc){ bVenc.textContent = vencidas; bVenc.style.display = vencidas > 0 ? 'inline-flex' : 'none'; }
+
+    // Badge Lançamentos: pendentes/vencidos no mês corrente
+    const mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
+    const pendentes = (db.contasPagar || []).filter(l => {
+      const d = new Date((l.vencimento||'') + 'T00:00:00');
+      if(d.getMonth() !== mesAtual || d.getFullYear() !== anoAtual) return false;
+      const se = finStatusEfetivo(l);
+      return se === 'Pendente' || se === 'Vencido';
+    }).length;
+    const bLanc = document.getElementById('badgeLancPend');
+    if(bLanc){ bLanc.textContent = pendentes; bLanc.style.display = pendentes > 0 ? 'inline-flex' : 'none'; }
   }
 
   // ── Lançamentos ─────────────────────────────────────────────
@@ -6164,6 +6212,7 @@
         <span style="font-size:13px">${_finPag} / ${totalPag}</span>
         <button class="fin-nav-btn" onclick="finPagSeguinte(${totalPag})" ${_finPag===totalPag?'disabled style="opacity:.4"':''}>Próxima</button>
       </div>`;
+    _updateFinBadges();
   }
 
   function finPagAnterior(){ if(_finPag > 1){ _finPag--; renderFinLancamentos(); } }
