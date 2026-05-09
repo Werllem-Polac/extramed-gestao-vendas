@@ -1978,7 +1978,11 @@
           </div>
           <div class="card">
             <div class="section-header">
-              <h3>Despesas Diárias <span id="finDiariasLabel"></span></h3>
+              <h3>Despesas Diárias</h3>
+              <div style="display:flex;gap:6px;align-items:center">
+                <select id="finDiarioMes" onchange="renderDespesasDiarias()" style="font-size:12px;padding:3px 6px;width:auto"></select>
+                <select id="finDiarioAno" onchange="renderDespesasDiarias()" style="font-size:12px;padding:3px 6px;width:auto"></select>
+              </div>
             </div>
             <svg id="finDiariasChart" width="100%" style="overflow:visible;display:block"></svg>
             <div class="fin-chart-legend">
@@ -1987,17 +1991,33 @@
             </div>
           </div>
         </div>
-        <div class="card" style="position:relative;margin-top:16px">
-          <div class="section-header">
-            <h3>Evolução de Despesas</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+          <div class="card" style="position:relative">
+            <div class="section-header">
+              <h3>Evolução de Despesas</h3>
+            </div>
+            <div style="position:relative;overflow:hidden">
+              <svg id="finEvolChart" width="100%" style="overflow:visible;display:block"></svg>
+              <div id="finEvolTooltip" style="position:absolute;background:#1f2937;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.35)"></div>
+            </div>
+            <div class="fin-chart-legend">
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#9B1C3E" stroke-width="1.5" stroke-linecap="round"/></svg>2025</span>
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>2026</span>
+            </div>
           </div>
-          <div style="position:relative;overflow:hidden">
-            <svg id="finEvolChart" width="100%" style="overflow:visible;display:block"></svg>
-            <div id="finEvolTooltip" style="position:absolute;background:#1f2937;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.35)"></div>
-          </div>
-          <div class="fin-chart-legend">
-            <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#9B1C3E" stroke-width="1.5" stroke-linecap="round"/></svg>2025</span>
-            <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>2026</span>
+          <div class="card" style="position:relative">
+            <div class="section-header">
+              <h3>Evolução de Faturamento</h3>
+            </div>
+            <div style="position:relative;overflow:hidden">
+              <svg id="finFatChart" width="100%" style="overflow:visible;display:block"></svg>
+              <div id="finFatTooltip" style="position:absolute;background:#1f2937;color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.35)"></div>
+            </div>
+            <div class="fin-chart-legend">
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#1d4ed8" stroke-width="1.5" stroke-linecap="round"/></svg>Receita Bruta</span>
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#b45309" stroke-width="1.5" stroke-linecap="round"/></svg>Valor Clínica</span>
+              <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/></svg>Valor Profissionais</span>
+            </div>
           </div>
         </div>
       </div>
@@ -5432,6 +5452,7 @@
 
     // Gráfico de evolução 2025 vs 2026 (sempre usa todos os dados, independente do filtro)
     renderFinEvolucao();
+    renderFinFaturamento();
 
     // Gráfico de despesas diárias do mês atual
     renderDespesasDiarias();
@@ -5494,13 +5515,24 @@
 
   function renderDespesasDiarias(){
     const svg = document.getElementById('finDiariasChart');
-    const label = document.getElementById('finDiariasLabel');
     if(!svg) return;
     const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = hoje.getMonth();
+
+    const selMes = document.getElementById('finDiarioMes');
+    const selAno = document.getElementById('finDiarioAno');
+    if(selMes && selMes.options.length === 0){
+      FIN_MESES_FULL.forEach((m,i) => { const o = document.createElement('option'); o.value = i; o.textContent = m; selMes.appendChild(o); });
+      selMes.value = hoje.getMonth();
+    }
+    if(selAno && selAno.options.length === 0){
+      const anoAtual = hoje.getFullYear();
+      for(let y = anoAtual - 2; y <= anoAtual + 1; y++){ const o = document.createElement('option'); o.value = y; o.textContent = y; selAno.appendChild(o); }
+      selAno.value = anoAtual;
+    }
+
+    const mes = selMes ? parseInt(selMes.value) : hoje.getMonth();
+    const ano = selAno ? parseInt(selAno.value) : hoje.getFullYear();
     const diasNoMes = new Date(ano, mes + 1, 0).getDate();
-    if(label) label.textContent = `— ${FIN_MESES_FULL[mes]}/${ano}`;
 
     const diario = new Array(diasNoMes).fill(0);
     const diarioPago = new Array(diasNoMes).fill(0);
@@ -5552,6 +5584,101 @@
     }
     svg.innerHTML = s;
   }
+
+  // ── Evolução de Faturamento ──────────────────────────────────
+  function renderFinFaturamento(){
+    const svg = document.getElementById('finFatChart');
+    if(!svg) return;
+    const sales = db.sales || [];
+    const anos = [2025, 2026];
+    const monthly = (yr, field) => Array.from({length:12}, (_,m) =>
+      sales.filter(v => {
+        if(v.status === 'Cancelada') return false;
+        const d = new Date((v.data||(v.dataHora||'').slice(0,10)) + 'T00:00:00');
+        return d.getFullYear() === yr && d.getMonth() === m;
+      }).reduce((s,v) => s + (v[field] || (field==='valorBruto' ? v.valorTotal||0 : 0)), 0)
+    );
+
+    const bruto25 = monthly(2025,'valorBruto'), bruto26 = monthly(2026,'valorBruto');
+    const rep25   = monthly(2025,'repasse'),    rep26   = monthly(2026,'repasse');
+    const liq25   = monthly(2025,'liquidoClinica'), liq26 = monthly(2026,'liquidoClinica');
+
+    const maxV = Math.max(...bruto25,...bruto26,...rep25,...rep26,...liq25,...liq26, 1);
+
+    const H=148, topPad=16, botPad=40, leftPad=64, rightPad=10;
+    const totalW=720, chartW=totalW-leftPad-rightPad, stepX=chartW/11;
+    svg.setAttribute('viewBox',`0 0 ${totalW} ${H+topPad+botPad}`);
+    svg.setAttribute('height', H+topPad+botPad);
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+    const xOf = i => leftPad + i*stepX;
+    const yOf = v => topPad + H - (v/maxV)*H;
+
+    const smoothD = data => {
+      const pts = data.map((v,i) => [xOf(i), yOf(v)]);
+      const t = 0.35;
+      let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+      for(let i=0; i<pts.length-1; i++){
+        const p0=pts[Math.max(i-1,0)], p1=pts[i], p2=pts[i+1], p3=pts[Math.min(i+2,pts.length-1)];
+        const cp1x=p1[0]+(p2[0]-p0[0])*t, cp1y=p1[1]+(p2[1]-p0[1])*t;
+        const cp2x=p2[0]-(p3[0]-p1[0])*t, cp2y=p2[1]-(p3[1]-p1[1])*t;
+        d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+      }
+      return d;
+    };
+
+    let s = '';
+    [0,.5,1].forEach(f => {
+      const y = (topPad+H-H*f).toFixed(1);
+      s += `<line x1="${leftPad}" y1="${y}" x2="${totalW-rightPad}" y2="${y}" stroke="#f0eef5" stroke-width="1"/>`;
+      s += `<text x="${leftPad-6}" y="${(parseFloat(y)+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#b0b8c9">${finFmtK(maxV*f)}</text>`;
+    });
+
+    // Linhas sólidas: tracejadas para 2025 (histórico), sólidas para 2026
+    const linha = (data, color, dash) =>
+      `<path d="${smoothD(data)}" fill="none" stroke="${color}" stroke-width="1.3" stroke-linecap="round"${dash?' stroke-dasharray="5,3"':''} opacity="0.85"/>`;
+
+    s += linha(bruto25,'#1d4ed8',true) + linha(bruto26,'#1d4ed8',false);
+    s += linha(rep25,  '#b45309',true) + linha(rep26,  '#b45309',false);
+    s += linha(liq25,  '#16a34a',true) + linha(liq26,  '#16a34a',false);
+
+    FIN_MESES.forEach((m,i) => {
+      const x = xOf(i).toFixed(1);
+      [[bruto25[i],bruto26[i],'#1d4ed8'],[rep25[i],rep26[i],'#b45309'],[liq25[i],liq26[i],'#16a34a']].forEach(([v25,v26,c]) => {
+        if(v25>0) s += `<circle cx="${x}" cy="${yOf(v25).toFixed(1)}" r="2.5" fill="${c}" stroke="#fff" stroke-width="1" opacity="0.7"/>`;
+        if(v26>0) s += `<circle cx="${x}" cy="${yOf(v26).toFixed(1)}" r="2.5" fill="${c}" stroke="#fff" stroke-width="1"/>`;
+      });
+      s += `<text x="${x}" y="${(topPad+H+15).toFixed(1)}" text-anchor="middle" font-size="10" fill="#9ca3af">${m}</text>`;
+      const bx = (xOf(i)-stepX/2).toFixed(1);
+      s += `<rect x="${bx}" y="${topPad}" width="${stepX.toFixed(1)}" height="${H}" fill="transparent"
+        data-mes="${FIN_MESES_FULL[i]}"
+        data-b25="${bruto25[i].toFixed(2)}" data-b26="${bruto26[i].toFixed(2)}"
+        data-r25="${rep25[i].toFixed(2)}"   data-r26="${rep26[i].toFixed(2)}"
+        data-l25="${liq25[i].toFixed(2)}"   data-l26="${liq26[i].toFixed(2)}"
+        onmouseover="finFatHover(event,this)" onmouseout="finFatOut()"/>`;
+    });
+    svg.innerHTML = s;
+  }
+
+  function finFatHover(evt, rect){
+    const tip = document.getElementById('finFatTooltip');
+    if(!tip) return;
+    const mes = rect.getAttribute('data-mes');
+    const b25=parseFloat(rect.getAttribute('data-b25')), b26=parseFloat(rect.getAttribute('data-b26'));
+    const r25=parseFloat(rect.getAttribute('data-r25')), r26=parseFloat(rect.getAttribute('data-r26'));
+    const l25=parseFloat(rect.getAttribute('data-l25')), l26=parseFloat(rect.getAttribute('data-l26'));
+    const row = (label, v25, v26, c) =>
+      `<div style="margin-bottom:3px"><span style="color:${c};font-weight:700">${label}</span>
+       <span style="color:#d1d5db;font-size:10px;margin-left:4px">25: ${formatCurrency(v25)} / 26: ${formatCurrency(v26)}</span></div>`;
+    tip.innerHTML = `<div style="font-weight:700;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:4px">${mes}</div>
+      ${row('Rec. Bruta',b25,b26,'#93c5fd')}${row('Vl. Clínica',r25,r26,'#fcd34d')}${row('Vl. Prof.',l25,l26,'#86efac')}`;
+    const cr = tip.parentElement.getBoundingClientRect();
+    let tx = evt.clientX-cr.left+14, ty = evt.clientY-cr.top-80;
+    if(tx+200>cr.width) tx = evt.clientX-cr.left-210;
+    if(ty<0) ty=4;
+    tip.style.left=tx+'px'; tip.style.top=ty+'px'; tip.style.opacity='1';
+  }
+  function finFatOut(){ const t=document.getElementById('finFatTooltip'); if(t) t.style.opacity='0'; }
 
   // ── Evolução 2025 vs 2026 ────────────────────────────────────
   function renderFinEvolucao(){
