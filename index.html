@@ -2000,10 +2000,6 @@
             <span><svg width="22" height="10"><line x1="0" y1="5" x2="22" y2="5" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/></svg>2026</span>
           </div>
         </div>
-        <div class="card" style="margin-top:16px">
-          <h3>Previsão Trimestral por Categoria</h3>
-          <table class="fin-trim-table" id="finTrimestral"></table>
-        </div>
       </div>
 
       <!-- ── RECEBIMENTOS ── -->
@@ -5433,7 +5429,6 @@
     renderFinChart(all, fAno, fMes !== -1 ? fMes : hoje.getMonth());
 
     // Tabela trimestral a partir do mês selecionado (ou mês atual)
-    renderFinTrimestral(filtered, fMes !== -1 ? fMes : hoje.getMonth(), fAno);
 
     // Gráfico de evolução 2025 vs 2026 (sempre usa todos os dados, independente do filtro)
     renderFinEvolucao();
@@ -5556,44 +5551,6 @@
       }
     }
     svg.innerHTML = s;
-  }
-
-  function renderFinTrimestral(all, mesAtual, ano){
-    const tbl = document.getElementById('finTrimestral');
-    if(!tbl) return;
-    const meses = [mesAtual, mesAtual+1, mesAtual+2];
-    const cats  = ['Fixo','Variável','Mercadoria'];
-    const getVal = (cat, mIdx) => {
-      const ma = mIdx%12, ya = ano + Math.floor(mIdx/12);
-      return all.filter(l => {
-        const d = new Date(l.vencimento+'T00:00:00');
-        return l.categoria===cat && d.getMonth()===ma && d.getFullYear()===ya;
-      }).reduce((s,l)=>s+l.valor,0);
-    };
-    const rows = cats.map(cat => {
-      const vals = meses.map(m => getVal(cat, m));
-      return {cat, vals, total: vals.reduce((a,b)=>a+b,0)};
-    });
-    const colTotals = meses.map(m => cats.reduce((s,cat)=>s+getVal(cat,m),0));
-    const grandTotal = colTotals.reduce((a,b)=>a+b,0);
-    tbl.innerHTML = `
-      <thead><tr>
-        <th>Categoria</th>
-        ${meses.map(m=>`<th>${FIN_MESES_FULL[m%12]}</th>`).join('')}
-        <th>Total Trim.</th>
-      </tr></thead>
-      <tbody>
-        ${rows.map(r=>`<tr>
-          <td>${r.cat}</td>
-          ${r.vals.map(v=>`<td>${formatCurrency(v)}</td>`).join('')}
-          <td>${formatCurrency(r.total)}</td>
-        </tr>`).join('')}
-        <tr class="total-row">
-          <td>Total</td>
-          ${colTotals.map(v=>`<td>${formatCurrency(v)}</td>`).join('')}
-          <td>${formatCurrency(grandTotal)}</td>
-        </tr>
-      </tbody>`;
   }
 
   // ── Evolução 2025 vs 2026 ────────────────────────────────────
