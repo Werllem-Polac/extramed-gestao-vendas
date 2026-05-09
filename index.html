@@ -2002,6 +2002,54 @@
       <!-- ── RECEBIMENTOS ── -->
       <div id="finRecebimentos" style="display:none">
 
+        <!-- Cabeçalho -->
+        <div class="section-header" style="margin-bottom:14px">
+          <div><h3>Recebimentos</h3></div>
+          <button class="btn btn-secondary" id="recContasAReceberBtn" onclick="toggleContasAReceber()">Contas a Receber</button>
+        </div>
+
+        <!-- ── PAINEL CONTAS A RECEBER ── -->
+        <div id="recContasAReceber" style="display:none">
+          <div class="card" style="margin-bottom:14px;padding:14px 18px">
+            <div class="fin-filters">
+              <input id="carBusca" placeholder="Buscar nº, paciente…" oninput="renderContasAReceber()" style="min-width:140px;flex:1"/>
+              <select id="carFiltroStatus" onchange="renderContasAReceber()" style="width:130px;flex-shrink:0">
+                <option value="">Todas as parcelas</option>
+                <option value="Em Aberto">Em Aberto</option>
+                <option value="Vencido">Vencido</option>
+                <option value="Recebido">Recebido</option>
+              </select>
+              <select id="carFiltroProfissional" onchange="renderContasAReceber()" style="width:140px;flex-shrink:0">
+                <option value="">Todos profissionais</option>
+              </select>
+            </div>
+          </div>
+          <div class="card" style="padding:0;margin-bottom:20px">
+            <div class="table-wrap" style="border-radius:16px;border:none">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Venda</th>
+                    <th>Data Venda</th>
+                    <th>Paciente</th>
+                    <th>Profissional</th>
+                    <th>Forma</th>
+                    <th style="text-align:center">Parcela</th>
+                    <th>Vencimento</th>
+                    <th class="right">Valor Parcela</th>
+                    <th style="text-align:center">Status</th>
+                    <th style="text-align:center">Ação</th>
+                  </tr>
+                </thead>
+                <tbody id="carTabela"></tbody>
+                <tfoot id="carTfoot"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LISTAGEM NORMAL ── -->
+        <div id="recListagem">
         <!-- Cards de resumo -->
         <div class="fin-grid5" id="recCards" style="margin-bottom:14px"></div>
 
@@ -2069,6 +2117,7 @@
           </div>
           <div class="fin-pag" id="recPag"></div>
         </div>
+        </div><!-- /#recListagem -->
       </div>
 
       <!-- ── LANÇAMENTOS ── -->
@@ -5231,7 +5280,7 @@
     if(btn) btn.classList.add('active');
     _finView = id;
     if(id === 'finDashboard')    renderFinDashboard();
-    if(id === 'finRecebimentos') renderFinRecebimentos();
+    if(id === 'finRecebimentos'){ _carAberto=false; _fecharPainelCAR(); renderFinRecebimentos(); }
     if(id === 'finLancamentos')  renderFinLancamentos();
     if(id === 'finCentros')      renderFinCentros();
   }
@@ -5635,6 +5684,149 @@
   function finEvolOut(){
     const tip = document.getElementById('finEvolTooltip');
     if(tip) tip.style.opacity = '0';
+  }
+
+  // ── Contas a Receber ────────────────────────────────────────
+
+  let _carAberto = false;
+
+  function _fecharPainelCAR(){
+    const painel   = document.getElementById('recContasAReceber');
+    const listagem = document.getElementById('recListagem');
+    const btn      = document.getElementById('recContasAReceberBtn');
+    if(painel)   painel.style.display   = 'none';
+    if(listagem) listagem.style.display = '';
+    if(btn){ btn.classList.remove('btn-primary'); btn.classList.add('btn-secondary'); }
+  }
+
+  function toggleContasAReceber(){
+    _carAberto = !_carAberto;
+    const painel  = document.getElementById('recContasAReceber');
+    const listagem = document.getElementById('recListagem');
+    const btn     = document.getElementById('recContasAReceberBtn');
+    if(painel)   painel.style.display   = _carAberto ? '' : 'none';
+    if(listagem) listagem.style.display = _carAberto ? 'none' : '';
+    if(btn)      btn.classList.toggle('btn-primary', _carAberto);
+    if(btn)      btn.classList.toggle('btn-secondary', !_carAberto);
+    if(_carAberto) renderContasAReceber();
+  }
+
+  function _ehParcelado(venda){
+    return (venda.pagamentos || []).some(p => (p.parcelas || 1) > 1);
+  }
+
+  function _gerarParcelas(venda){
+    const dataBase = new Date((venda.data || (venda.dataHora||'').slice(0,10)) + 'T00:00:00');
+    const recebidas = new Set(venda.parcelasRecebidas || []);
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const parcelas = [];
+    (venda.pagamentos || []).forEach(pgto => {
+      const n = pgto.parcelas || 1;
+      if(n <= 1) return;
+      const valorParcela = (pgto.valor || 0) / n;
+      for(let i = 1; i <= n; i++){
+        const venc = new Date(dataBase);
+        venc.setMonth(venc.getMonth() + (i - 1));
+        let status;
+        if(recebidas.has(i))       status = 'Recebido';
+        else if(venc < hoje)       status = 'Vencido';
+        else                       status = 'Em Aberto';
+        parcelas.push({ num: i, total: n, vencimento: venc, valorParcela, status, forma: pgto.forma });
+      }
+    });
+    return parcelas;
+  }
+
+  function renderContasAReceber(){
+    finEnsure();
+    const busca    = (document.getElementById('carBusca')||{}).value || '';
+    const fStatus  = (document.getElementById('carFiltroStatus')||{}).value || '';
+    const fProf    = (document.getElementById('carFiltroProfissional')||{}).value || '';
+
+    // Popula select de profissional
+    const sp = document.getElementById('carFiltroProfissional');
+    if(sp && sp.options.length <= 1){
+      (db.doctors || []).forEach(d => {
+        const o = document.createElement('option'); o.value = d.id; o.textContent = d.nome; sp.appendChild(o);
+      });
+    }
+
+    const vendasParceladas = (db.sales || []).filter(v => {
+      if(v.status !== 'Ativa') return false;
+      if(!_ehParcelado(v)) return false;
+      if(fProf && v.medicoId !== fProf) return false;
+      if(busca){
+        const q = busca.toLowerCase();
+        if(!(v.numero||'').toLowerCase().includes(q) && !(v.paciente||'').toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+
+    // Expande em linhas de parcela
+    const linhas = [];
+    vendasParceladas.forEach(v => {
+      _gerarParcelas(v).forEach(p => {
+        if(fStatus && p.status !== fStatus) return;
+        linhas.push({ venda: v, parcela: p });
+      });
+    });
+
+    // Totais para o rodapé
+    const totAberto   = linhas.filter(l => l.parcela.status !== 'Recebido').reduce((s,l) => s + l.parcela.valorParcela, 0);
+    const totRecebido = linhas.filter(l => l.parcela.status === 'Recebido').reduce((s,l) => s + l.parcela.valorParcela, 0);
+    const totVencido  = linhas.filter(l => l.parcela.status === 'Vencido').reduce((s,l) => s + l.parcela.valorParcela, 0);
+
+    const statusBadge = s => {
+      const map = { 'Recebido':'fin-st-pago', 'Vencido':'fin-st-vencido', 'Em Aberto':'fin-st-pendente' };
+      return `<span class="fin-st ${map[s]||'fin-st-previsto'}">${s}</span>`;
+    };
+
+    const tbody = document.getElementById('carTabela');
+    if(tbody) tbody.innerHTML = linhas.length ? linhas.map(({ venda: v, parcela: p }) => {
+      const vencStr = p.vencimento.toISOString().slice(0,10);
+      const jaRecebido = p.status === 'Recebido';
+      return `<tr style="${p.status==='Vencido'?'background:#fff5f5':''}">
+        <td style="font-weight:700;white-space:nowrap">${v.numero||'-'}</td>
+        <td style="white-space:nowrap">${fmtData(v.data||(v.dataHora||'').slice(0,10))}</td>
+        <td>${v.paciente||'-'}</td>
+        <td style="font-size:12px;color:var(--gray)">${v.medicoNome||'-'}</td>
+        <td style="font-size:12px">${p.forma||'-'}</td>
+        <td style="text-align:center;font-weight:700">${p.num}/${p.total}</td>
+        <td style="white-space:nowrap${p.status==='Vencido'?';color:#b91c1c;font-weight:700':''}">${fmtData(vencStr)}</td>
+        <td class="right" style="font-weight:700">${formatCurrency(p.valorParcela)}</td>
+        <td style="text-align:center">${statusBadge(p.status)}</td>
+        <td style="text-align:center">
+          ${jaRecebido
+            ? `<button class="btn btn-light" style="padding:3px 10px;font-size:11px" onclick="desmarcarParcela('${v.id}',${p.num})">Desfazer</button>`
+            : `<button class="btn btn-primary" style="padding:3px 10px;font-size:11px" onclick="marcarParcelaRecebida('${v.id}',${p.num})">Recebido</button>`
+          }
+        </td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="10" class="empty">Nenhuma parcela encontrada.</td></tr>`;
+
+    const tfoot = document.getElementById('carTfoot');
+    if(tfoot) tfoot.innerHTML = linhas.length ? `<tr style="background:var(--soft);font-weight:700;border-top:2px solid var(--border)">
+      <td colspan="7" style="padding:10px 12px;font-size:13px;color:var(--gray)">${linhas.length} parcela(s) — Em aberto: ${formatCurrency(totAberto)} · Vencido: <span style="color:#b91c1c">${formatCurrency(totVencido)}</span> · Recebido: <span style="color:#16a34a">${formatCurrency(totRecebido)}</span></td>
+      <td class="right" style="padding:10px 8px;color:var(--wine)">${formatCurrency(linhas.reduce((s,l)=>s+l.parcela.valorParcela,0))}</td>
+      <td colspan="2"></td>
+    </tr>` : '';
+  }
+
+  function marcarParcelaRecebida(vendaId, numParcela){
+    finEnsure();
+    const v = db.sales.find(s => s.id === vendaId);
+    if(!v) return;
+    if(!Array.isArray(v.parcelasRecebidas)) v.parcelasRecebidas = [];
+    if(!v.parcelasRecebidas.includes(numParcela)) v.parcelasRecebidas.push(numParcela);
+    saveDB(); renderContasAReceber();
+  }
+
+  function desmarcarParcela(vendaId, numParcela){
+    finEnsure();
+    const v = db.sales.find(s => s.id === vendaId);
+    if(!v || !Array.isArray(v.parcelasRecebidas)) return;
+    v.parcelasRecebidas = v.parcelasRecebidas.filter(n => n !== numParcela);
+    saveDB(); renderContasAReceber();
   }
 
   // ── Recebimentos ────────────────────────────────────────────
