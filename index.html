@@ -5399,7 +5399,7 @@
       const d = new Date((l.vencimento||'') + 'T00:00:00');
       return d.getMonth() === mes && d.getFullYear() === ano && finStatusEfetivo(l) === 'Pago';
     }).reduce((s,l) => s + l.valor, 0);
-    _recAtualizaDashboard(totBruto, totLiquido, totRepasse, totClinica, despesas, totClinica - despesas);
+    _recAtualizaDashboard(totBruto, totLiquido, totRepasse, totClinica, despesas, totRepasse - despesas);
   }
 
   function renderFinChart(all, ano, mesAtual){
@@ -5802,10 +5802,10 @@
       return finStatusEfetivo(l) === 'Pago';
     });
     const totDespesas  = despesasPeriodo.reduce((s,l) => s + l.valor, 0);
-    const resultado    = totClinica - totDespesas;
+    const resultado    = totRepasse - totDespesas;
     const confEl = document.getElementById('recConfrontoNums');
     if(confEl) confEl.innerHTML = `
-      <span style="font-size:13px;color:#16a34a"><strong>Valor Profissionais:</strong> ${formatCurrency(totClinica)}</span>
+      <span style="font-size:13px;color:#16a34a"><strong>Valor Clínica:</strong> ${formatCurrency(totRepasse)}</span>
       <span style="font-size:13px;color:var(--gray)">−</span>
       <span style="font-size:13px;color:#b91c1c"><strong>Despesas Pagas:</strong> ${formatCurrency(totDespesas)}</span>
       <span style="font-size:13px;color:var(--gray)">=</span>
