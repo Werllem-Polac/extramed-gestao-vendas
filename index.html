@@ -2058,8 +2058,8 @@
                   <th class="right" onclick="recSortBy('valorBruto')" style="cursor:pointer;user-select:none">Bruto <span id="recSort-valorBruto"></span></th>
                   <th class="right" onclick="recSortBy('descontoGeral')" style="cursor:pointer;user-select:none">Desconto <span id="recSort-descontoGeral"></span></th>
                   <th class="right" onclick="recSortBy('valorTotal')" style="cursor:pointer;user-select:none">Líquido <span id="recSort-valorTotal"></span></th>
-                  <th class="right" onclick="recSortBy('repasse')" style="cursor:pointer;user-select:none">Repasse <span id="recSort-repasse"></span></th>
-                  <th class="right" onclick="recSortBy('liquidoClinica')" style="cursor:pointer;user-select:none">Líq. Clínica <span id="recSort-liquidoClinica"></span></th>
+                  <th class="right" onclick="recSortBy('repasse')" style="cursor:pointer;user-select:none">Valor Clínica <span id="recSort-repasse"></span></th>
+                  <th class="right" onclick="recSortBy('liquidoClinica')" style="cursor:pointer;user-select:none">Valor Profissionais <span id="recSort-liquidoClinica"></span></th>
                   <th onclick="recSortBy('status')" style="cursor:pointer;user-select:none">Status <span id="recSort-status"></span></th>
                 </tr>
               </thead>
@@ -5785,8 +5785,8 @@
       {t:`Receita Bruta (${nVendas} venda${nVendas!==1?'s':''})`, v:totBruto,    cls:'fin-val-blue'},
       {t:'Descontos Concedidos',                                    v:totDesconto, cls:'fin-val-amber'},
       {t:'Receita Líquida',                                         v:totLiquido,  cls:'fin-val-green'},
-      {t:'Repasse Profissionais',                                   v:totRepasse,  cls:'fin-val-amber'},
-      {t:'Líquido Clínica',                                         v:totClinica,  cls:'fin-val-green'},
+      {t:'Valor Clínica',                                            v:totRepasse,  cls:'fin-val-amber'},
+      {t:'Valor Profissionais',                                      v:totClinica,  cls:'fin-val-green'},
     ].map(c => `<div class="fin-card"><h4>${c.t}</h4><div class="fin-val ${c.cls}">${formatCurrency(c.v)}</div></div>`).join('');
 
     // Confronto Receitas × Despesas
@@ -5805,7 +5805,7 @@
     const resultado    = totClinica - totDespesas;
     const confEl = document.getElementById('recConfrontoNums');
     if(confEl) confEl.innerHTML = `
-      <span style="font-size:13px;color:#16a34a"><strong>Receitas (Líq. Clínica):</strong> ${formatCurrency(totClinica)}</span>
+      <span style="font-size:13px;color:#16a34a"><strong>Valor Profissionais:</strong> ${formatCurrency(totClinica)}</span>
       <span style="font-size:13px;color:var(--gray)">−</span>
       <span style="font-size:13px;color:#b91c1c"><strong>Despesas Pagas:</strong> ${formatCurrency(totDespesas)}</span>
       <span style="font-size:13px;color:var(--gray)">=</span>
@@ -5876,8 +5876,8 @@
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
         <div><div style="font-size:11px;color:var(--gray)">Receita Bruta</div><div style="font-size:16px;font-weight:800;color:#1d4ed8">${formatCurrency(bruto)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray)">Repasse Profissionais</div><div style="font-size:16px;font-weight:800;color:#b45309">${formatCurrency(repasse)}</div></div>
-        <div><div style="font-size:11px;color:var(--gray)">Líquido Clínica</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(clinica)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Valor Clínica</div><div style="font-size:16px;font-weight:800;color:#b45309">${formatCurrency(repasse)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Valor Profissionais</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(clinica)}</div></div>
         <div><div style="font-size:11px;color:var(--gray)">Despesas Pagas</div><div style="font-size:16px;font-weight:800;color:#b91c1c">${formatCurrency(despesas)}</div></div>
         <div><div style="font-size:11px;color:var(--gray)">Receita Líquida</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(liquido)}</div></div>
         <div><div style="font-size:11px;color:var(--gray);margin-bottom:2px">Resultado Operacional</div>
