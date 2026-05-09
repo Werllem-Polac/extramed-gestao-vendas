@@ -398,6 +398,7 @@
     .fin-aba-btn.active{color:var(--wine);border-bottom-color:var(--wine)}
     .fin-aba-btn:hover:not(.active){color:var(--wine-dark);background:#faf6f8;border-radius:8px 8px 0 0}
     .fin-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .fin-grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
     .fin-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px 20px}
     .fin-card h4{margin:0 0 8px;font-size:12px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
     .fin-card .fin-val{font-size:22px;font-weight:800;margin:0}
@@ -1935,6 +1936,7 @@
       <!-- Sub-nav -->
       <div class="fin-abas">
         <button class="fin-aba-btn active" onclick="showFinView('finDashboard',this)">Dashboard</button>
+        <button class="fin-aba-btn" onclick="showFinView('finRecebimentos',this)">Recebimentos</button>
         <button class="fin-aba-btn" onclick="showFinView('finLancamentos',this)">Lançamentos</button>
         <button class="fin-aba-btn" onclick="showFinView('finCentros',this)">Centros de Custo</button>
       </div>
@@ -1954,6 +1956,8 @@
           <button class="btn btn-light" onclick="limparFiltroDataFin()" style="padding:4px 12px;font-size:12px;">Limpar datas</button>
         </div>
         <div class="fin-grid4" id="finCards"></div>
+        <!-- Resultado Operacional (alimentado pelo módulo Recebimentos) -->
+        <div class="card" id="dashRecSummary" style="margin-bottom:4px;padding:16px 20px;background:linear-gradient(135deg,#f9f5fb 0%,#fff 100%)"></div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:16px;align-items:start">
           <div class="card">
             <div class="section-header">
@@ -1992,6 +1996,78 @@
         <div class="card" style="margin-top:16px">
           <h3>Previsão Trimestral por Categoria</h3>
           <table class="fin-trim-table" id="finTrimestral"></table>
+        </div>
+      </div>
+
+      <!-- ── RECEBIMENTOS ── -->
+      <div id="finRecebimentos" style="display:none">
+
+        <!-- Cards de resumo -->
+        <div class="fin-grid5" id="recCards" style="margin-bottom:14px"></div>
+
+        <!-- Confronto Receitas × Despesas -->
+        <div class="card" id="recConfrontoBox" style="margin-bottom:14px;padding:16px 20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <span style="font-size:13px;font-weight:700;color:var(--wine)">Confronto do Período</span>
+            <div style="display:flex;gap:24px;flex-wrap:wrap" id="recConfrontoNums"></div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card" style="margin-bottom:14px;padding:14px 18px">
+          <div class="fin-filters">
+            <input id="recBusca" placeholder="Buscar nº, paciente, profissional…" oninput="renderFinRecebimentos()" style="min-width:140px;flex:1"/>
+            <select id="recFiltroStatus" onchange="renderFinRecebimentos()" style="width:110px;flex-shrink:0">
+              <option value="">Todos</option>
+              <option value="Ativa">Ativa</option>
+              <option value="Cancelada">Cancelada</option>
+              <option value="Estorno Parcial">Estorno Parcial</option>
+              <option value="Estorno Total">Estorno Total</option>
+            </select>
+            <select id="recFiltroPagamento" onchange="renderFinRecebimentos()" style="width:130px;flex-shrink:0">
+              <option value="">Todas as formas</option>
+              <option>Dinheiro</option><option>Pix</option><option>Cartão Débito</option>
+              <option>Cartão Crédito</option><option>Convênio</option><option>Boleto</option>
+              <option>Parcelado</option><option>Pagamento Misto</option>
+            </select>
+            <select id="recFiltroProfissional" onchange="renderFinRecebimentos()" style="width:130px;flex-shrink:0">
+              <option value="">Todos profissionais</option>
+            </select>
+            <button class="fin-nav-btn" onclick="recMesAnterior()" style="flex-shrink:0">←</button>
+            <select id="recSelectMes" onchange="recMesSelect()" style="font-weight:700;font-size:13px;width:100px;flex-shrink:0"></select>
+            <select id="recSelectAno" onchange="recMesSelect()" style="font-weight:700;font-size:13px;width:74px;flex-shrink:0"></select>
+            <button class="fin-nav-btn" onclick="recMesSeguinte()" style="flex-shrink:0">→</button>
+            <input type="date" id="recDataInicial" onchange="renderFinRecebimentos()" title="Data inicial" style="width:140px;flex-shrink:0"/>
+            <input type="date" id="recDataFinal" onchange="renderFinRecebimentos()" title="Data final" style="width:140px;flex-shrink:0"/>
+            <button class="btn btn-light" onclick="limparFiltroRec()" style="padding:4px 10px;font-size:12px;flex-shrink:0;white-space:nowrap">Limpar</button>
+          </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card" style="padding:0">
+          <div class="table-wrap" style="border-radius:16px;border:none">
+            <table>
+              <thead>
+                <tr>
+                  <th onclick="recSortBy('numero')" style="cursor:pointer;user-select:none">Nº <span id="recSort-numero"></span></th>
+                  <th onclick="recSortBy('data')" style="cursor:pointer;user-select:none">Data <span id="recSort-data"></span></th>
+                  <th onclick="recSortBy('paciente')" style="cursor:pointer;user-select:none">Paciente <span id="recSort-paciente"></span></th>
+                  <th onclick="recSortBy('medicoNome')" style="cursor:pointer;user-select:none">Profissional <span id="recSort-medicoNome"></span></th>
+                  <th>Cond. Pagamento</th>
+                  <th>Parcelas</th>
+                  <th class="right" onclick="recSortBy('valorBruto')" style="cursor:pointer;user-select:none">Bruto <span id="recSort-valorBruto"></span></th>
+                  <th class="right" onclick="recSortBy('descontoGeral')" style="cursor:pointer;user-select:none">Desconto <span id="recSort-descontoGeral"></span></th>
+                  <th class="right" onclick="recSortBy('valorTotal')" style="cursor:pointer;user-select:none">Líquido <span id="recSort-valorTotal"></span></th>
+                  <th class="right" onclick="recSortBy('repasse')" style="cursor:pointer;user-select:none">Repasse <span id="recSort-repasse"></span></th>
+                  <th class="right" onclick="recSortBy('liquidoClinica')" style="cursor:pointer;user-select:none">Líq. Clínica <span id="recSort-liquidoClinica"></span></th>
+                  <th onclick="recSortBy('status')" style="cursor:pointer;user-select:none">Status <span id="recSort-status"></span></th>
+                </tr>
+              </thead>
+              <tbody id="recTabela"></tbody>
+              <tfoot id="recTfoot"></tfoot>
+            </table>
+          </div>
+          <div class="fin-pag" id="recPag"></div>
         </div>
       </div>
 
@@ -5102,6 +5178,13 @@
   let _finAba  = 'Todos';
   let _finPag  = 1;
 
+  // Recebimentos
+  let _recMes      = new Date().getMonth();
+  let _recAno      = new Date().getFullYear();
+  let _recSortCol  = 'data';
+  let _recSortDir  = -1;
+  let _recPag      = 1;
+
   function finEnsure(){
     if(!Array.isArray(db.centrosCusto)) db.centrosCusto = structuredClone(defaultDB.centrosCusto);
     if(!Array.isArray(db.contasPagar))  db.contasPagar  = [];
@@ -5140,7 +5223,7 @@
 
   // ── Navegação de views ──────────────────────────────────────
   function showFinView(id, btn){
-    ['finDashboard','finLancamentos','finCentros'].forEach(v => {
+    ['finDashboard','finRecebimentos','finLancamentos','finCentros'].forEach(v => {
       const el = document.getElementById(v);
       if(el) el.style.display = v === id ? '' : 'none';
     });
@@ -5148,6 +5231,7 @@
     if(btn) btn.classList.add('active');
     _finView = id;
     if(id === 'finDashboard')    renderFinDashboard();
+    if(id === 'finRecebimentos') renderFinRecebimentos();
     if(id === 'finLancamentos')  renderFinLancamentos();
     if(id === 'finCentros')      renderFinCentros();
   }
@@ -5206,9 +5290,10 @@
   function renderFinanceiro(){
     finEnsure();
     preencherSelectFinCentro();
-    if(_finView === 'finDashboard')   renderFinDashboard();
-    if(_finView === 'finLancamentos') renderFinLancamentos();
-    if(_finView === 'finCentros')     renderFinCentros();
+    if(_finView === 'finDashboard')    renderFinDashboard();
+    if(_finView === 'finRecebimentos') renderFinRecebimentos();
+    if(_finView === 'finLancamentos')  renderFinLancamentos();
+    if(_finView === 'finCentros')      renderFinCentros();
   }
 
   function preencherSelectFinCentro(){
@@ -5295,6 +5380,26 @@
 
     // Gráfico de despesas diárias do mês atual
     renderDespesasDiarias();
+
+    // Alimenta o card de Resultado Operacional com o mês/ano do dashboard
+    _recAtualizaDashboardPorPeriodo(fMes !== -1 ? fMes : hoje.getMonth(), fAno);
+  }
+
+  function _recAtualizaDashboardPorPeriodo(mes, ano){
+    const ativas = (db.sales || []).filter(v => {
+      if(v.status !== 'Ativa') return false;
+      const d = new Date((v.data||(v.dataHora||'').slice(0,10)) + 'T00:00:00');
+      return d.getMonth() === mes && d.getFullYear() === ano;
+    });
+    const totBruto   = ativas.reduce((s,v) => s + (v.valorBruto  || v.valorTotal || 0), 0);
+    const totLiquido = ativas.reduce((s,v) => s + (v.valorTotal   || 0), 0);
+    const totRepasse = ativas.reduce((s,v) => s + (v.repasse      || 0), 0);
+    const totClinica = ativas.reduce((s,v) => s + (v.liquidoClinica || 0), 0);
+    const despesas   = (db.contasPagar || []).filter(l => {
+      const d = new Date((l.vencimento||'') + 'T00:00:00');
+      return d.getMonth() === mes && d.getFullYear() === ano && finStatusEfetivo(l) === 'Pago';
+    }).reduce((s,l) => s + l.valor, 0);
+    _recAtualizaDashboard(totBruto, totLiquido, totRepasse, totClinica, despesas, totClinica - despesas);
   }
 
   function renderFinChart(all, ano, mesAtual){
@@ -5530,6 +5635,255 @@
   function finEvolOut(){
     const tip = document.getElementById('finEvolTooltip');
     if(tip) tip.style.opacity = '0';
+  }
+
+  // ── Recebimentos ────────────────────────────────────────────
+
+  function _syncRecSelects(){
+    const m = document.getElementById('recSelectMes');
+    const a = document.getElementById('recSelectAno');
+    if(m) m.value = _recMes;
+    if(a) a.value = _recAno;
+  }
+
+  function _populateRecSelects(){
+    const sm = document.getElementById('recSelectMes');
+    const sa = document.getElementById('recSelectAno');
+    const anos = _finAnos();
+    if(sm && !sm.options.length){
+      FIN_MESES_FULL.forEach((n,i) => { const o = document.createElement('option'); o.value=i; o.textContent=n; sm.appendChild(o); });
+    }
+    if(sa) sa.innerHTML = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+    if(sm) sm.value = _recMes;
+    if(sa) sa.value = _recAno;
+
+    const sp = document.getElementById('recFiltroProfissional');
+    if(sp){
+      const cur = sp.value;
+      sp.innerHTML = '<option value="">Todos profissionais</option>' +
+        (db.doctors || []).map(d => `<option value="${d.id}">${d.nome}</option>`).join('');
+      sp.value = cur;
+    }
+  }
+
+  function recMesAnterior(){
+    const d = new Date(_recAno, _recMes - 1);
+    _recMes = d.getMonth(); _recAno = d.getFullYear(); _recPag = 1;
+    _syncRecSelects(); renderFinRecebimentos();
+  }
+  function recMesSeguinte(){
+    const d = new Date(_recAno, _recMes + 1);
+    _recMes = d.getMonth(); _recAno = d.getFullYear(); _recPag = 1;
+    _syncRecSelects(); renderFinRecebimentos();
+  }
+  function recMesSelect(){
+    const m = document.getElementById('recSelectMes');
+    const a = document.getElementById('recSelectAno');
+    if(m && a){ _recMes = parseInt(m.value); _recAno = parseInt(a.value); _recPag = 1; renderFinRecebimentos(); }
+  }
+  function recSortBy(col){
+    if(_recSortCol === col) _recSortDir *= -1; else { _recSortCol = col; _recSortDir = 1; }
+    renderFinRecebimentos();
+  }
+  function limparFiltroRec(){
+    const di = document.getElementById('recDataInicial');
+    const df = document.getElementById('recDataFinal');
+    if(di) di.value = ''; if(df) df.value = '';
+    renderFinRecebimentos();
+  }
+
+  function _recStatusBadge(status){
+    const map = {
+      'Ativa':          'fin-st-pago',
+      'Cancelada':      'fin-st-vencido',
+      'Estorno Parcial':'fin-st-pendente',
+      'Estorno Total':  'fin-st-vencido',
+    };
+    return `<span class="fin-st ${map[status]||'fin-st-previsto'}">${status||'-'}</span>`;
+  }
+
+  function _recPagamentoBadge(venda){
+    const pags = venda.pagamentos || [];
+    if(!pags.length) return venda.formaPagamento || '-';
+    if(pags.length === 1){
+      const p = pags[0];
+      return p.forma + (p.parcelas > 1 ? ` ${p.parcelas}x` : '');
+    }
+    return 'Misto';
+  }
+
+  function _recParcelasInfo(venda){
+    const pags = venda.pagamentos || [];
+    if(!pags.length) return '-';
+    const total = pags.reduce((s,p) => s + (p.parcelas||1), 0);
+    if(total <= 1 && pags.length === 1) return '1x ' + formatCurrency(pags[0].valor);
+    return pags.map(p => `${p.parcelas||1}x ${formatCurrency(p.valor)}`).join(' + ');
+  }
+
+  function renderFinRecebimentos(){
+    finEnsure();
+    _populateRecSelects();
+
+    const busca     = (document.getElementById('recBusca')||{}).value || '';
+    const fStatus   = (document.getElementById('recFiltroStatus')||{}).value || '';
+    const fPgto     = (document.getElementById('recFiltroPagamento')||{}).value || '';
+    const fProf     = (document.getElementById('recFiltroProfissional')||{}).value || '';
+    const dataIni   = document.getElementById('recDataInicial')?.value || '';
+    const dataFim   = document.getElementById('recDataFinal')?.value || '';
+    const usaInterval = dataIni || dataFim;
+
+    const todas = (db.sales || []).filter(v => {
+      const dataVenda = v.data || (v.dataHora || '').slice(0,10);
+      if(usaInterval){
+        if(dataIni && dataVenda < dataIni) return false;
+        if(dataFim && dataVenda > dataFim) return false;
+      } else {
+        const d = new Date(dataVenda + 'T00:00:00');
+        if(d.getMonth() !== _recMes || d.getFullYear() !== _recAno) return false;
+      }
+      if(fStatus && v.status !== fStatus) return false;
+      if(fProf   && v.medicoId !== fProf) return false;
+      if(busca){
+        const q = busca.toLowerCase();
+        if(!(v.numero||'').toLowerCase().includes(q) &&
+           !(v.paciente||'').toLowerCase().includes(q) &&
+           !(v.medicoNome||'').toLowerCase().includes(q)) return false;
+      }
+      if(fPgto){
+        const pags = v.pagamentos || [];
+        const formas = pags.length ? pags.map(p => p.forma) : [v.formaPagamento||''];
+        if(!formas.some(f => f === fPgto)) return false;
+      }
+      return true;
+    });
+
+    // Ordenação
+    const REC_SORT_COLS = ['numero','data','paciente','medicoNome','valorBruto','descontoGeral','valorTotal','repasse','liquidoClinica','status'];
+    todas.sort((a,b) => {
+      const va = a[_recSortCol] || 0;
+      const vb = b[_recSortCol] || 0;
+      if(typeof va === 'number') return (va - vb) * _recSortDir;
+      return String(va).localeCompare(String(vb)) * _recSortDir;
+    });
+
+    REC_SORT_COLS.forEach(col => {
+      const el = document.getElementById('recSort-'+col);
+      if(el) el.textContent = _recSortCol === col ? (_recSortDir === 1 ? ' ↑' : ' ↓') : '';
+    });
+
+    // Totais para os cards (somente vendas ativas)
+    const ativas = todas.filter(v => v.status === 'Ativa');
+    const totBruto    = ativas.reduce((s,v) => s + (v.valorBruto  || v.valorTotal || 0), 0);
+    const totDesconto = ativas.reduce((s,v) => s + (v.descontoGeral || 0), 0);
+    const totLiquido  = ativas.reduce((s,v) => s + (v.valorTotal   || 0), 0);
+    const totRepasse  = ativas.reduce((s,v) => s + (v.repasse      || 0), 0);
+    const totClinica  = ativas.reduce((s,v) => s + (v.liquidoClinica || 0), 0);
+    const nVendas     = ativas.length;
+
+    const cards = document.getElementById('recCards');
+    if(cards) cards.innerHTML = [
+      {t:`Receita Bruta (${nVendas} venda${nVendas!==1?'s':''})`, v:totBruto,    cls:'fin-val-blue'},
+      {t:'Descontos Concedidos',                                    v:totDesconto, cls:'fin-val-amber'},
+      {t:'Receita Líquida',                                         v:totLiquido,  cls:'fin-val-green'},
+      {t:'Repasse Profissionais',                                   v:totRepasse,  cls:'fin-val-amber'},
+      {t:'Líquido Clínica',                                         v:totClinica,  cls:'fin-val-green'},
+    ].map(c => `<div class="fin-card"><h4>${c.t}</h4><div class="fin-val ${c.cls}">${formatCurrency(c.v)}</div></div>`).join('');
+
+    // Confronto Receitas × Despesas
+    const despesasPeriodo = (db.contasPagar || []).filter(l => {
+      const dataLanc = l.vencimento || '';
+      if(usaInterval){
+        if(dataIni && dataLanc < dataIni) return false;
+        if(dataFim && dataLanc > dataFim) return false;
+      } else {
+        const d = new Date(dataLanc + 'T00:00:00');
+        if(d.getMonth() !== _recMes || d.getFullYear() !== _recAno) return false;
+      }
+      return finStatusEfetivo(l) === 'Pago';
+    });
+    const totDespesas  = despesasPeriodo.reduce((s,l) => s + l.valor, 0);
+    const resultado    = totClinica - totDespesas;
+    const confEl = document.getElementById('recConfrontoNums');
+    if(confEl) confEl.innerHTML = `
+      <span style="font-size:13px;color:#16a34a"><strong>Receitas (Líq. Clínica):</strong> ${formatCurrency(totClinica)}</span>
+      <span style="font-size:13px;color:var(--gray)">−</span>
+      <span style="font-size:13px;color:#b91c1c"><strong>Despesas Pagas:</strong> ${formatCurrency(totDespesas)}</span>
+      <span style="font-size:13px;color:var(--gray)">=</span>
+      <span style="font-size:14px;font-weight:800;color:${resultado>=0?'#16a34a':'#b91c1c'}">
+        Resultado: ${formatCurrency(resultado)}
+      </span>`;
+
+    // Paginação
+    const REC_POR_PAG = 10;
+    const totalPag = Math.max(1, Math.ceil(todas.length / REC_POR_PAG));
+    if(_recPag > totalPag) _recPag = totalPag;
+    const pagina = todas.slice((_recPag-1)*REC_POR_PAG, _recPag*REC_POR_PAG);
+
+    const tbody = document.getElementById('recTabela');
+    if(tbody) tbody.innerHTML = pagina.length ? pagina.map(v => {
+      const desc = v.descontoGeral || 0;
+      const bruto = v.valorBruto || v.valorTotal || 0;
+      return `<tr>
+        <td style="font-weight:700;white-space:nowrap">${v.numero||'-'}</td>
+        <td style="white-space:nowrap">${fmtData(v.data||(v.dataHora||'').slice(0,10))}</td>
+        <td>${v.paciente||'-'}</td>
+        <td style="font-size:12px;color:var(--gray)">${v.medicoNome||'-'}</td>
+        <td style="font-size:12px">${_recPagamentoBadge(v)}</td>
+        <td style="font-size:12px;color:var(--gray)">${_recParcelasInfo(v)}</td>
+        <td class="right">${formatCurrency(bruto)}</td>
+        <td class="right" style="color:${desc>0?'#b45309':'var(--gray)'}">${desc>0?'−'+formatCurrency(desc):'-'}</td>
+        <td class="right" style="font-weight:700">${formatCurrency(v.valorTotal||0)}</td>
+        <td class="right" style="color:#b45309">${formatCurrency(v.repasse||0)}</td>
+        <td class="right" style="font-weight:700;color:var(--wine)">${formatCurrency(v.liquidoClinica||0)}</td>
+        <td>${_recStatusBadge(v.status)}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="12" class="empty">Nenhum recebimento encontrado para este período.</td></tr>`;
+
+    // Rodapé com totais da página inteira (todas, não só a página)
+    const tfoot = document.getElementById('recTfoot');
+    if(tfoot) tfoot.innerHTML = todas.length ? `<tr style="background:var(--soft);font-weight:700;border-top:2px solid var(--border)">
+      <td colspan="6" style="text-align:right;padding:10px 8px;color:var(--gray);font-size:13px">${todas.length} recebimento(s)</td>
+      <td class="right" style="padding:10px 8px">${formatCurrency(totBruto)}</td>
+      <td class="right" style="padding:10px 8px;color:#b45309">${totDesconto>0?'−'+formatCurrency(totDesconto):'-'}</td>
+      <td class="right" style="padding:10px 8px;color:var(--wine)">${formatCurrency(totLiquido)}</td>
+      <td class="right" style="padding:10px 8px;color:#b45309">${formatCurrency(totRepasse)}</td>
+      <td class="right" style="padding:10px 8px;color:var(--wine)">${formatCurrency(totClinica)}</td>
+      <td></td>
+    </tr>` : '';
+
+    const pag = document.getElementById('recPag');
+    if(pag) pag.innerHTML = `<span>${todas.length} recebimento(s)</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="fin-nav-btn" onclick="recPagAnterior()" ${_recPag===1?'disabled style="opacity:.4"':''}>Anterior</button>
+        <span style="font-size:13px">${_recPag} / ${totalPag}</span>
+        <button class="fin-nav-btn" onclick="recPagSeguinte(${totalPag})" ${_recPag===totalPag?'disabled style="opacity:.4"':''}>Próxima</button>
+      </div>`;
+
+    // Envia resumo para o Dashboard (atualiza se já estiver visível)
+    _recAtualizaDashboard(totBruto, totLiquido, totRepasse, totClinica, totDespesas, resultado);
+  }
+
+  function recPagAnterior(){ if(_recPag > 1){ _recPag--; renderFinRecebimentos(); } }
+  function recPagSeguinte(tot){ if(_recPag < tot){ _recPag++; renderFinRecebimentos(); } }
+
+  function _recAtualizaDashboard(bruto, liquido, repasse, clinica, despesas, resultado){
+    const el = document.getElementById('dashRecSummary');
+    if(!el) return;
+    const mes = FIN_MESES_FULL[_recMes] + ' ' + _recAno;
+    el.innerHTML = `
+      <div style="font-size:11px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">
+        Resultado de ${mes}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <div><div style="font-size:11px;color:var(--gray)">Receita Bruta</div><div style="font-size:16px;font-weight:800;color:#1d4ed8">${formatCurrency(bruto)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Repasse Profissionais</div><div style="font-size:16px;font-weight:800;color:#b45309">${formatCurrency(repasse)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Líquido Clínica</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(clinica)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Despesas Pagas</div><div style="font-size:16px;font-weight:800;color:#b91c1c">${formatCurrency(despesas)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray)">Receita Líquida</div><div style="font-size:16px;font-weight:800;color:#16a34a">${formatCurrency(liquido)}</div></div>
+        <div><div style="font-size:11px;color:var(--gray);margin-bottom:2px">Resultado Operacional</div>
+          <div style="font-size:18px;font-weight:900;color:${resultado>=0?'#16a34a':'#b91c1c'}">${formatCurrency(resultado)}</div>
+        </div>
+      </div>`;
   }
 
   // ── Lançamentos ─────────────────────────────────────────────
