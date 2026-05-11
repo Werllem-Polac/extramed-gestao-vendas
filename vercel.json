@@ -38,6 +38,9 @@
     "api/paciente-pendente.js": {
       "maxDuration": 10
     },
+    "api/criar-usuario.js": {
+      "maxDuration": 10
+    },
     "api/backup.js": {
       "maxDuration": 30
     }

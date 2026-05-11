@@ -1910,12 +1910,12 @@
                 <label>E-mail de acesso</label>
                 <input id="usuarioLogin" type="email" placeholder="usuario@email.com" autocomplete="off" />
               </div>
-              <div>
-                <label>Senha <span style="font-size:11px;color:var(--gray)">(somente ao criar)</span></label>
+              <div id="usuarioSenhaWrap">
+                <label id="usuarioSenhaLabel">Senha</label>
                 <input id="usuarioSenha" type="password" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
               </div>
             </div>
-            <div class="helper-text" style="margin-bottom:12px">O e-mail e a senha são usados para entrar no sistema. Para redefinir a senha de um usuário existente, use "Esqueci minha senha" na tela de login.</div>
+            <div class="helper-text" id="usuarioSenhaHelp" style="margin-bottom:12px">O e-mail e a senha são usados para entrar no sistema.</div>
 
             <div class="perm-panel">
               <div class="perm-panel-title">
@@ -3451,6 +3451,13 @@
     });
     document.getElementById('usuarioPerfil').value = 'Secretária';
     document.getElementById('usuarioStatus').value = 'Ativo';
+    // Restaura labels para modo novo cadastro
+    const senhaLabel = document.getElementById('usuarioSenhaLabel');
+    const senhaHelp  = document.getElementById('usuarioSenhaHelp');
+    const senhaInput = document.getElementById('usuarioSenha');
+    if(senhaLabel) senhaLabel.textContent = 'Senha';
+    if(senhaInput) senhaInput.placeholder = 'Mínimo 8 caracteres';
+    if(senhaHelp)  senhaHelp.textContent  = 'O e-mail e a senha são usados para entrar no sistema.';
     renderPermissoesGrid(); // todas marcadas por padrão
   }
 
@@ -3489,26 +3496,43 @@
       ? (existing?.codigo || '')
       : String(Math.max(0, ...db.users.map(u => parseInt(u.codigo || '0'))) + 1).padStart(2, '0');
 
-    // Perfil salvo sem senha — autenticação gerenciada pelo Supabase Auth
-    const payload = { id: id || uid(), codigo: nextCodigo, nome, cargo, perfil, login, status, permissoes };
+    // Perfil salvo sem senha — autenticação gerenciada pelo Supabase Auth via API server-side
+    const newId  = id || uid();
+    const payload = { id: newId, codigo: nextCodigo, nome, cargo, perfil, login, status, permissoes };
 
-    if(!id && senha){
-      // Criar conta no Supabase Auth para o novo usuário
-      const { error: authErr } = await supabaseClient.auth.signUp({
-        email: login,
-        password: senha,
+    if(senha){
+      // Obter token da sessão atual para autenticar a chamada server-side
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const token = session?.access_token;
+      if(!token){ alert('Sessão expirada. Faça login novamente.'); return; }
+
+      // Descobrir se o e-mail já existe no Auth (usuário existente tem authUserId salvo)
+      const authUserId = existing?.authUserId || null;
+      const action  = (!id || !authUserId) ? 'criar' : 'redefinir-senha';
+      const body    = { action, email: login, password: senha };
+      if(action === 'redefinir-senha') body.userId = authUserId;
+
+      const resp = await fetch('/api/criar-usuario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
       });
-      if(authErr && !authErr.message.includes('already registered')){
-        alert(`Erro ao criar acesso: ${authErr.message}`);
+      const result = await resp.json().catch(() => ({}));
+
+      if(!resp.ok){
+        alert('Erro ao salvar acesso: ' + (result.error || resp.status));
         return;
       }
+
+      // Guardar o authUserId retornado (necessário para futura redefinição de senha)
+      if(result.userId) payload.authUserId = result.userId;
     }
 
-    if(id){ db.users = db.users.map(u => u.id === id ? payload : u); }
+    if(id){ db.users = db.users.map(u => u.id === id ? {...u, ...payload} : u); }
     else   { db.users.push(payload); }
 
     saveDB(); limparUsuarioForm(); refreshAll();
-    if(!id) alert('Usuário criado. O acesso estará disponível assim que o e-mail for confirmado (se habilitado no painel Supabase).');
+    if(!id) alert('Usuário criado com acesso liberado imediatamente.');
   }
 
   function editarUsuario(id){
@@ -3520,7 +3544,14 @@
     document.getElementById('usuarioPerfil').value= u.perfil;
     document.getElementById('usuarioLogin').value = u.login;
     document.getElementById('usuarioStatus').value= u.status;
-    document.getElementById('usuarioSenha').value = ''; // senha nunca exposta ao frontend
+    document.getElementById('usuarioSenha').value = '';
+    // Ajusta label e helper para modo edição
+    const senhaLabel = document.getElementById('usuarioSenhaLabel');
+    const senhaHelp  = document.getElementById('usuarioSenhaHelp');
+    const senhaInput = document.getElementById('usuarioSenha');
+    if(senhaLabel) senhaLabel.textContent = 'Nova senha (opcional)';
+    if(senhaInput) senhaInput.placeholder = 'Deixe em branco para não alterar';
+    if(senhaHelp)  senhaHelp.textContent  = 'Preencha apenas se quiser redefinir a senha deste usuário.';
     renderPermissoesGrid(u.permissoes || SYSTEM_SECTIONS.map(s => s.id));
     document.querySelectorAll('#usuariosSubnav .subnav-btn').forEach(b => b.classList.remove('active'));
     const btn = document.querySelector('#usuariosSubnav .subnav-btn[data-usuarios-view="cadastrar"]'); if(btn) btn.classList.add('active');
