@@ -4058,33 +4058,38 @@
   }
 
   // ── Autocomplete Vendas ──────────────────────────────────────
-  const _acIdx = {paciente: -1, medico: -1};
+  const _acIdx     = {paciente: -1, medico: -1};
+  const _acMatches = {paciente: [],  medico: []};  // matches guardados por referência — sem passar texto em HTML
 
   function acVenda(tipo, q){
     const listEl = document.getElementById(tipo === 'paciente' ? 'vendaPacienteList' : 'vendaMedicoList');
     const hidEl  = document.getElementById(tipo === 'paciente' ? 'vendaPaciente'     : 'vendaMedico');
     hidEl.value = '';
     _acIdx[tipo] = -1;
+    _acMatches[tipo] = [];
     if(!q || q.length < 1){ listEl.style.display = 'none'; listEl.innerHTML = ''; return; }
     const items = tipo === 'paciente'
       ? (db.patients || [])
       : (db.doctors  || []).filter(d => d.status === 'Ativo');
     const ql = q.toLowerCase();
-    const matches = items.filter(i => i.nome && i.nome.toLowerCase().includes(ql)).slice(0, 20);
-    if(!matches.length){
+    _acMatches[tipo] = items.filter(i => i.nome && i.nome.toLowerCase().includes(ql)).slice(0, 20);
+    if(!_acMatches[tipo].length){
       listEl.innerHTML = '<div class="ac-empty">Nenhum resultado</div>';
       listEl.style.display = 'block';
       return;
     }
-    listEl.innerHTML = matches.map(i =>
-      `<div class="ac-item" onmousedown="acVendaSelect('${tipo}','${i.id}',${JSON.stringify(i.nome)})">${i.nome}</div>`
+    // Usa índice inteiro no atributo — nenhum texto com aspas ou caracteres especiais no HTML
+    listEl.innerHTML = _acMatches[tipo].map((i, idx) =>
+      `<div class="ac-item" onmousedown="acVendaSelect('${tipo}',${idx})">${i.nome}</div>`
     ).join('');
     listEl.style.display = 'block';
   }
 
-  function acVendaSelect(tipo, id, nome){
-    document.getElementById(tipo === 'paciente' ? 'vendaPacienteInput' : 'vendaMedicoInput').value = nome;
-    document.getElementById(tipo === 'paciente' ? 'vendaPaciente'      : 'vendaMedico').value = id;
+  function acVendaSelect(tipo, idx){
+    const item = _acMatches[tipo][idx];
+    if(!item) return;
+    document.getElementById(tipo === 'paciente' ? 'vendaPacienteInput' : 'vendaMedicoInput').value = item.nome;
+    document.getElementById(tipo === 'paciente' ? 'vendaPaciente'      : 'vendaMedico').value      = item.id;
     const listEl = document.getElementById(tipo === 'paciente' ? 'vendaPacienteList' : 'vendaMedicoList');
     listEl.style.display = 'none';
     _acIdx[tipo] = -1;
